@@ -725,9 +725,9 @@
                     var Granjas = "<b>" + texto + ":</b><br>";
                     textoDescarga += "<table><h2>" + texto + "</h2>";
                     textoDescarga += "<thead><tr>";
-                    obtieneDatosRtdo(response);
-                    if (response.features.length == 0) { Granjas += "No se han localizado<br>"; }
-                    else { Granjas += response.features.length + " " + texto2 + "<br>"; }
+                    var contador = obtieneDatosRtdo(response);
+                    if (contador == 0) { Granjas += "No se han localizado<br>"; }
+                    else { Granjas += contador + " " + texto2 + "<br>"; }
                     consultaDistancias += Granjas;
                     dom.byId("listadoRtdos").innerHTML = consultaDistancias;
                 }
@@ -740,21 +740,20 @@
                             textoDescarga += "<td><strong>" + property + "</strong></td>";
                         }
                     }
+                    var contador = 0;
                     textoDescarga += "</tr></thead>";
                     for (var x = 0; x < features.length; x++) {
-                        var contains = features[x].geometry.contains(geomBuffer.getExtent().getCenter());
-                        var polygon = new esri.geometry.Polygon(map.spatialreference);
-                        polygon = features[x].geometry;
-                        polygon.addRing(geomBuffer.rings[0]);
-                        var isIntersecting = polygon.isSelfIntersecting(polygon);
-                        if (isIntersecting || contains) {
+                        var intersecta = geometryEngine.intersects(features[x].geometry, geomBuffer);
+                        if (intersecta) {
                             getTextContent(features[x]);
-                        }                        
+                            contador++;
+                        }                      
                     }
                     textoDescarga += "</table>";
-                    if (features.length === 0) {
+                    if (contador === 0) {
                         textoDescarga += "No se han localizado";
                     }
+                    return contador;
                 }
                 function getTextContent(graphic) {
                     var attr = graphic.attributes;
