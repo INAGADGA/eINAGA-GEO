@@ -730,30 +730,10 @@
                     else { Granjas += response.features.length + " " + texto2 + "<br>"; }
                     consultaDistancias += Granjas;
                     dom.byId("listadoRtdos").innerHTML = consultaDistancias;
-
-                    var feature;
-                    var features = response.features;
-                    listadoAfeccionesCotos = "<b>Cotos Afectados:</b>";
-                    if (features.length == 0) { dom.byId("seleccion").innerHTML = "Ningún punto encontrado"; } else { dom.byId("seleccion").innerHTML = ""; }
-                    for (var x = 0; x < features.length; x++) {
-                        var contains = features[x].geometry.contains(geomBuffer.getExtent().getCenter());
-                        var polygon = new esri.geometry.Polygon(map.spatialreference);
-                        polygon = features[x].geometry;
-                        polygon.addRing(geomBuffer.rings[0]);
-                        var isIntersecting = polygon.isSelfIntersecting(polygon);
-                        if (isIntersecting || contains) {
-                            listadoAfeccionesCotos += "</br>" + features[x].attributes.LABELS;
-                        }
-                    }
-                    $("#colapseCotos").collapsible("expand");
-                    $("[data-role=panel]").panel("open");
-                    var query = new Query();
-                    query.geometry = poligonoConsulta.getExtent();
-                    query.outFields = ["*"];
-                    fcMunis.queryFeatures(query, dameMunicipios);    
                 }
 
                 function obtieneDatosRtdo(response) {
+
                     var features = response.features;
                     for (var property in response.fieldAliases) {
                         if (property != "OBJECTID") {
@@ -762,7 +742,14 @@
                     }
                     textoDescarga += "</tr></thead>";
                     for (var x = 0; x < features.length; x++) {
-                        getTextContent(features[x]);
+                        var contains = features[x].geometry.contains(geomBuffer.getExtent().getCenter());
+                        var polygon = new esri.geometry.Polygon(map.spatialreference);
+                        polygon = features[x].geometry;
+                        polygon.addRing(geomBuffer.rings[0]);
+                        var isIntersecting = polygon.isSelfIntersecting(polygon);
+                        if (isIntersecting || contains) {
+                            getTextContent(features[x]);
+                        }                        
                     }
                     textoDescarga += "</table>";
                     if (features.length === 0) {
