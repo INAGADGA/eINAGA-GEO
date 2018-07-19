@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
 <html lang="es-es">
 <head>
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline';
-                     script-src 'self' https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com  https://idearagon.aragon.es http://idearagon.aragon.es https://clarity.maptiles.arcgis.com https://tile.openstreetmap.org 'unsafe-eval' 'unsafe-inline' data: gap: https://ssl.gstatic.com 'unsafe-eval';
-                     style-src 'self'  https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com  https://idearagon.aragon.es  http://idearagon.aragon.es https://dojotoolkit.org 'unsafe-inline';
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline';
+                     script-src 'self' https://cdn.jsdelivr.net https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com  https://idearagon.aragon.es http://idearagon.aragon.es https://clarity.maptiles.arcgis.com https://tile.openstreetmap.org 'unsafe-eval' 'unsafe-inline' data: gap: https://ssl.gstatic.com 'unsafe-eval';
+                     style-src 'self' https://cdn.jsdelivr.net https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com  https://idearagon.aragon.es  http://idearagon.aragon.es https://dojotoolkit.org 'unsafe-inline';
                      connect-src 'self' https://geocode.arcgis.com https://dojotoolkit.org https://dojotoolkit.org https://idearagon.aragon.es http://idearagon.aragon.es https://sampleserver6.arcgisonline.com  https://server.arcgisonline.com  https://www.arcgis.com https://server.arcgisonline.com https://clarity.maptiles.arcgis.com  https://services.arcgisonline.com https://ovc.catastro.meh.es  http://ovc.catastro.meh.es https://tile.openstreetmap.org https://aplicaciones.aragon.es 'unsafe-eval' 'unsafe-inline' 'self' ws:;
                      img-src 'self'  https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com https://idearagon.aragon.es http://idearagon.aragon.es https://sampleserver6.arcgisonline.com  https://server.arcgisonline.com  https://www.arcgis.com https://server.arcgisonline.com https://clarity.maptiles.arcgis.com  https://services.arcgisonline.com https://ovc.catastro.meh.es  http://ovc.catastro.meh.es https://tile.openstreetmap.org https://aplicaciones.aragon.es 'unsafe-eval' 'unsafe-inline' blob: data: ; media-src *;
                      frame-src www.openstreetmap.org https://ovc.catastro.meh.es https://www1.sedecatastro.gob.es;
@@ -16,7 +16,7 @@
     <meta name="msapplication-tap-highlight" content="no">
     <!-- Chrome, Firefox OS and Opera -->
     <meta name="theme-color" content="#4285f4">
-    
+
     <!-- Windows Phone -->
     <meta name="msapplication-navbutton-color" content="#4285f4">
     <!-- iOS Safari -->
@@ -26,6 +26,11 @@
     <script>
         var dojoConfig = { locale: "es-es" }
     </script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/leaflet/1.0.0-rc.1/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/leaflet/1.0.0-rc.1/leaflet-src.js"></script>
+    <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>
+
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"
             integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
             crossorigin="anonymous"></script>
@@ -43,9 +48,9 @@
     </script>
 
 
-    <link rel="stylesheet" href="https://js.arcgis.com/3.22/dijit/themes/claro/claro.css">
-    <link rel="stylesheet" href="https://js.arcgis.com/3.22/esri/css/esri.css">
-    <script src="https://js.arcgis.com/3.22compact/init.js"></script>  
+    <link rel="stylesheet" href="https://js.arcgis.com/3.25/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="https://js.arcgis.com/3.25/esri/css/esri.css">
+    <script src="https://js.arcgis.com/3.25compact/init.js"></script>
     <link rel="stylesheet" type="text/css" href="css/popup.css">
     <link rel="stylesheet" type="text/css" href="css/comunes.css">
     <link rel="stylesheet" type="text/css" href="css/geo.css">
@@ -57,14 +62,16 @@
             <div data-role="main" class="ui-content">
                 <div data-role="collapsible-set">
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                        <h3>eINAGA-GEO</h3>
+                        <h3>Dibuja Localización</h3>
                         <button type="button" class="tool" id="point"></button>
                         <button type="button" class="tool" id="polyline"></button>
                         <button type="button" class="tool" id="polygon"></button>
                         </br><hr />
                         <label for="basic">Área de influencia en metros:</label>
                         <input type="number" data-clear-btn="false" name="number-1" id="km" value="">
-                    </div>
+                        <button type="button" id="analisisDistancias">Análisis Distancia</button>
+                        <button type="button" id="descargaGeom">Guarda Geometría</button>
+                    </div>                                       
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Localización Coordenadas</h3>
                         <h6>Coordenadas ETRS89 Zona 30N</h6>
@@ -115,6 +122,7 @@
                                 <input type="checkbox" name="checkboxappe" id="checkboxappe" data-mini="true"><label for="checkboxappe">Ámbitos de protección especies amenazadas</label>
                                 <input type="checkbox" name="checkCotos" id="checkCotos" data-mini="true"><label for="checkCotos">Terrenos Cinegéticos</label>
                                 <input type="checkbox" name="checkMontes" id="checkMontes" data-mini="true"><label for="checkMontes">Montes</label>
+                                <input type="checkbox" name="checkVVPP" id="checkVVPP" data-mini="true"><label for="checkVVPP">Vías Pecuarias</label>
                                 <input type="checkbox" name="checkRaster" id="checkRaster" data-mini="true"><label for="checkRaster">IGN Raster</label>
                             </fieldset>
                         </form>
@@ -139,6 +147,17 @@
                 </div>
             </div>
 
+        </div>
+        <div data-role="panel" id="myPanelRtdo" data-position="left" data-display="overlay" data-dismissible="false" data-swipe-close="false">
+            <a href="#pageone" data-rel="close" class="ui-btn ui-btn-inline ui-shadow ui-corner-all ui-btn-a ui-icon-delete ui-btn-icon-left">Resultados</a>
+            <div data-role="collapsible-set">
+                <h3>Análisis Distancias</h3>
+                <div id="listadoRtdos"></div>
+                <p />
+                <a id="descarga" data-role="button" data-mini="true">Más detalles</a>
+                <p />
+                <div id="resultadoImpacto"></div>
+            </div>
         </div>
         <div data-role="main" class="ui-content" style="height: 100%;">
             <div id="map"

@@ -6,17 +6,14 @@
     function onDeviceReady() {
 
         console.log('inicio visor **************************************************************************');
-        var geomGoogle, geomINAGA;
+
         var map, tb, coordx, coordy, geom, url;
-        var coordConsulta;  
-        var textoDescarga = "";
         var listcoor = []; var orden = 0;
         var loading; var edicion = false;
         var visible = [];
         var visibleFiguras = [];
         var prefijo, ultpos = 0;
-        var geomBuffer;
-        var stringGeoJson;
+        var poligonoConsulta;
         var myVar;
         var valores;
         require([
@@ -42,7 +39,6 @@
             "esri/geometry/Circle",
             "esri/geometry/normalizeUtils",
             "esri/geometry/webMercatorUtils",
-            "esri/geometry/geometryEngine",
             "esri/tasks/GeometryService",
             "esri/tasks/BufferParameters",
             "esri/tasks/query",
@@ -72,7 +68,7 @@
             "esri/layers/LabelClass",
             "esri/renderers/SimpleRenderer"
 
-        ], function (dom, domStyle, array, connect, parser, query, on, domConstruct, Color, esriConfig, Map, Graphic, Units, InfoTemplate, PopupMobile, Draw, Circle, normalizeUtils, webMercatorUtils, geometryEngine, GeometryService, BufferParameters, Query, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, TextSymbol,
+        ], function (dom, domStyle, array, connect, parser, query, on, domConstruct, Color, esriConfig, Map, Graphic, Units, InfoTemplate, PopupMobile, Draw, Circle, normalizeUtils, webMercatorUtils, GeometryService, BufferParameters, Query, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, TextSymbol,
             Font, Measurement, OverviewMap, BasemapGallery, Basemap, BasemapLayer, Scalebar, Search, HomeButton, Legend, LocateButton, FeatureLayer, ArcGISDynamicMapServiceLayer, WMSLayer, WMSLayerInfo, 
             LabelClass, SimpleRenderer
         ) {                
@@ -119,7 +115,6 @@
                 });
                 map.disableKeyboardNavigation();
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Geodesic" }));
-                map.addLayer(new esri.layers.GraphicsLayer({ "id": "Buffer" }));
 
                 //map.infoWindow.resize(400, 300);
 
@@ -274,7 +269,173 @@
                 }, "HomeButton");
                 home.startup();
 
-                
+                //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+                function dibujaGeometria(evtObj) {
+                    if (map.getScale() < 25000) {
+                        var geometry = dameGeomEtrs89(evtObj.geometry);
+                        doBuffer(evtObj.geometry);
+                    }
+                    else { map.graphics.clear(); tb.deactivate(); alert("Debe acercarse hasta una escala menor de 25000 para digitalizar"); }
+
+                }
+
+                function dameGeomEtrs89() {
+                    var outSR = new esri.SpatialReference(25830);
+                    var params = new esri.tasks.ProjectParameters();
+                    var geomGoogle = arguments[0];
+                    params.geometries = [geomGoogle]; //[pt.normalize()];
+                    params.outSR = outSR;
+                    var geometry;
+                    var newurl = "";
+                    gsvc.project(params, function (rtdos) {
+                        geometry = rtdos[0];
+                        console.log(geometry);
+                        var symbol;
+                        switch (geometry.type) {
+                            case "point":
+                                prefijo = "pnt_";
+                                symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
+                                break;
+                            case "polyline":
+                                prefijo = "lin_";
+                                symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
+                                break;
+                            case "polygon":
+                                prefijo = "pol_";
+                                symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
+                                break;
+                        }
+                        var graphic = new esri.Graphic(geomGoogle, symbol);
+                        map.graphics.add(graphic);
+                        generarTextoFromGeom(geometry, prefijo + fecha2 + '.txt');
+                        tb.deactivate();
+                        map.setInfoWindowOnClick(true);
+                    });
+                }
+
+                function reseteaMedicion() {
+                    measurement.clearResult();
+                    measurement.setTool("area", false);
+                    measurement.setTool("distance", false);
+                    measurement.setTool("location", false);
+                    map.setInfoWindowOnClick(true);
+                }
+
+                function zoomExtension(minx, miny, maxx, maxy) {
+                    var _extent = new esri.geometry.Extent(minx, miny, maxx, maxy, new esri.SpatialReference({ wkid: 25830 }))
+                    var outSR = new esri.SpatialReference(3857);
+                    var params = new esri.tasks.ProjectParameters();
+                    params.geometries = [_extent];
+                    params.outSR = outSR;
+                    gsvc.project(params, function (projectedPoints) {
+                        pt = projectedPoints[0];
+                        map.setExtent(projectedPoints[0], true);
+                    });
+                }
+
+                function doBuffer(evtObj) {
+                    var distancia = $("#km").val();
+                    map.getLayer("Geodesic").clear();
+                    map.graphics.clear();
+                    map.setInfoWindowOnClick(true);
+                    tb.deactivate();
+                    var geometry = evtObj, symbol;
+                    switch (geometry.type) {
+                        case "point":
+                            symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
+                            break;
+                        case "polyline":
+                            symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 1);
+                            break;
+                        case "polygon":
+                            symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
+                            break;
+                    }
+                    var graphic = new Graphic(geometry, symbol);
+                    map.graphics.add(graphic);
+                    //setup the buffer parameters
+                    var params = new BufferParameters();
+                    params.distances = [distancia];
+                    params.outSpatialReference = map.spatialReference;
+                    params.unit = [esri.tasks.GeometryService.UNIT_METER];
+                    params.geodesic = true;
+                    // normaliza la geometria               
+                    normalizeUtils.normalizeCentralMeridian([geometry]).then(function (normalizedGeometries) {
+                        var normalizedGeometry = normalizedGeometries[0];
+                        if (normalizedGeometry.type === "polygon") {
+                            esriConfig.defaults.geometryService.simplify([normalizedGeometry], function (geometries) {
+                                params.geometries = geometries;
+                                esriConfig.defaults.geometryService.buffer(params, showGeodesic);
+                            });
+                        } else {
+                            params.geometries = [normalizedGeometry];
+                            esriConfig.defaults.geometryService.buffer(params, showGeodesic);
+                        }
+                    });
+
+                }
+                function showGeodesic(b) {
+                    var attrs, sym;
+                    attrs = { "type": "Geodesic" };
+                    sym = new esri.symbol.SimpleFillSymbol();
+                    sym.setColor(null);
+                    sym.setOutline(new esri.symbol.SimpleLineSymbol("solid", new dojo.Color([255, 0, 0, 1]), 2));
+                    addGraphic(b[0], attrs, sym);
+                }
+                function addGraphic(geom, attrs, sym) {
+                    var template, g, s;
+                    poligonoConsulta = geom;
+                    template = new esri.InfoTemplate("", "Type: ${type}");
+                    g = map.getLayer("Geodesic");
+                    map.getLayer(attrs.type).add(
+                        new esri.Graphic(geom, sym, attrs, template)
+                    );
+                    if (g.graphics.length > 0) {
+                        map.setExtent(esri.graphicsExtent([g.graphics[0]]).expand(3), true);
+                    }
+                    //var query = new Query();
+                    //query.geometry = geom.getExtent();
+                    //query.outFields = ["*"];
+                    //query.where = filtroFecha;
+                    //fcCotos.queryFeatures(query, dameCotos);
+                }
+
+                function addPoint4326(geometry) {
+                    map.graphics.clear();
+                    var attrs, sym;
+                    attrs = { "type": "Geodesic" };
+                    symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
+                    var graphic = new Graphic(geometry, symbol);
+                    map.graphics.add(graphic);
+                    map.centerAndZoom(graphic.geometry, 18);
+                }
+
+                fTemplate = function locate() {
+                    if (graphico !== undefined) {
+                        var extension = graphico.geometry.getExtent();
+                        if (!extension) {
+                            map.centerAndZoom(popup.getSelectedFeature().geometry, 15);
+                        } else {
+                            map.setExtent(graphico.geometry.getExtent(), true);
+                        }
+                        // cerrar ventana datos
+                        $(".esriMobileInfoView").css("display", "none");
+                        $(".esriMobileNavigationBar").css("display", "none");
+                    }
+                };
+
+                //fresize = function resizeIframe(obj) {
+                //    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
+                //}
+
+                function cambiaVisibilidad(nombre) {
+                    var targetLayer = map.getLayer(nombre);
+                    if (targetLayer.visible) {
+                        targetLayer.setVisibility(false);
+                    }
+                    else { targetLayer.setVisibility(true); }
+                }
 
                 //Eventos -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 on(dom.byId("posicion"), "click", function () {
@@ -282,10 +443,9 @@
                 });
 
                 tb = new esri.toolbars.Draw(map);
-
-                on(dom.byId("descarga"), "click", function () {
-                    generaTextoDescarga(textoDescarga)
-                });
+                //tb.on("draw-end",
+                //    dibujaGeometria
+                //);
 
                 query(".tool").on("click", function (evt) {
                     reseteaMedicion();
@@ -376,44 +536,28 @@
                         cambiaVisibilidad("IGN");
                     });
                     $("#checkboxhmd").click(function () {
-                        if ($('#checkboxhmd').is(":checked")) { visibleFiguras.push("0") }
-                        else { quitaValoresVisibilidad("0"); }
-                        dynamicMSLayerFPA.setVisibleLayers(visibleFiguras);
+                        cambiaVisibilidad("Humedales");
                     });
                     $("#checkboxlics").click(function () {
-                        if ($('#checkboxlics').is(":checked")) { visibleFiguras.push("1") }
-                        else { quitaValoresVisibilidad("1"); }
-                        dynamicMSLayerFPA.setVisibleLayers(visibleFiguras);
+                        cambiaVisibilidad("Lics");
                     });
                     $("#checkboxzepas").click(function () {
-                        if ($('#checkboxzepas').is(":checked")) { visibleFiguras.push("2") }
-                        else { quitaValoresVisibilidad("2"); }
-                        dynamicMSLayerFPA.setVisibleLayers(visibleFiguras);
+                        cambiaVisibilidad("Zepas");
                     });
                     $("#checkboxlig").click(function () {
-                        if ($('#checkboxlig').is(":checked")) { visibleFiguras.push("3") }
-                        else { quitaValoresVisibilidad("3"); }
-                        dynamicMSLayerFPA.setVisibleLayers(visibleFiguras);
+                        cambiaVisibilidad("Ligs");
                     });
                     $("#checkboxenp").click(function () {
-                        if ($('#checkboxenp').is(":checked")) { visibleFiguras.push("4") }
-                        else { quitaValoresVisibilidad("4"); }
-                        dynamicMSLayerFPA.setVisibleLayers(visibleFiguras);
+                        cambiaVisibilidad("Enp");
                     });
                     $("#checkboxporn").click(function () {
-                        if ($('#checkboxporn').is(":checked")) { visibleFiguras.push("5") }
-                        else { quitaValoresVisibilidad("5"); }
-                        dynamicMSLayerFPA.setVisibleLayers(visibleFiguras);
+                        cambiaVisibilidad("Porn");
                     });
                     $("#checkboxacrit").click(function () {
-                        if ($('#checkboxacrit').is(":checked")) { visibleFiguras.push("6") }
-                        else { quitaValoresVisibilidad("6"); }
-                        dynamicMSLayerFPA.setVisibleLayers(visibleFiguras);
+                        cambiaVisibilidad("Acrit");
                     });
                     $("#checkboxappe").click(function () {
-                        if ($('#checkboxappe').is(":checked")) { visibleFiguras.push("7") }
-                        else { quitaValoresVisibilidad("7"); }
-                        dynamicMSLayerFPA.setVisibleLayers(visibleFiguras);
+                        cambiaVisibilidad("Appe");
                     });
 
                 });
@@ -455,7 +599,7 @@
                     $("[data-role=panel]").panel("close");
                 });
 
-               
+
                 on(dom.byId("localizaCoord"), "click", function () {
                     //zoomToCoord(dom.byId("CoordX").value, dom.byId("CoordY").value);
                     dom.byId("transformacion2wgs84").innerHTML = "";
@@ -500,156 +644,26 @@
                     $(".esriMobileInfoView").css("display", "none");
                 });
 
-
-                on(dom.byId("analisisDistancias"), "click", function () {
-                    // falta comprobar la geometria de consulta no es nula
-                    var distancia = $("#km").val();
-                    if (geomGoogle === undefined) { alert("Debe de dibujar la localización antes de realizar el análisis"); }
-                    else if (distancia === undefined || distancia <= 0) { alert("Debe indicar la distancia del análisis"); }
-                    else
-                        doBuffer(geomGoogle);
-                });
-                on(dom.byId("descargaGeom"), "click", function () {
-                    // falta comprobar que existe geometría a descargar
-                    if (stringGeoJson === undefined) { alert("Debe de dibujar la localización antes de descargarla");}
-                    else
-                        writeToFile(prefijo + fecha2 + '.geojson', stringGeoJson);
-                });
-
-                //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-                function dibujaGeometria(evtObj) {
-                   
-                    var distancia = $("#km").val();
-                    console.log(evtObj.geometry.cache);
-                    switch (evtObj.geometry.type) {
-                        case "point":
-                            if (distancia > 3000) { alert("Se ha superado la superficie máxima"); return; }
-                            break;
-                        case "polyline":
-                            var long = geometryEngine.geodesicLength(geometryEngine.simplify(evtObj.geometry), "meters");
-                            alert("longitud: " + long + " meters");
-                            break;
-                        case "polygon":
-                            var area = geometryEngine.geodesicArea(geometryEngine.simplify(evtObj.geometry), "hectares");
-                            alert("area: " + area + " hectares");
-                            break;
-                    }
-
-                    geomGoogle = evtObj.geometry;
-                    dameGeomEtrs89(evtObj.geometry);
-                }
-
-                function dameGeomEtrs89() {
+                // funciones   -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                function dameInf() {
+                    dameGeomEtrs89(coordConsulta);
+                    //visible("loadingSaturacion", 1);
+                    //distancia = $("#distAnalisis").val();
+                    dom.byId("listadoRtdos").innerHTML = "";
+                    dom.byId("resultadoImpacto").innerHTML = "";
                     var g = map.getLayer("Geodesic");
                     g.clear();
                     map.graphics.clear();
-                    var outSR = new esri.SpatialReference(25830);
-                    var params = new esri.tasks.ProjectParameters();
-                    var geomGoogle = arguments[0];
-                    params.geometries = [geomGoogle]; //[pt.normalize()];
-                    params.outSR = outSR;
-                    var geometry;
-                    var newurl = "";
-                    gsvc.project(params, function (rtdos) {
-                        geometry = rtdos[0];
-                        console.log(geometry);
-                        var symbol;
-                        switch (geometry.type) {
-                            case "point":
-                                prefijo = "pnt_";
-                                symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
-                                break;
-                            case "polyline":
-                                prefijo = "lin_";
-                                symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
-                                break;
-                            case "polygon":
-                                prefijo = "pol_";
-                                symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
-                                break;
-                        }
-                        addGraphic("Geodesic", geomGoogle, symbol);
-                        var feature = L.esri.Util.arcgisToGeoJSON(geometry, "FID");
-                        stringGeoJson = JSON.stringify(feature);
-                        tb.deactivate();
-                        map.setInfoWindowOnClick(true);
-                    });
-                }
-                function reseteaMedicion() {
-                    measurement.clearResult();
-                    measurement.setTool("area", false);
-                    measurement.setTool("distance", false);
-                    measurement.setTool("location", false);
-                    map.setInfoWindowOnClick(true);
-                }
-                function zoomExtension(minx, miny, maxx, maxy) {
-                    var _extent = new esri.geometry.Extent(minx, miny, maxx, maxy, new esri.SpatialReference({ wkid: 25830 }))
-                    var outSR = new esri.SpatialReference(3857);
-                    var params = new esri.tasks.ProjectParameters();
-                    params.geometries = [_extent];
-                    params.outSR = outSR;
-                    gsvc.project(params, function (projectedPoints) {
-                        pt = projectedPoints[0];
-                        map.setExtent(projectedPoints[0], true);
-                    });
-                }
-                function doBuffer() {
-                    var distancia = $("#km").val();
-                    map.getLayer("Buffer").clear();
-                    map.graphics.clear();
-                    map.setInfoWindowOnClick(true);
-                    tb.deactivate();
-                    var geometry = geomGoogle;                    
-                    var params = new BufferParameters();
-                    params.distances = [distancia];
-                    params.outSpatialReference = map.spatialReference;
-                    params.unit = [esri.tasks.GeometryService.UNIT_METER];
-                    params.geodesic = true;
-                    // normaliza la geometria               
-                    normalizeUtils.normalizeCentralMeridian([geometry]).then(function (normalizedGeometries) {
-                        var normalizedGeometry = normalizedGeometries[0];
-                        if (normalizedGeometry.type === "polygon") {
-                            esriConfig.defaults.geometryService.simplify([normalizedGeometry], function (geometries) {
-                                params.geometries = geometries;
-                                esriConfig.defaults.geometryService.buffer(params, showBuffer);
-                            });
-                        } else {
-                            params.geometries = [normalizedGeometry];
-                            esriConfig.defaults.geometryService.buffer(params, showBuffer);
-                        }
-                    });
-                }
-                function showBuffer(b) {
-                    var sym = new esri.symbol.SimpleFillSymbol();
-                    sym.setColor(null);
-                    sym.setOutline(new esri.symbol.SimpleLineSymbol("solid", new dojo.Color([255, 0, 0, 1]), 2));
-                    addGraphic("Buffer", b[0], sym);
-                    dameInf();
-                }
-                function addGraphic(capa, geom,  sym) {
-                    var attrs = { "type": "Geodesic" };
-                    var template, g, s;
-                    geomBuffer = geom;
-                    template = new esri.InfoTemplate("", "Type: ${type}");
-                    g = map.getLayer(capa);
-                    g.add( new esri.Graphic(geom, sym, attrs, template) );
-                    if (g.graphics.length > 0) {
-                        map.setExtent(esri.graphicsExtent([g.graphics[0]]).expand(3), true);
-                    }
-                }
-               
-                function dameInf() {
-                    
-                    //visible("loadingSaturacion", 1);
-                    distancia = $("#km").val();
-                    dom.byId("listadoRtdos").innerHTML = "";
-                    dom.byId("resultadoImpacto").innerHTML = "";
                     map.setInfoWindowOnClick(true);
                     tb.deactivate();
 
+                    var circleGeometry = new esri.geometry.Circle({
+                        center: coordConsulta,   //.getExtent().getCenter(),
+                        radius: distancia,
+                        geodesic: true
+                    });
                     var query = new Query();
-                    query.geometry = geomBuffer; 
+                    query.geometry = coordConsulta; //circleGeometry.getExtent();
                     query.outFields = ["*"];
                     //query.where = "";
                     query.distance = distancia;
@@ -658,135 +672,59 @@
                     textoDescarga = "";
                     consultaDistancias = "<b>Fecha: " + fecha + "</b><hr/>";  // + Granjas;
                     dom.byId("listadoRtdos").innerHTML = consultaDistancias;
-                    consultaDistancias += "<h4 style=\"color:red;\">Entidades a menos de " + distancia + " m</h4>" + Granjas;
-                    try {
-                        if ($('#checkCotos').is(":checked")) {
-                            fc_cotos.queryFeatures(query, dameCotos);
-                        }
-                        if ($('#checkMontes').is(":checked")) {
-                            fc_montes.queryFeatures(query, dameMontes);
-                        } if ($('#checkboxhmd').is(":checked")) {
-                            fc_humedales.queryFeatures(query, dameHumedales);
-                        } if ($('#checkboxlics').is(":checked")) {
-                            fc_lics.queryFeatures(query, dameLics);
-                        } if ($('#checkboxzepas').is(":checked")) {
-                            fc_zepas.queryFeatures(query, dameZepas);
-                        } if ($('#checkboxlig').is(":checked")) {
-                            fc_ligs.queryFeatures(query, dameLigs);
-                        } if ($('#checkboxenp').is(":checked")) {
-                            fc_enp.queryFeatures(query, dameEnp);
-                        } if ($('#checkboxporn').is(":checked")) {
-                            fc_porn.queryFeatures(query, damePorn);
-                        } if ($('#checkboxacrit').is(":checked")) {
-                            fc_acrit.queryFeatures(query, dameAcrit);
-                        } if ($('#checkboxappe').is(":checked")) {
-                            fc_appe.queryFeatures(query, dameAppe);
-                        }
+                    var analisisDist = $('#checkAnalisis').is(":checked");
+                    var analisisSaldo = $('#checkSaldo').is(":checked");
+                    if (analisisDist) {
+                        consultaDistancias += "<h4 style=\"color:red;\">Explotaciones a menos de " + distancia + " m</h4>" + Granjas;
+                        var symbolPnt = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
+                        var sym = new esri.symbol.SimpleFillSymbol();
+                        sym.setColor(null);
+                        sym.setOutline(new esri.symbol.SimpleLineSymbol("solid", new dojo.Color([255, 0, 0, 1]), 2));
+                        addGraphic(coordConsulta, symbolPnt);
+                        addGraphic(circleGeometry, sym);
+                        poligonoConsulta = circleGeometry;
+
+                        if ($('#checkGr_Prod').is(":checked")) { fcGranjasProduccion.queryFeatures(query, dameGranjasProd); }
+                        if ($('#checkGr_TInaga').is(":checked")) { fcGranjasInagaTram.queryFeatures(query, dameGranjasINAGATrm); }
+                        if ($('#checkGr_RInaga').is(":checked")) { fcGranjasInagaReso.queryFeatures(query, dameGranjasINAGAResol); }
+                        visible("descarga", 1);
                     }
-                    catch{
-                    
+                    else {
+                        visible("descarga", 0);
                     }
-                    //visible("loadingSaturacion", 0);
-                    $("[data-role=panel]").panel("open")
+                    if (analisisSaldo) {
+                        cursorEspera();
+                        query.geometry = coordConsulta;
+                        query.distance = 5000;
+                        query.units = "Meters";
+                        fcRecintos.queryFeatures(query, dameSaldoAcumulado);
+                    }
+                    else {
+                        visible("loadingSaturacion", 0);
+                        $("[data-role=panel]").panel("open")
+                    }
                 }
 
-                function dameCotos(response) {
-                    obtieneDatosConsulta(response, "Terrenos Cinegéticos","Cotos");
-                }                
-                function dameMontes(response) {
-                    obtieneDatosConsulta(response, "Montes", "Montes");
-                }
-                function dameHumedales(response) {
-                    obtieneDatosConsulta(response, "Humedales", "Humedales");
-                }
-                function dameLics(response) {
-                    obtieneDatosConsulta(response, "LICS", "LICS");
-                }
-                function dameZepas(response) {
-                    obtieneDatosConsulta(response, "Zepas", "Zepas");
-                }
-                function dameLigs(response) {
-                    obtieneDatosConsulta(response, "LIG", "Ligs");
-                }
-                function dameEnp(response) {
-                    obtieneDatosConsulta(response, "ENP", "ENP");
-                }
-                function damePorn(response) {
-                    obtieneDatosConsulta(response, "PORN", "PORN");
-                }
-                function dameAcrit(response) {
-                    obtieneDatosConsulta(response, "ACRIT", "ACRIT");
-                }
-                function dameAppe(response) {
-                    obtieneDatosConsulta(response, "APPE", "APPE");
-                }
-
-                function obtieneDatosConsulta(response, texto, texto2) {
-                    var Granjas = "<b>" + texto + ":</b><br>";
-                    textoDescarga += "<table><h2>" + texto + "</h2>";
+                function dameGranjasProd(response) {
+                    var Granjas = "<b>Explotaciones REGA (Producción):</b><br>";
+                    textoDescarga += "<table><h2>Explotaciones REGA (Producción)</h2>";
                     textoDescarga += "<thead><tr>";
                     obtieneDatosRtdo(response);
                     if (response.features.length == 0) { Granjas += "No se han localizado<br>"; }
-                    else { Granjas += response.features.length + " " + texto2 + "<br>"; }
+                    else { Granjas += response.features.length + " explotaciones<br>"; }
                     consultaDistancias += Granjas;
-                    dom.byId("listadoRtdos").innerHTML = consultaDistancias;
-
-                    var feature;
-                    var features = response.features;
-                    listadoAfeccionesCotos = "<b>Cotos Afectados:</b>";
-                    if (features.length == 0) { dom.byId("seleccion").innerHTML = "Ningún punto encontrado"; } else { dom.byId("seleccion").innerHTML = ""; }
-                    for (var x = 0; x < features.length; x++) {
-                        var contains = features[x].geometry.contains(geomBuffer.getExtent().getCenter());
-                        var polygon = new esri.geometry.Polygon(map.spatialreference);
-                        polygon = features[x].geometry;
-                        polygon.addRing(geomBuffer.rings[0]);
-                        var isIntersecting = polygon.isSelfIntersecting(polygon);
-                        if (isIntersecting || contains) {
-                            listadoAfeccionesCotos += "</br>" + features[x].attributes.LABELS;
-                        }
-                    }
-                    $("#colapseCotos").collapsible("expand");
-                    $("[data-role=panel]").panel("open");
-                    var query = new Query();
-                    query.geometry = poligonoConsulta.getExtent();
-                    query.outFields = ["*"];
-                    fcMunis.queryFeatures(query, dameMunicipios);    
+                    dom.byId("listadoGranjas").innerHTML = consultaDistancias;
                 }
 
-                function obtieneDatosRtdo(response) {
-                    var features = response.features;
-                    for (var property in response.fieldAliases) {
-                        if (property != "OBJECTID") {
-                            textoDescarga += "<td><strong>" + property + "</strong></td>";
-                        }
-                    }
-                    textoDescarga += "</tr></thead>";
-                    for (var x = 0; x < features.length; x++) {
-                        getTextContent(features[x]);
-                    }
-                    textoDescarga += "</table>";
-                    if (features.length === 0) {
-                        textoDescarga += "No se han localizado";
-                    }
-                }
-                function getTextContent(graphic) {
-                    var attr = graphic.attributes;
-                    var contador = 0;
-                    textoDescarga += "<tr>";
-                    contador = 0;
-                    for (var property in attr) {
-                        if (property != "OBJECTID") {
-                            if ((graphic._layer.fields[contador].type) === "esriFieldTypeDate") {
-                                textoDescarga += "<td><strong>" + new Date(parseInt(attr[property])).toLocaleDateString() + "</strong></td>";
-                            }
-                            else {
-                                textoDescarga += "<td><strong>" + attr[property] + "</strong></td>";
-                            }
-                        }
-                        contador++;
-                    }
-                    textoDescarga += "</tr>";
-                    return textoDescarga;
+                function dameGranjasINAGATrm(response) {
+                    var Granjas = "<b>Explotaciones tramitándose en INAGA:</b><br>";
+                    textoDescarga += "<table><h2>Explotaciones tramitándose en INAGA</h2>";
+                    textoDescarga += "<thead><tr>";
+                    obtieneDatosRtdo(response);
+                    if (response.features.length == 0) { Granjas += "No se han localizado<br>"; }
+                    else { Granjas += response.features.length + " explotaciones<br>"; }
+                    consultaDistancias += Granjas;
+                    dom.byId("listadoGranjas").innerHTML = consultaDistancias;
                 }
 
                 function writeToFile(fileName, data) {
@@ -840,56 +778,6 @@
                     console.log('Error (' + fileName + '): ' + msg);
                 }
 
-                function addPoint4326(geometry) {
-                    map.graphics.clear();
-                    var attrs, sym;
-                    attrs = { "type": "Geodesic" };
-                    symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
-                    var graphic = new Graphic(geometry, symbol);
-                    map.graphics.add(graphic);
-                    map.centerAndZoom(graphic.geometry, 18);
-                }
-
-                fTemplate = function locate() {
-                    if (graphico !== undefined) {
-                        var extension = graphico.geometry.getExtent();
-                        if (!extension) {
-                            map.centerAndZoom(popup.getSelectedFeature().geometry, 15);
-                        } else {
-                            map.setExtent(graphico.geometry.getExtent(), true);
-                        }
-                        // cerrar ventana datos
-                        $(".esriMobileInfoView").css("display", "none");
-                        $(".esriMobileNavigationBar").css("display", "none");
-                    }
-                };
-
-                //fresize = function resizeIframe(obj) {
-                //    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
-                //}
-
-                function cambiaVisibilidad(nombre) {
-                    var targetLayer = map.getLayer(nombre);
-                    if (targetLayer.visible) {
-                        targetLayer.setVisibility(false);
-                    }
-                    else { targetLayer.setVisibility(true); }
-                }
-
-                function generaTextoDescarga() {
-                    var texto = [];
-                    var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Consulta de afecciones</h1><b>Fecha: " + fecha
-                        + "</b><br><b>Distancia análisis: " + distancia + " m</b>"
-                        + textoDescarga
-                        + "<br><hr><br><b>Geometría de consulta en geojson (SRS 25830): </b>" + stringGeoJson
-                        + "</body></html>";
-                    texto.push(cuerpo);
-                    var myWindow = window.open("", "_blank", "scrollbars=yes");
-                    myWindow.document.write(cuerpo);
-                    return new Blob(texto, {
-                        type: 'text/plain'
-                    });
-                }
                 function initToolbar(evtObj) {
                     //console.debug("initToolbar");
                     tb = new esri.toolbars.Draw(evtObj.map);
@@ -1022,20 +910,116 @@
 
                 
                 // Capas necesarias para las búsquedas-------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                // create a text symbol to define the style of labels               
+                // create a text symbol to define the style of labels
+                var statesColor = new Color("#666");
+                var statesLine = new SimpleLineSymbol("solid", statesColor, 1.5);
+                var statesSymbol = new SimpleFillSymbol("solid", statesLine, null);
+                var statesRenderer = new SimpleRenderer(statesSymbol);
+
+                var statesLabel = new TextSymbol().setColor(statesColor);
+                statesLabel.font.setSize("14pt");
+                statesLabel.font.setFamily("arial");
+
+                //this is the very least of what should be set within the JSON  
+                var json = {
+                    "labelExpressionInfo": { "value": "{MATRICULA}" }
+                };
+
+                //create instance of LabelClass (note: multiple LabelClasses can be passed in as an array)
+                var labelClass = new LabelClass(json);
+                labelClass.symbol = statesLabel; // symbol also can be set in LabelClass' json
                 
-                var fc_cotos = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Cotos_Caza/MapServer/2");  
-                var fc_montes = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer/5");  
-                var fc_vvpp = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer/6");  
-                var fc_humedales = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/0");  
-                var fc_lics = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/1");  
-                var fc_zepas = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/2");  
-                var fc_ligs = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/3");  
-                var fc_enp = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/4");  
-                var fc_porn = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/5");  
-                var fc_acrit = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/6");  
-                var fc_appe = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/7");  
                 
+                var fc_cotos = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Cotos_Caza/MapServer/2", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")),                    
+                    id:"Cotos"
+                });  
+                fc_cotos.setRenderer(statesRenderer);
+                fc_cotos.setLabelingInfo([labelClass]);
+                var fc_montes = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer/5", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes", "<b>Matricula:</b> ${MATRICULA} <br><b>Nombre:</b> ${DENOMINACION} <br><b>Titular:</b> ${TITULAR} <br><b>Tipo:</b> ${TIPO}")),
+                    id:"Montes"
+                });  
+                var fc_vvpp = new ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer/6", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("Vías Pecuarias", "<b>MUNICIPIO:</b> ${MUNICIPIO}<br><b>NOMBRE_VIA:</b> ${NOMBRE_VIA}<br><b>Tipo:</b> ${DTIPVIA}")),
+                    id:"Vvpp"
+                });  
+                var fc_humedales = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/0", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("HUMEDALES", "<b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")),
+                    id:"Humedales"
+                });  
+                var fc_lics = new ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/", {
+                    visibleLayers:[0,1], 
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("LICS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")),
+                    id:"Lics"
+                });  
+                var fc_zepas = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/2", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("ZEPAS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")),
+                    id:"Zepas"
+                });  
+                var fc_ligs = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/3", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("ZEPAS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")),
+                    id:"Ligs"
+                });  
+                var fc_enp = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/4", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("ZEPAS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")),
+                    id:"Enp"
+                });  
+                var fc_porn = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/5", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("ZEPAS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")),
+                    id:"Porn"
+                });  
+                var fc_acrit = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/6", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("AREAS CRITICAS", "<b><b>CODIGO:</b> ${CODZONA}<br><b>Nombre:</b> ${DZONA}")),
+                    id:"Acrit"
+                });  
+                var fc_appe = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/7", {
+                    mode: esri.layers.FeatureLayer.MODE_ONDEMAND, outFields: ["*"], visible: false, showLabels: true,
+                    infoTemplate: new esri.InfoTemplate(getInfotemplate("ZEPAS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")),
+                    id:"Appe"
+                });  
+                //fc_cotos.visible = false;
+                //fc_montes.visible = false;
+                //fc_vvpp.visible = false;
+                //fc_humedales.visible = false;
+                //fc_lics.visible = false;
+                //fc_zepas.visible = false;
+                //fc_ligs.visible = false;
+                //fc_enp.visible = false;
+                //fc_porn.visible = false;
+                //fc_acrit.visible = false;
+                //fc_appe.visible = false;
+                //fc_cotos.id = "Cotos";
+                //fc_montes.id = "Montes";
+                //fc_vvpp.id = "Vvpp";
+                //fc_humedales.id = "Humedales";
+                //fc_lics.id = "Lics";
+                //fc_zepas.id = "Zepas";
+                //fc_ligs.id = "Ligs";
+                //fc_enp.id = "Enp";
+                //fc_porn.id = "Porn";
+                //fc_acrit.id = "Acrit";
+                //fc_appe.id = "Appe";
+                //fc_cotos.infoTemplate = new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}"));
+                //fc_montes.infoTemplate = new esri.InfoTemplate(getInfotemplate("Montes", "<b>Matricula:</b> ${MATRICULA} <br><b>Nombre:</b> ${DENOMINACION} <br><b>Titular:</b> ${TITULAR} <br><b>Tipo:</b> ${TIPO}"));               
+                //fc_vvpp.infoTemplate = new esri.InfoTemplate(getInfotemplate("Vías Pecuarias", "<b>MUNICIPIO:</b> ${MUNICIPIO}<br><b>NOMBRE_VIA:</b> ${NOMBRE_VIA}<br><b>Tipo:</b> ${DTIPVIA}"));
+                //fc_humedales.infoTemplate = new esri.InfoTemplate(getInfotemplate("HUMEDALES", "<b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}"));
+                //fc_lics.infoTemplate = new esri.InfoTemplate(getInfotemplate("LICS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}"));
+                //fc_zepas.infoTemplate = new esri.InfoTemplate(getInfotemplate("ZEPAS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}"));
+                //fc_ligs.infoTemplate = new esri.InfoTemplate(getInfotemplate("LIG", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}"));
+                //fc_enp.infoTemplate = new esri.InfoTemplate(getInfotemplate("ENP", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}"));
+                //fc_porn.infoTemplate = new esri.InfoTemplate(getInfotemplate("PORN", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}"));
+                //fc_acrit.infoTemplate = new esri.InfoTemplate(getInfotemplate("AREAS CRITICAS", "<b><b>CODIGO:</b> ${CODZONA}<br><b>Nombre:</b> ${DZONA}"));
+                //fc_appe.infoTemplate = new esri.InfoTemplate(getInfotemplate("APPE", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}"));
                 // busquedas -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 var s = new Search({
                     enableButtonMode: true,
@@ -1121,35 +1105,35 @@
                     return new esri.InfoTemplate(titulo, campos);
                 }
 
-                var dynamicMSLayerMontes = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer", {
-                    id: "Montes",
-                    outFields: ["*"]
-                    //,opacity: 0.9
-                });
-                dynamicMSLayerMontes.setVisibility(false);
-                dynamicMSLayerMontes.setInfoTemplates({
-                    //0: { infoTemplate:   new esri.InfoTemplate("Piquetes de deslinde", "${*}") },
-                    //1: { infoTemplate:   new esri.InfoTemplate("Mojones de montes", "${*}") },
-                    //2: { infoTemplate:   new esri.InfoTemplate("Consorcios de repoblación", "${*}") },
-                    //3: { infoTemplate:   new esri.InfoTemplate("Consorcios de repoblación", "${*}") },
-                    //4: { infoTemplate: new esri.InfoTemplate("Montes", "Matricula: ${MATRICULA}<br>Nombre: ${NOMBRE}<br>Titular: ${TITULAR}<br>Tipo: ${DTIPO}") },
-                    //5: { infoTemplate: new esri.InfoTemplate("Montes Gen", "Matricula: ${MATRICULA}<br>Nombre: ${DENOMINACION}<br>Titular: ${TITULAR}<br>Tipo: ${TIPO}") }
-                    4: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) },
-                    5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes Gen", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${DENOMINACION}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${TIPO}")) },
-                    6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Vías Pecuarias", "<b>Municipio:</b> ${MUNICIPIO}<br><b>Nombre:</b> ${NOMBRE_VIA}<br><b>Tipo:</b> ${DTIPVIA}")) }
-                });
-                dynamicMSLayerMontes.setImageFormat("png32", true);
-                var dynamicMSLayerCotos = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Cotos_Caza/MapServer", {
-                    id: "Cotos",
-                    outFields: ["*"]
-                    //,opacity: 0.7
-                });
-                dynamicMSLayerCotos.setVisibility(false);
-                dynamicMSLayerCotos.setInfoTemplates({
-                    1: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) },
-                    2: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) }
-                });
-                dynamicMSLayerCotos.setImageFormat("png32", true);
+                //var dynamicMSLayerMontes = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer", {
+                //    id: "Montes",
+                //    outFields: ["*"]
+                //    //,opacity: 0.9
+                //});
+                //dynamicMSLayerMontes.setVisibility(false);
+                //dynamicMSLayerMontes.setInfoTemplates({
+                //    //0: { infoTemplate:   new esri.InfoTemplate("Piquetes de deslinde", "${*}") },
+                //    //1: { infoTemplate:   new esri.InfoTemplate("Mojones de montes", "${*}") },
+                //    //2: { infoTemplate:   new esri.InfoTemplate("Consorcios de repoblación", "${*}") },
+                //    //3: { infoTemplate:   new esri.InfoTemplate("Consorcios de repoblación", "${*}") },
+                //    //4: { infoTemplate: new esri.InfoTemplate("Montes", "Matricula: ${MATRICULA}<br>Nombre: ${NOMBRE}<br>Titular: ${TITULAR}<br>Tipo: ${DTIPO}") },
+                //    //5: { infoTemplate: new esri.InfoTemplate("Montes Gen", "Matricula: ${MATRICULA}<br>Nombre: ${DENOMINACION}<br>Titular: ${TITULAR}<br>Tipo: ${TIPO}") }
+                //    4: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) },
+                //    5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes Gen", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${DENOMINACION}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${TIPO}")) },
+                //    6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Vías Pecuarias", "<b>Municipio:</b> ${MUNICIPIO}<br><b>Nombre:</b> ${NOMBRE_VIA}<br><b>Tipo:</b> ${DTIPVIA}")) }
+                //});
+                //dynamicMSLayerMontes.setImageFormat("png32", true);
+                //var dynamicMSLayerCotos = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Cotos_Caza/MapServer", {
+                //    id: "Cotos",
+                //    outFields: ["*"]
+                //    //,opacity: 0.7
+                //});
+                //dynamicMSLayerCotos.setVisibility(false);
+                //dynamicMSLayerCotos.setInfoTemplates({
+                //    1: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) },
+                //    2: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) }
+                //});
+                //dynamicMSLayerCotos.setImageFormat("png32", true);
 
                 var dynamicMSLayerLimites = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer", {
                     id: "Limites",
@@ -1157,23 +1141,23 @@
                 });
                 dynamicMSLayerLimites.setImageFormat("png32", true);
 
-                var dynamicMSLayerFPA = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer", {
-                    id: "Figuras",
-                    outFields: ["*"]
-                    //,opacity: 0.7
-                });
-                dynamicMSLayerFPA.setInfoTemplates({
-                    0: { infoTemplate: new esri.InfoTemplate(getInfotemplate("HUMEDALES", "<b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    1: { infoTemplate: new esri.InfoTemplate(getInfotemplate("LICS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    2: { infoTemplate: new esri.InfoTemplate(getInfotemplate("ZEPAS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    3: { infoTemplate: new esri.InfoTemplate(getInfotemplate("LIG", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    4: { infoTemplate: new esri.InfoTemplate(getInfotemplate("ENP", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("PORN", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("AREAS CRITICAS", "<b><b>CODIGO:</b> ${CODZONA}<br><b>Nombre:</b> ${DZONA}")) },
-                    7: { infoTemplate: new esri.InfoTemplate(getInfotemplate("APPE", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                });
-                dynamicMSLayerFPA.setVisibleLayers([]);
-                dynamicMSLayerFPA.setImageFormat("png32", true);
+                //var dynamicMSLayerFPA = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer", {
+                //    id: "Figuras",
+                //    outFields: ["*"]
+                //    //,opacity: 0.7
+                //});
+                //dynamicMSLayerFPA.setInfoTemplates({
+                //    0: { infoTemplate: new esri.InfoTemplate(getInfotemplate("HUMEDALES", "<b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                //    1: { infoTemplate: new esri.InfoTemplate(getInfotemplate("LICS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                //    2: { infoTemplate: new esri.InfoTemplate(getInfotemplate("ZEPAS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                //    3: { infoTemplate: new esri.InfoTemplate(getInfotemplate("LIG", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                //    4: { infoTemplate: new esri.InfoTemplate(getInfotemplate("ENP", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                //    5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("PORN", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                //    6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("AREAS CRITICAS", "<b><b>CODIGO:</b> ${CODZONA}<br><b>Nombre:</b> ${DZONA}")) },
+                //    7: { infoTemplate: new esri.InfoTemplate(getInfotemplate("APPE", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                //});
+                //dynamicMSLayerFPA.setVisibleLayers([]);
+                //dynamicMSLayerFPA.setImageFormat("png32", true);
                 var layer1 = new WMSLayerInfo({
                     name: 'Catastro',
                     title: 'Catastro'
@@ -1236,8 +1220,8 @@
                 wmsLayeriGN.spatialReferences[0] = 3857;
 
 
-                map.addLayers([wmsLayeriGN, dynamicMSLayerMontes, dynamicMSLayerCotos, dynamicMSLayerFPA, dynamicMSLayerLimites, wmsSigpac, layerCat]);
-                //map.addLayers([wmsLayeriGN, fc_montes,fc_vvpp, fc_cotos, fc_humedales, fc_lics, fc_zepas, fc_ligs, fc_enp, fc_porn, fc_acrit, fc_acrit, dynamicMSLayerLimites, wmsSigpac, layerCat]);
+                //map.addLayers([wmsLayeriGN, dynamicMSLayerMontes, dynamicMSLayerCotos, dynamicMSLayerFPA, dynamicMSLayerLimites, wmsSigpac, layerCat]);
+                map.addLayers([wmsLayeriGN, fc_montes,fc_vvpp, fc_cotos, fc_humedales, fc_lics, fc_zepas, fc_ligs, fc_enp, fc_porn, fc_acrit, fc_acrit, dynamicMSLayerLimites, wmsSigpac, layerCat]);
 
             });
     }

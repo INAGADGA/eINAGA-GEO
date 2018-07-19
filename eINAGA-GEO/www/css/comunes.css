@@ -1,13 +1,17 @@
 ﻿#pageone {
-    height: 100%;
+    height: 100%
 }
 
 #myPanel {
-    background-color: rgba(255, 255, 255, 0.5);
+    background-color: rgba(255, 255, 255, 0.5)
 }
 
 body {
-    font-family: arial;
+    font-family: arial
+}
+
+.ui-panel-inner {
+    padding: 0.75em
 }
 
 .ui-page-theme-a .ui-bar-inherit {
@@ -16,7 +20,7 @@ body {
 
 .ui-content {
     height: 100%;
-    padding: 0;
+    padding: 0
 }
 
 #backButton {
@@ -43,7 +47,7 @@ body {
     padding: 2px;
     width: 40px;
     height: 30px;
-    color: #000;
+    color: #000
 }
 
 #search {
@@ -51,9 +55,9 @@ body {
     position: absolute;
     z-index: 40;
     top: 110px;
-    left: 18px;
-
+    left: 18px
 }
+
 #tituloVisor {
     position: absolute;
     top: 10px;
@@ -63,7 +67,7 @@ body {
     /*background-color: rgba(22, 22, 22, 0.54);*/
     color: #000 !important;
     font-weight: 700;
-    font-size: 0.8em;
+    font-size: 0.8em
     /*border: 1px solid #000;    
     border-radius: 5px;*/
     /*padding:7px;*/
@@ -73,18 +77,22 @@ body {
     position: absolute;
     top: 155px;
     left: 19px;
-    z-index: 30;
+    z-index: 30
 }
+
 .HomeButton .home {
     width: 40px;
     background-color: rgba(7, 41, 101, 0.85);
+    border: 1px solid #ddd;
 }
+
 #LocateButton {
     position: absolute;
     top: 200px;
     left: 19px;
-    z-index: 30;
+    z-index: 30
 }
+
 .LocateButton .zoomLocateButton {
     width: 40px;
     background-color: rgba(7, 41, 101, 0.85);
@@ -102,7 +110,7 @@ body {
     padding: 2px;
     width: 40px;
     height: 30px;
-    color: #000;
+    color: #000
 }
 
 #mapaBase {
@@ -115,16 +123,23 @@ body {
 .arcgisSearch .searchBtn {
     background-color: rgba(7, 41, 101, 0.85);
     color: white;
-    border-color: #ddd;
-}
-    .esriSimpleSliderTL {
-    display: none;
+    border-color: #ddd
 }
 
 
+
+.esriSimpleSliderTL {
+    display: none
+}
+
+
+.ui-collapsible-content {
+    background-color: white
+    /*opacity: .6;*/
+}
 
 .ui-field-contain, .ui-mobile fieldset.ui-field-contain {
-    padding: 0;
+    padding: 0
 }
 
 .dijitTitlePane {
@@ -133,18 +148,18 @@ body {
     background-color: #C0C0C0;
     color: #000000;
     font-weight: bold;
-    font-size: 80%;
+    font-size: 80%
 }
 
 .details {
     font-size: 14px;
     font-weight: 600;
-    padding-bottom: 20px;
+    padding-bottom: 20px
 }
 
 button {
     margin: 2px;
-    cursor: pointer;
+    cursor: pointer
 }
 
 /*--------------------------------------------------leyenda------------------------------------------*/
@@ -152,15 +167,15 @@ button {
 .esriLegendLayerLabel, .esriLegendLayer {
     font-family: 'Arial';
     font-size: 12px;
-    color: black;
+    color: black
 }
 
 .esriLegendService img {
-    width: 30px;
+    width: 30px
 }
 
 .esriLegendServiceLabel {
-    display: none;
+    display: none
 }
 
 /*--------------------------------------------------Loading------------------------------------------*/
@@ -176,7 +191,7 @@ button {
     height: 30px;
     margin: 0 auto;
     -moz-animation: spinPulse 1s infinite ease-in-out;
-    -webkit-animation: spinPulse 1s infinite linear;
+    -webkit-animation: spinPulse 1s infinite linear
 }
 
 .circle1 {
@@ -193,7 +208,7 @@ button {
     position: relative;
     top: -30px;
     -moz-animation: spinoffPulse 1s infinite linear;
-    -webkit-animation: spinoffPulse 1s infinite linear;
+    -webkit-animation: spinoffPulse 1s infinite linear
 }
 
 @-moz-keyframes spinPulse {
@@ -253,27 +268,27 @@ button {
 }
 
 .ui-select .ui-btn select {
-    font-size: 1em;
+    font-size: 1em
 }
 
 /*--------------------------------------------------basemapgallery------------------------------------------*/
 
 .esriBasemapGalleryThumbnail {
     height: 47px;
-    width: 80px;
+    width: 80px
 }
 
 .esriBasemapGalleryLabelContainer {
     font-size: .8em;
     font-weight: 600;
-    text-shadow: 0 0 3px #ffffff, 0 0 5px #ffffff;
+    text-shadow: 0 0 3px #ffffff, 0 0 5px #ffffff
 }
 
 .esriBasemapGallery {
     /*background-color: rgba(0,0,0,0);
     border: 5px solid rgba(0,183,229,0.9);*/
     height: 50%;
-    opacity: .9;
+    opacity: .9
 }
 
 /*--------------------------------------------------acercar a------------------------------------------*/
@@ -282,20 +297,6 @@ button {
     margin: auto;
     width: 50%
 }
-    
-.localizacion {
-    /*background-image: url("../images/ico_localizacion.png");*/
-    background-size: 16px 16px;
-    background-position: center center;
-    background-repeat: no-repeat;
-    -webkit-border-radius: 1em;
-    border-radius: 1em;
-    width: 75%
-}
-
-/* -----
-SVG Icons - svgicons.sparkk.fr
------ */
 
 .svg-icon {
     width: 1em;
@@ -310,5 +311,33 @@ SVG Icons - svgicons.sparkk.fr
 
     .svg-icon circle {
         stroke: #4691f6;
-        stroke-width: 1;
+        stroke-width: 1
     }
+
+.localizacion {
+    /*background-image: url("../images/ico_localizacion.png");*/
+    background-size: 16px 16px;
+    background-position: center center;
+    background-repeat: no-repeat;
+    -webkit-border-radius: 1em;
+    border-radius: 1em;
+    width: 75%;
+}
+
+@media (min-width: 28em) {
+    .ui-field-contain > label, .ui-field-contain .ui-controlgroup-label, .ui-field-contain > .ui-rangeslider > label {
+        float: left;
+        width: 27%;
+        margin: .5em 2% 0 0;
+    }
+}
+
+@media (min-width: 28em) {
+    .ui-field-contain > label ~ [class*=ui-], .ui-field-contain .ui-controlgroup-controls {
+        float: left;
+        width: 70%;
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+}
