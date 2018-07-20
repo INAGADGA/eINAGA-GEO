@@ -570,6 +570,8 @@
                                 break;
                         }
                         addGraphic("Geodesic", geomGoogle, symbol);
+                        map.getLayer("Buffer").clear();
+                        map.graphics.clear();
                         var feature = L.esri.Util.arcgisToGeoJSON(geometry, "FID");
                         stringGeoJson = JSON.stringify(feature);
                         tb.deactivate();
@@ -635,7 +637,7 @@
                     g = map.getLayer(capa);
                     g.add( new esri.Graphic(geom, sym, attrs, template) );
                     if (g.graphics.length > 0) {
-                        map.setExtent(esri.graphicsExtent([g.graphics[0]]).expand(3), true);
+                        map.setExtent(esri.graphicsExtent([g.graphics[0]]).expand(1.4), true);
                     }
                 }
                
@@ -777,6 +779,8 @@
 
                 function writeToFile(fileName, data) {
                     //data = JSON.stringify(data, null, '\t');
+                    alert(data);
+                    alert(cordova.file);
                     window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function (directoryEntry) {
                         directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                             fileEntry.createWriter(function (fileWriter) {
@@ -870,11 +874,18 @@
                         + "<br><hr><br><b>Geometría de consulta en geojson (SRS 25830): </b>" + stringGeoJson
                         + "</body></html>";
                     texto.push(cuerpo);
-                    var myWindow = window.open("", "_blank", "scrollbars=yes");
-                    myWindow.document.write(cuerpo);
-                    return new Blob(texto, {
-                        type: 'text/plain'
-                    });
+                    //var myWindow = window.open("", "_blank", "scrollbars=yes");
+                    //myWindow.document.write(cuerpo);
+                    //return new Blob(texto, {
+                    //    type: 'text/plain'
+                    //});
+
+                    let options = { documentSize: 'A4', type: 'share', fileName: 'myFile.pdf' };
+
+                    pdf.fromData(cuerpo, options)
+                        .then((stats) => console.log('status', stats))   // ok..., ok if it was able to handle the file to the OS.
+                        .catch((err) => console.err(err));
+
                 }
                 function initToolbar(evtObj) {
                     //console.debug("initToolbar");
