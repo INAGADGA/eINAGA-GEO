@@ -93,7 +93,7 @@
                 //  otras variables -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 var d = new Date();
                 var fecha = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
-                var fecha2 = d.getDate() + "" + (d.getMonth() + 1) + "" + d.getFullYear();
+                var fecha2 = d.getFullYear() + "" + ("00" + (d.getMonth() + 1)).slice(-2) + "" + ("00" + (d.getDate())).slice(-2);
 
                 var sls = new SimpleLineSymbol("solid", new Color("#444444"), 3);
                 var sfs = new SimpleFillSymbol("solid", sls, new Color([68, 68, 68, 0.25]));
@@ -283,10 +283,6 @@
 
                 tb = new esri.toolbars.Draw(map);
 
-                on(dom.byId("descarga"), "click", function () {
-                    generaTextoDescarga(textoDescarga)
-                });
-
                 query(".tool").on("click", function (evt) {
                     reseteaMedicion();
 
@@ -296,10 +292,13 @@
                             if (tb) {
                                 tb.activate(evt.target.id);
                                 map.setInfoWindowOnClick(false);
-                                $("[data-role=panel]").panel("close");
+                                $("#myPanel").panel("close");
                             }
                         }
-                        else { tb.deactivate(); alert("Debe acercarse hasta una escala menor de 25.000 para digitalizar"); }
+                        else {
+                            tb.deactivate();
+                            showMessage("Debe acercarse hasta una escala menor de 25.000 para digitalizar");
+                        }
                     }
                 });
 
@@ -369,9 +368,9 @@
                     $("#checkMontes").click(function () {
                         cambiaVisibilidad("Montes");
                     });
-                    $("#checkVVPP").click(function () {
-                        cambiaVisibilidad("Vvpp");
-                    });
+                    //$("#checkVVPP").click(function () {
+                    //    cambiaVisibilidad("Vvpp");
+                    //});
                     $("#checkRaster").click(function () {
                         cambiaVisibilidad("IGN");
                     });
@@ -417,15 +416,7 @@
                     });
 
                 });
-
-                function quitaValoresVisibilidad(pos) {
-                    capas = [];
-                    esta = false;
-                    for (index = 0; index < visibleFiguras.length; index++) {
-                        if (visibleFiguras[index] != pos) { capas.push(visibleFiguras[index]); }
-                    }
-                    visibleFiguras = capas;
-                };
+                
 
                 on(dom.byId("clearGraphicsM"), "click", function () {
                     if (map) {
@@ -448,11 +439,11 @@
                             dom.byId("etrs").innerHTML = "<hr /><b>Coordenada ETRS89 30N</br><table style='width:100%'><tr><th>X</th><th>Y</th></tr><tr><td>" + pt.x.toFixed(0) + "</td><td>" + pt.y.toFixed(0) + "</td></tr></table><hr />";
                         });
                     }
-                    $("[data-role=panel]").panel("open");
+                    $("#myPanel").panel("open");
                 });
                 measurement.on("tool-change", function (evt) {
                     map.setInfoWindowOnClick(false); dom.byId("etrs").innerHTML = "";
-                    $("[data-role=panel]").panel("close");
+                    $("#myPanel").panel("close");
                 });
 
                
@@ -504,19 +495,35 @@
                 on(dom.byId("analisisDistancias"), "click", function () {
                     // falta comprobar la geometria de consulta no es nula
                     var distancia = $("#km").val();
-                    if (geomGoogle === undefined) { alert("Debe de dibujar la localización antes de realizar el análisis"); }
-                    else if (distancia === undefined || distancia <= 0) { alert("Debe indicar la distancia del análisis"); }
+                    if (geomGoogle === undefined) { showMessage("Debe de dibujar la localización antes de realizar el análisis"); }
+                    else if (distancia === undefined || distancia <= 0) { showMessage("Debe indicar la distancia del análisis"); }
                     else
                         doBuffer(geomGoogle);
                 });
                 on(dom.byId("descargaGeom"), "click", function () {
                     // falta comprobar que existe geometría a descargar
-                    if (stringGeoJson === undefined) { alert("Debe de dibujar la localización antes de descargarla");}
+                    if (stringGeoJson === undefined) { showMessage("Debe de dibujar la localización antes de descargarla");}
                     else
                         writeToFile(prefijo + fecha2 + '.geojson', stringGeoJson);
                 });
 
+                on(dom.byId("descarga"), "click", function () {
+                    generaTextoDescarga("INF_" + fecha2 + '.pdf')
+                });
+
                 //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                function showMessage(message) {
+                    dom.byId("dialogoPop").innerHTML = message;
+                    $("#popupDialog").popup('open');
+                }
+                function quitaValoresVisibilidad(pos) {
+                    capas = [];
+                    esta = false;
+                    for (index = 0; index < visibleFiguras.length; index++) {
+                        if (visibleFiguras[index] != pos) { capas.push(visibleFiguras[index]); }
+                    }
+                    visibleFiguras = capas;
+                };
 
                 function dibujaGeometria(evtObj) {
                    
@@ -524,15 +531,15 @@
                     console.log(evtObj.geometry.cache);
                     switch (evtObj.geometry.type) {
                         case "point":
-                            if (distancia > 3000) { alert("Se ha superado la superficie máxima"); return; }
+                            if (distancia > 3000) { showMessage("Se ha superado la superficie máxima"); return; }
                             break;
                         case "polyline":
                             var long = geometryEngine.geodesicLength(geometryEngine.simplify(evtObj.geometry), "meters");
-                            alert("longitud: " + long + " meters");
+                            showMessage("longitud: " + long + " meters");
                             break;
                         case "polygon":
                             var area = geometryEngine.geodesicArea(geometryEngine.simplify(evtObj.geometry), "hectares");
-                            alert("area: " + area + " hectares");
+                            showMessage("area: " + area + " hectares");
                             break;
                     }
 
@@ -576,6 +583,7 @@
                         stringGeoJson = JSON.stringify(feature);
                         tb.deactivate();
                         map.setInfoWindowOnClick(true);
+                        $("#myPanel").panel("open");
                     });
                 }
                 function reseteaMedicion() {
@@ -639,8 +647,7 @@
                     if (g.graphics.length > 0) {
                         map.setExtent(esri.graphicsExtent([g.graphics[0]]).expand(1.4), true);
                     }
-                }
-               
+                }               
                 function dameInf() {
                     
                     //visible("loadingSaturacion", 1);
@@ -689,9 +696,9 @@
                     
                     }
                     //visible("loadingSaturacion", 0);
-                    $("[data-role=panel]").panel("open")
+                    $("#myPanel").panel("close");
+                    $("#myPanelRtdo").panel("open");
                 }
-
                 function dameCotos(response) {
                     obtieneDatosConsulta(response, "Terrenos Cinegéticos","Cotos");
                 }                
@@ -779,19 +786,19 @@
 
                 function writeToFile(fileName, data) {
                     //data = JSON.stringify(data, null, '\t');
-                    alert(data);
-                    alert(cordova.file);
+                    showMessage(data);
+                    showMessage(cordova.file);
                     window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function (directoryEntry) {
                         directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
                             fileEntry.createWriter(function (fileWriter) {
                                 fileWriter.onwriteend = function (e) {
                                     // for real-world usage, you might consider passing a success callback
-                                    alert('Write of file "' + fileName + '"" completed.');
+                                    showMessage('Write of file "' + fileName + '"" completed.');
                                 };
 
                                 fileWriter.onerror = function (e) {
                                     // you could hook this up with our global error handler, or pass in an error callback
-                                    alert('Write failed: ' + e.toString());
+                                    showMessage('Write failed: ' + e.toString());
                                 };
 
                                 var blob = new Blob([data], { type: 'text/plain' });
@@ -800,7 +807,7 @@
                         }, errorHandler.bind(null, fileName));
                     }, errorHandler.bind(null, fileName));
 
-                    alert('finaliza');
+                    showMessage('finaliza');
                 }
 
                 var errorHandler = function (fileName, e) {
@@ -827,7 +834,7 @@
                             break;
                     };
 
-                    console.log('Error (' + fileName + '): ' + msg);
+                    showMessage('Error (' + fileName + '): ' + msg);
                 }
 
                 function addPoint4326(geometry) {
@@ -866,21 +873,21 @@
                     else { targetLayer.setVisibility(true); }
                 }
 
-                function generaTextoDescarga() {
-                    var texto = [];
+                function generaTextoDescarga(nombre) {
+                    //var texto = [];
                     var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Consulta de afecciones</h1><b>Fecha: " + fecha
                         + "</b><br><b>Distancia análisis: " + distancia + " m</b>"
                         + textoDescarga
                         + "<br><hr><br><b>Geometría de consulta en geojson (SRS 25830): </b>" + stringGeoJson
                         + "</body></html>";
-                    texto.push(cuerpo);
+                    //texto.push(cuerpo);
                     //var myWindow = window.open("", "_blank", "scrollbars=yes");
                     //myWindow.document.write(cuerpo);
                     //return new Blob(texto, {
                     //    type: 'text/plain'
                     //});
 
-                    let options = { documentSize: 'A4', type: 'share', fileName: 'myFile.pdf' };
+                    let options = { documentSize: 'A4', type: 'share', fileName: nombre };
 
                     pdf.fromData(cuerpo, options)
                         .then((stats) => console.log('status', stats))   // ok..., ok if it was able to handle the file to the OS.
@@ -946,7 +953,7 @@
                     };
 
                     function onError(error) {
-                        alert('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                        showMessage('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                     }
                 }
                 function projectToEtrs89(geometry) {
@@ -999,7 +1006,7 @@
                     }
                     else { texto.push(i++ + ' ' + migeometry.x.toFixed(2).replace('.', ',') + ' ' + migeometry.y.toFixed(2).replace('.', ',')); }
 
-                    alert(cordova.file);
+                    showMessage(cordova.file);
                     writeToFile(nombre, texto.join());
                                         
                 };
@@ -1016,7 +1023,7 @@
                     var win = window.open(url);
                     win.focus();
                 }
-
+                
                 
                 // Capas necesarias para las búsquedas-------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 // create a text symbol to define the style of labels               
@@ -1131,9 +1138,9 @@
                     //3: { infoTemplate:   new esri.InfoTemplate("Consorcios de repoblación", "${*}") },
                     //4: { infoTemplate: new esri.InfoTemplate("Montes", "Matricula: ${MATRICULA}<br>Nombre: ${NOMBRE}<br>Titular: ${TITULAR}<br>Tipo: ${DTIPO}") },
                     //5: { infoTemplate: new esri.InfoTemplate("Montes Gen", "Matricula: ${MATRICULA}<br>Nombre: ${DENOMINACION}<br>Titular: ${TITULAR}<br>Tipo: ${TIPO}") }
-                    4: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) },
-                    5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes Gen", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${DENOMINACION}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${TIPO}")) },
-                    6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Vías Pecuarias", "<b>Municipio:</b> ${MUNICIPIO}<br><b>Nombre:</b> ${NOMBRE_VIA}<br><b>Tipo:</b> ${DTIPVIA}")) }
+                    4: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes", "<h3>Montes:</h3><b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) },
+                    5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes Gen", "<h3>Montes:</h3><b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${DENOMINACION}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${TIPO}")) },
+                    6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Vías Pecuarias", "<h3>Vías Pecuarias:</h3><b>Municipio:</b> ${MUNICIPIO}<br><b>Nombre:</b> ${NOMBRE_VIA}<br><b>Tipo:</b> ${DTIPVIA}")) }
                 });
                 dynamicMSLayerMontes.setImageFormat("png32", true);
                 var dynamicMSLayerCotos = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Cotos_Caza/MapServer", {
@@ -1143,8 +1150,8 @@
                 });
                 dynamicMSLayerCotos.setVisibility(false);
                 dynamicMSLayerCotos.setInfoTemplates({
-                    1: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) },
-                    2: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) }
+                    1: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<h3>Terrenos Cinegéticos:</h3><b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) },
+                    2: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Terrenos Cinegéticos", "<h3>Terrenos Cinegéticos:</h3><b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) }
                 });
                 dynamicMSLayerCotos.setImageFormat("png32", true);
 
@@ -1160,14 +1167,14 @@
                     //,opacity: 0.7
                 });
                 dynamicMSLayerFPA.setInfoTemplates({
-                    0: { infoTemplate: new esri.InfoTemplate(getInfotemplate("HUMEDALES", "<b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    1: { infoTemplate: new esri.InfoTemplate(getInfotemplate("LICS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    2: { infoTemplate: new esri.InfoTemplate(getInfotemplate("ZEPAS", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    3: { infoTemplate: new esri.InfoTemplate(getInfotemplate("LIG", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    4: { infoTemplate: new esri.InfoTemplate(getInfotemplate("ENP", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("PORN", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
-                    6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("AREAS CRITICAS", "<b><b>CODIGO:</b> ${CODZONA}<br><b>Nombre:</b> ${DZONA}")) },
-                    7: { infoTemplate: new esri.InfoTemplate(getInfotemplate("APPE", "<b>CODIGO: ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                    0: { infoTemplate: new esri.InfoTemplate(getInfotemplate("HUMEDALES", "<h3>HUMEDALES:</h3><b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                    1: { infoTemplate: new esri.InfoTemplate(getInfotemplate("LICS", "<h3>LICS:</h3><b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                    2: { infoTemplate: new esri.InfoTemplate(getInfotemplate("ZEPAS", "<h3>ZEPAS:</h3><b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                    3: { infoTemplate: new esri.InfoTemplate(getInfotemplate("LIG", "<h3>LIG:</h3><b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                    4: { infoTemplate: new esri.InfoTemplate(getInfotemplate("ENP", "<h3>ENP:</h3><b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                    5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("PORN", "<h3>PORN:</h3><b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
+                    6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("AREAS CRITICAS", "<h3>Áreas Críticas:</h3><b><b>CODIGO:</b> ${CODZONA}<br><b>Nombre:</b> ${DZONA}")) },
+                    7: { infoTemplate: new esri.InfoTemplate(getInfotemplate("APPE", "<h3>Ámbitos de Protección:</h3><b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
                 });
                 dynamicMSLayerFPA.setVisibleLayers([]);
                 dynamicMSLayerFPA.setImageFormat("png32", true);
