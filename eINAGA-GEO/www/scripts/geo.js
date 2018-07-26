@@ -19,6 +19,8 @@
         var stringGeoJson;
         var myVar;
         var valores;
+        var contadorConsultas = 0;
+               
         require([
             "dojo/dom",
             "dojo/dom-style",
@@ -76,6 +78,8 @@
             Font, Measurement, OverviewMap, BasemapGallery, Basemap, BasemapLayer, Scalebar, Search, HomeButton, Legend, LocateButton, FeatureLayer, ArcGISDynamicMapServiceLayer, WMSLayer, WMSLayerInfo, 
             LabelClass, SimpleRenderer
         ) {                
+                
+                
 
                 //function init() {
                 parser.parse();
@@ -353,6 +357,7 @@
 
 
                 $(document).ready(function () {
+                    
                     $("#checkCatastro").click(function () {
                         cambiaVisibilidad("OVC");
                     });
@@ -511,6 +516,7 @@
                     generaTextoDescarga("INF_" + fecha2 + '.pdf')
                 });
 
+
                 //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 function showMessage(message) {
                     dom.byId("dialogoPop").innerHTML = message;
@@ -650,7 +656,7 @@
                 }               
                 function dameInf() {
                     
-                    //visible("loadingSaturacion", 1);
+                    
                     distancia = $("#km").val();
                     dom.byId("listadoRtdos").innerHTML = "";
                     dom.byId("resultadoImpacto").innerHTML = "";
@@ -668,68 +674,98 @@
                     consultaDistancias = "<b>Fecha: " + fecha + "</b><hr/>";  // + Granjas;
                     dom.byId("listadoRtdos").innerHTML = consultaDistancias;
                     consultaDistancias += "<h4 style=\"color:red;\">Entidades a menos de " + distancia + " m</h4>" + Granjas;
+                    contadorConsultas = 0;
                     try {
                         if ($('#checkCotos').is(":checked")) {
+                            contadorConsultas++; 
                             fc_cotos.queryFeatures(query, dameCotos);
-                        }
-                        if ($('#checkMontes').is(":checked")) {
+                        }if ($('#checkMontes').is(":checked")) {
+                            contadorConsultas++; 
                             fc_montes.queryFeatures(query, dameMontes);
                         } if ($('#checkboxhmd').is(":checked")) {
+                            contadorConsultas++; 
                             fc_humedales.queryFeatures(query, dameHumedales);
                         } if ($('#checkboxlics').is(":checked")) {
+                            contadorConsultas++; 
                             fc_lics.queryFeatures(query, dameLics);
                         } if ($('#checkboxzepas').is(":checked")) {
+                            contadorConsultas++; 
                             fc_zepas.queryFeatures(query, dameZepas);
                         } if ($('#checkboxlig').is(":checked")) {
+                            contadorConsultas++; 
                             fc_ligs.queryFeatures(query, dameLigs);
                         } if ($('#checkboxenp').is(":checked")) {
+                            contadorConsultas++; 
                             fc_enp.queryFeatures(query, dameEnp);
                         } if ($('#checkboxporn').is(":checked")) {
+                            contadorConsultas++; 
                             fc_porn.queryFeatures(query, damePorn);
                         } if ($('#checkboxacrit').is(":checked")) {
+                            contadorConsultas++; 
                             fc_acrit.queryFeatures(query, dameAcrit);
                         } if ($('#checkboxappe').is(":checked")) {
+                            contadorConsultas++; 
                             fc_appe.queryFeatures(query, dameAppe);
                         }
                     }
-                    catch{
-                    
+                    catch(ex){
+                        showMessage(err.message);
                     }
-                    //visible("loadingSaturacion", 0);
-                    $("#myPanel").panel("close");
-                    $("#myPanelRtdo").panel("open");
+                    if (contadorConsultas > 0) {
+                        visible("loadingSaturacion", 1);
+                        $("#myPanel").panel("close");
+                        $("#myPanelRtdo").panel("open");
+                    }
+                    else {
+                        showMessage("Debes seleccionar alguna capa de análisis");
+                    }
                 }
-                function dameCotos(response) {
-                    obtieneDatosConsulta(response, "Terrenos Cinegéticos","Cotos");
+                function dameCotos(response) {                    
+                    obtieneDatosConsulta(response, "Terrenos Cinegéticos", "Cotos");                                        
+                    semaforoResta();
                 }                
-                function dameMontes(response) {
-                    obtieneDatosConsulta(response, "Montes", "Montes");
+                function dameMontes(response) {                    
+                    obtieneDatosConsulta(response, "Montes", "Montes");                    
+                    semaforoResta();
                 }
-                function dameHumedales(response) {
-                    obtieneDatosConsulta(response, "Humedales", "Humedales");
+                function dameHumedales(response) {                    
+                    obtieneDatosConsulta(response, "Humedales", "Humedales");                    
+                    semaforoResta();
                 }
-                function dameLics(response) {
-                    obtieneDatosConsulta(response, "LICS", "LICS");
+                function dameLics(response) {                    
+                    obtieneDatosConsulta(response, "LICS", "LICS");                    
+                    semaforoResta();
                 }
                 function dameZepas(response) {
-                    obtieneDatosConsulta(response, "Zepas", "Zepas");
+                    obtieneDatosConsulta(response, "Zepas", "Zepas");                    
+                    semaforoResta();
                 }
                 function dameLigs(response) {
                     obtieneDatosConsulta(response, "LIG", "Ligs");
+                    semaforoResta();
                 }
                 function dameEnp(response) {
                     obtieneDatosConsulta(response, "ENP", "ENP");
+                    semaforoResta();
                 }
                 function damePorn(response) {
                     obtieneDatosConsulta(response, "PORN", "PORN");
+                    semaforoResta();
                 }
                 function dameAcrit(response) {
-                    obtieneDatosConsulta(response, "ACRIT", "ACRIT");
+                    obtieneDatosConsulta(response, "ACRIT", "ACRIT");                    
+                    semaforoResta();
                 }
                 function dameAppe(response) {
-                    obtieneDatosConsulta(response, "APPE", "APPE");
+                    obtieneDatosConsulta(response, "APPE", "APPE");                    
+                    semaforoResta();
                 }
-
+                function semaforoResta() {
+                    --contadorConsultas;
+                    if (contadorConsultas === 0) {
+                        visible("loadingSaturacion", 0);
+                    }
+                }
                 function obtieneDatosConsulta(response, texto, texto2) {
                     var Granjas = "<b>" + texto + ":</b><br>";
                     textoDescarga += "<table><h2>" + texto + "</h2>";
@@ -785,29 +821,30 @@
                 }
 
                 function writeToFile(fileName, data) {
-                    //data = JSON.stringify(data, null, '\t');
-                    showMessage(data);
-                    showMessage(cordova.file);
-                    window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function (directoryEntry) {
-                        directoryEntry.getFile(fileName, { create: true }, function (fileEntry) {
-                            fileEntry.createWriter(function (fileWriter) {
-                                fileWriter.onwriteend = function (e) {
-                                    // for real-world usage, you might consider passing a success callback
-                                    showMessage('Write of file "' + fileName + '"" completed.');
-                                };
+                    if (cordova.platformId === 'ios') {
+                    }
+                    else {
+                        //showMessage(data);
+                        showMessage(cordova.file);
+                        window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function (directoryEntry) {
+                            directoryEntry.getFile( fileName, { create: true }, function (fileEntry) {
+                                fileEntry.createWriter(function (fileWriter) {
+                                    fileWriter.onwriteend = function (e) {
+                                        // for real-world usage, you might consider passing a success callback
+                                        showMessage('<p>Archivo guardado corectamente en</p><p> ' + cordova.file.externalCacheDirectory.replace('/','</p><p>') + "</p> \\" + fileName );
+                                    };
 
-                                fileWriter.onerror = function (e) {
-                                    // you could hook this up with our global error handler, or pass in an error callback
-                                    showMessage('Write failed: ' + e.toString());
-                                };
+                                    fileWriter.onerror = function (e) {
+                                        // you could hook this up with our global error handler, or pass in an error callback
+                                        showMessage('Error: ' + e.toString());
+                                    };
 
-                                var blob = new Blob([data], { type: 'text/plain' });
-                                fileWriter.write(blob);
+                                    var blob = new Blob([data], { type: 'text/plain' });
+                                    fileWriter.write(blob);
+                                }, errorHandler.bind(null, fileName));
                             }, errorHandler.bind(null, fileName));
-                        }, errorHandler.bind(null, fileName));
-                    }, errorHandler.bind(null, fileName));
-
-                    showMessage('finaliza');
+                        }, errorHandler.bind(null, fileName));                        
+                    }
                 }
 
                 var errorHandler = function (fileName, e) {
@@ -837,6 +874,14 @@
                     showMessage('Error (' + fileName + '): ' + msg);
                 }
 
+                function visible(id, flag) {
+                    if (flag == 1) {
+                        document.getElementById(id).style.visibility = 'visible';
+                    }
+                    else if (flag == 0) {
+                        document.getElementById(id).style.visibility = 'hidden';
+                    }
+                }
                 function addPoint4326(geometry) {
                     map.graphics.clear();
                     var attrs, sym;

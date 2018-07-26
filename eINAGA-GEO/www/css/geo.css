@@ -2,27 +2,33 @@ svg {
     width: 25px;
     height: 25px;
 }
-#point{
-        background-image: url('../images/punto.png' );
-        background-size: 48px 48px;
-        height: 48px;  
-        width: 48px;
-        float:left;
-        font-size: 10px;
-        margin-right: 10px
-    }
-    #polyline{
-        background-image: url('../images/line.png' );
-        background-size: 48px 48px;
-        height: 48px;  
-        width: 48px;
-        float:left;font-size: 10px;
-        margin-right: 10px
-    }
-    #polygon{
-        background-image: url('../images/poli.png' );
-        background-size: 48px 48px;
-        height: 48px;  
-        width: 48px;
-        font-size: 10px;
-    }
+#point {
+    background-image: url('../images/punto.png' );
+    background-size: 48px 48px;
+    height: 48px;
+    width: 48px;
+    float: left;
+    font-size: 10px;
+    margin-right: 10px
+}
+#polyline {
+    background-image: url('../images/line.png' );
+    background-size: 48px 48px;
+    height: 48px;
+    width: 48px;
+    float: left;
+    font-size: 10px;
+    margin-right: 10px
+}
+#polygon {
+    background-image: url('../images/poli.png' );
+    background-size: 48px 48px;
+    height: 48px;
+    width: 48px;
+    font-size: 10px;
+}
+#dialogoPop {
+    margin: 20px;
+    padding: 10px;
+}
+ 
