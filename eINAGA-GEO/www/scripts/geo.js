@@ -10,11 +10,16 @@
         var map, tb, coordx, coordy, geom, url;
         var coordConsulta;  
         var textoDescarga = "";
+        var textoParcelas = ""; 
+        var textoParcelasDesglosado = ""; 
+        var contadorParcelas = 0;
         var listcoor = []; var orden = 0;
         var loading; var edicion = false;
         var visible = [];
         var visibleFiguras = [];
         var prefijo, ultpos = 0;
+        var prefijoParce = "Catastro_Parcela_";
+        var campoRefpar = "REFPAR";
         var geomBuffer;
         var stringGeoJson;
         var myVar;
@@ -79,8 +84,6 @@
             LabelClass, SimpleRenderer
         ) {                
                 
-                
-
                 //function init() {
                 parser.parse();
 
@@ -91,7 +94,7 @@
                 var customExtentAndSR = new esri.geometry.Extent(-300000, 4840000, 120000, 5280000, new esri.SpatialReference({ wkid: 3857 })); //= new esri.geometry.Extent(550000,4400000,825000,4770000, new esri.SpatialReference({wkid:25830}));
                 // variables capa de busqueda del servicio a consultar  ------------------------------------------------------------------------------------------------------------------------------
                 var tituloVisor = "<center><b><font color='white'>eINAGA-GEO</font></b></center>"
-                dom.byId("tituloVisor").innerHTML = tituloVisor;
+                dom.byId("tituloVisor").innerHTML = tituloVisor; 
 
 
                 //  otras variables -------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -339,6 +342,10 @@
                             $(".esriMobileNavigationBar").css("display", "inline-block");
                         });
                     }
+                    else if (dom.byId("consultaParcelas").checked) {
+                        map.setInfoWindowOnClick(false);
+                        dameParcela(evt.mapPoint);
+                    }
                     else {
                         map.infoWindow.resize(280, 300);
                     }
@@ -516,8 +523,74 @@
                     generaTextoDescarga("INF_" + fecha2 + '.pdf')
                 });
 
+                on(dom.byId("descargaParcelas"), "click", function () {
+                    writeToFile(prefijoParce + fecha2 + '.txt', textoParcelasDesglosado);
+                });
+                on(dom.byId("limpiaParcelas"), "click", function () {
+                    textoParcelasDesglosado = "";
+                    dom.byId("ArrayParcelas").innerHTML = "";
+                    contadorParcelas = 0;
+                    dom.byId("ParcelasSel").innerHTML = "";
+                });
+                on(dom.byId("select-choice-1"), "change", function () {
+                    var x = document.getElementById("select-choice-1").value;
+                    if (textoParcelasDesglosado.length > 0) {
+                        showMessage("Para cambiar de tipo de parcesa es necesario que borre la selección actual");
+                    }
+                    else {
+                        if (x === "01") {
+                            prefijoParce = "Catastro_Parcela_";
+                            campoRefpar = "REFPAR";                       
+                        }
+                        if (x === "02") {
+                            prefijoParce = "Catastro_Subparcela_";
+                            campoRefpar = "REFPAR_SUBP";
+                        }
+                        else {
+                            prefijoParce = "Sigpac_";
+                            campoRefpar = "REFREC";
+                        }
+                    }
 
+                    //var selected = $(this).val();
+
+                    //if (selected != 'bar') {
+                    //    if (!confirm('Are you sure?')) {
+                    //        $(this).val($.data(this, 'current'));
+                    //        return false;
+                    //    }
+                    //}
+
+                    //$.data(this, 'current', $(this).val());
+                });
+                on(dom.byId("select-choice-1"), "click", function () {                    
+                    if (textoParcelasDesglosado.length > 0) {
+                        showMessage("Para cambiar de tipo de parcesa es necesario que borre la selección actual");
+                        return;
+                    }
+                });
                 //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                
+                function dameParcela() {
+                    try {
+                        var query = new Query();
+                        query.geometry = arguments[0];
+                        query.outFields = ["*"];
+                        var dropd = $("#select-choice-1").find('option:selected').val();
+                        if (dropd === "01") {
+                            fc_parce.queryFeatures(query, dameParce);
+                        }
+                        else if (dropd === "02") {
+                            fc_subparce.queryFeatures(query, dameParce);
+                        }
+                        else {
+                            fc_recintos.queryFeatures(query, dameParce);
+                        }
+                    }
+                    catch (ex) {
+                        showMessage(ex);
+                    }
+                }
                 function showMessage(message) {
                     dom.byId("dialogoPop").innerHTML = message;
                     $("#popupDialog").popup('open');
@@ -766,6 +839,46 @@
                         visible("loadingSaturacion", 0);
                     }
                 }
+                function dameParce(response) {
+                    var features = response.features;
+                    if (features.length === 0) { return; }
+                    var dropd = $("#select-choice-1").find('option:selected').val();
+                    
+                    var valor = features[0].attributes[campoRefpar];                                        
+                    if (textoParcelas.indexOf(valor) == -1) {
+                        dom.byId("ArrayParcelas").innerHTML += "</p>" + valor;
+                        contadorParcelas++;
+                        dom.byId("ParcelasSel").innerHTML = contadorParcelas + " Parcelas Seleccionadas";
+                        if (dropd === "01") {
+                            textoParcelasDesglosado += "\r" +
+                                features[0].attributes["DELEGACIO"] + "\t" +
+                                features[0].attributes["MUNAGR"] + "\t" +
+                                features[0].attributes["MASA"] + "\t" +
+                                features[0].attributes["PARCELA"];
+                        }
+                        else if (dropd === "02") {
+                            textoParcelasDesglosado += "\r" +
+                                features[0].attributes["DELEGACIO"] + "\t" +
+                                features[0].attributes["MUNAGR"] + "\t" +
+                                features[0].attributes["MASA"] + "\t" +
+                                features[0].attributes["PARCELA"] + "\t" +
+                                features[0].attributes["SUBPARCE"];
+                        }
+                        else {
+                            textoParcelasDesglosado += "\r" +
+                                features[0].attributes["PROVINCIA"] + "\t" +
+                                features[0].attributes["AGREGADO"] + "\t" +
+                                features[0].attributes["POLIGONO"] + "\t" +
+                                features[0].attributes["PARCELA"] + "\t" +
+                                features[0].attributes["RECINTO"];
+                        }
+                        textoParcelas += ";" + valor;
+                        activaAnimacion();
+                    }
+                    else {
+                        showMessage("Ya está seleccionada");
+                    }
+                }
                 function obtieneDatosConsulta(response, texto, texto2) {
                     var Granjas = "<b>" + texto + ":</b><br>";
                     textoDescarga += "<table><h2>" + texto + "</h2>";
@@ -826,12 +939,12 @@
                     else {
                         //showMessage(data);
                         showMessage(cordova.file);
-                        window.resolveLocalFileSystemURL(cordova.file.externalCacheDirectory, function (directoryEntry) {
+                        window.resolveLocalFileSystemURL(cordova.file.cacheDirectory, function (directoryEntry) {
                             directoryEntry.getFile( fileName, { create: true }, function (fileEntry) {
                                 fileEntry.createWriter(function (fileWriter) {
                                     fileWriter.onwriteend = function (e) {
                                         // for real-world usage, you might consider passing a success callback
-                                        showMessage('<p>Archivo guardado corectamente en</p><p> ' + cordova.file.externalCacheDirectory.replace('/','</p><p>') + "</p> \\" + fileName );
+                                        showMessage('<p>Archivo guardado corectamente en</p> ' + cordova.file.externalCacheDirectory.split("/").join('</p>') + "</p> /" + fileName );
                                     };
 
                                     fileWriter.onerror = function (e) {
@@ -1068,7 +1181,12 @@
                     var win = window.open(url);
                     win.focus();
                 }
-                
+
+                function activaAnimacion() {
+                    var elm = document.querySelector("#ParcelasSel");
+                    var newone = elm.cloneNode(true);
+                    elm.parentNode.replaceChild(newone, elm);
+                }
                 
                 // Capas necesarias para las búsquedas-------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 // create a text symbol to define the style of labels               
@@ -1084,6 +1202,9 @@
                 var fc_porn = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/5");  
                 var fc_acrit = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/6");  
                 var fc_appe = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/7");  
+                var fc_parce = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/5");  
+                var fc_subparce = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/6");  
+                var fc_recintos = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/8");  
                 
                 // busquedas -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 var s = new Search({
