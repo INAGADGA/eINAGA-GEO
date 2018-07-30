@@ -939,12 +939,12 @@
                     else {
                         //showMessage(data);
                         showMessage(cordova.file);
-                        window.resolveLocalFileSystemURL(cordova.file.cacheDirectory, function (directoryEntry) {
+                        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
                             directoryEntry.getFile( fileName, { create: true }, function (fileEntry) {
                                 fileEntry.createWriter(function (fileWriter) {
                                     fileWriter.onwriteend = function (e) {
                                         // for real-world usage, you might consider passing a success callback
-                                        showMessage('<p>Archivo guardado corectamente en</p> ' + cordova.file.externalCacheDirectory.split("/").join('</p>') + "</p> /" + fileName );
+                                        showMessage('<p>Archivo guardado corectamente en</p> ' + cordova.file.dataDirectory.split("/").join('</p>') + "</p> /" + fileName );
                                     };
 
                                     fileWriter.onerror = function (e) {
