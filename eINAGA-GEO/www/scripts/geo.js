@@ -292,6 +292,8 @@
 
                 query(".tool").on("click", function (evt) {
                     reseteaMedicion();
+                    var g = map.getLayer("Geodesic");
+                    g.clear();
 
                     if (evt.target.id.substring(0, 4) != "rec_") {
                         map.graphics.clear();
@@ -540,28 +542,29 @@
                     else {
                         if (x === "01") {
                             prefijoParce = "Catastro_Parcela_";
-                            campoRefpar = "REFPAR";                       
+                            campoRefpar = "REFPAR";         
+                            $("#checkCatastro").prop('checked', true).checkboxradio('refresh');                        
+                            setVisible("OVC");
+                            $("#checkSigpac").prop('checked', false).checkboxradio('refresh');
+                            setInVisible("SIGPAC");
                         }
-                        if (x === "02") {
+                        else if (x === "02") {
                             prefijoParce = "Catastro_Subparcela_";
                             campoRefpar = "REFPAR_SUBP";
+                            $("#checkCatastro").prop('checked', true).checkboxradio("refresh");
+                            setVisible("OVC");
+                            $("#checkSigpac").prop('checked', false).checkboxradio("refresh");
+                            setInVisible("SIGPAC");
                         }
                         else {
                             prefijoParce = "Sigpac_";
-                            campoRefpar = "REFREC";
+                            campoRefpar = "REFREC";                
+                            $("#checkSigpac").prop('checked', true).checkboxradio("refresh");
+                            setVisible("SIGPAC");
+                            $("#checkCatastro").prop('checked', false).checkboxradio("refresh");
+                            setInVisible("OVC");
                         }
                     }
-
-                    //var selected = $(this).val();
-
-                    //if (selected != 'bar') {
-                    //    if (!confirm('Are you sure?')) {
-                    //        $(this).val($.data(this, 'current'));
-                    //        return false;
-                    //    }
-                    //}
-
-                    //$.data(this, 'current', $(this).val());
                 });
                 on(dom.byId("select-choice-1"), "click", function () {                    
                     if (textoParcelasDesglosado.length > 0) {
@@ -627,8 +630,7 @@
                 }
 
                 function dameGeomEtrs89() {
-                    var g = map.getLayer("Geodesic");
-                    g.clear();
+                   
                     map.graphics.clear();
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
@@ -933,47 +935,44 @@
                     return textoDescarga;
                 }
 
-                function writeToFile2(fileName, data) {
-                    if (cordova.platformId === 'ios') {
-                    }
-                    else {
-                        //showMessage(data);
-                        showMessage(cordova.file);
-                        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
-                            directoryEntry.getFile( fileName, { create: true }, function (fileEntry) {
-                                fileEntry.createWriter(function (fileWriter) {
-                                    fileWriter.onwriteend = function (e) {
-                                        // for real-world usage, you might consider passing a success callback
-                                        showMessage('<p>Archivo guardado corectamente en</p> ' + cordova.file.dataDirectory.split("/").join('</p>') + "</p> /" + fileName );
-                                    };
+                //function writeToFile2(fileName, data) {
+                //    if (cordova.platformId === 'ios') {
+                //    }
+                //    else {
+                //        //showMessage(data);
+                //        showMessage(cordova.file);
+                //        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
+                //            directoryEntry.getFile( fileName, { create: true }, function (fileEntry) {
+                //                fileEntry.createWriter(function (fileWriter) {
+                //                    fileWriter.onwriteend = function (e) {
+                //                        // for real-world usage, you might consider passing a success callback
+                //                        showMessage('<p>Archivo guardado corectamente en</p> ' + cordova.file.dataDirectory.split("/").join('</p>') + "</p> /" + fileName );
+                //                    };
 
-                                    fileWriter.onerror = function (e) {
-                                        // you could hook this up with our global error handler, or pass in an error callback
-                                        showMessage('Error: ' + e.toString());
-                                    };
+                //                    fileWriter.onerror = function (e) {
+                //                        // you could hook this up with our global error handler, or pass in an error callback
+                //                        showMessage('Error: ' + e.toString());
+                //                    };
 
-                                    var blob = new Blob([data], { type: 'text/plain' });
-                                    fileWriter.write(blob);
-                                }, errorHandler.bind(null, fileName));
-                            }, errorHandler.bind(null, fileName));
-                        }, errorHandler.bind(null, fileName));                        
-                    }
-                }
+                //                    var blob = new Blob([data], { type: 'text/plain' });
+                //                    fileWriter.write(blob);
+                //                }, errorHandler.bind(null, fileName));
+                //            }, errorHandler.bind(null, fileName));
+                //        }, errorHandler.bind(null, fileName));                        
+                //    }
+                //}
+
                 function writeToFile(fileName, data) {
                     if (cordova.platformId === 'ios') {
                     }
-                    else {
-                        showMessage('entra en función writeToFile');
+                    else {                        
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-
-                            showMessage('file system open: ' + fs.name);
+                            //showMessage('file system open: ' + fs.name);
                             fs.root.getFile("Download/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
-
-                                showMessage("fileEntry is file?" + fileEntry.isFile.toString());
+                                //showMessage("fileEntry is file?" + fileEntry.isFile.toString());
                                 // fileEntry.name == 'someFile.txt'
                                 // fileEntry.fullPath == '/someFile.txt'
                                 writeFile(fileEntry, data);
-
                             }, onErrorCreateFile);
 
                         }, onErrorLoadFs);                    
@@ -1072,6 +1071,19 @@
                         targetLayer.setVisibility(false);
                     }
                     else { targetLayer.setVisibility(true); }
+                }
+
+                function setVisible(nombre) {
+                    var targetLayer = map.getLayer(nombre);
+                    if (!targetLayer.visible) {
+                        targetLayer.setVisibility(true);
+                    }
+                }
+                function setInVisible(nombre) {
+                    var targetLayer = map.getLayer(nombre);
+                    if (targetLayer.visible) {
+                        targetLayer.setVisibility(false);
+                    }
                 }
 
                 function generaTextoDescarga(nombre) {
