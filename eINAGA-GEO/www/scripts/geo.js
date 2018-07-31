@@ -999,14 +999,14 @@
                 function writeFile(fileEntry, dataObj) {
                     // Create a FileWriter object for our FileEntry (log.txt).
                     fileEntry.createWriter(function (fileWriter) {
-                        showMessage(fileEntry.fullPath);
+                        //showMessage(fileEntry.fullPath);
                         fileWriter.onwriteend = function () {
-                            showMessage("Successful file write...");
-                            //readFile(fileEntry);
+                            showMessage("Almacenado en " + fileEntry.fullPath);
+                            
                         };
 
                         fileWriter.onerror = function (e) {
-                            showMessage("Failed file write: " + e.toString());
+                            showMessage("Falla el guardado: " + e.toString());
                         };
 
                         var blob = new Blob([dataObj], { type: 'text/plain' });
