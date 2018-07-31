@@ -978,6 +978,9 @@
                         }, onErrorLoadFs);                    
                     }
                 }
+                function onErrorLoadFs(er) {
+                    showMessage('onErrorLoadFs: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                }
                 function writeFile(fileEntry, dataObj) {
                     // Create a FileWriter object for our FileEntry (log.txt).
                     fileEntry.createWriter(function (fileWriter) {
