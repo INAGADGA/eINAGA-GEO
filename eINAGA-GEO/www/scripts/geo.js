@@ -967,7 +967,7 @@
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
 
                             showMessage('file system open: ' + fs.name);
-                            fs.root.getFile(fileName, { create: true, exclusive: false }, function (fileEntry) {
+                            fs.root.getFile("Dowload/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
 
                                 showMessage("fileEntry is file?" + fileEntry.isFile.toString());
                                 // fileEntry.name == 'someFile.txt'
