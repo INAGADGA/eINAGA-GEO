@@ -963,9 +963,10 @@
                     if (cordova.platformId === 'ios') {
                     }
                     else {
+                        showMessage('entra en función writeToFile');
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
 
-                            console.log('file system open: ' + fs.name);
+                            showMessage('file system open: ' + fs.name);
                             fs.root.getFile(fileName, { create: true, exclusive: false }, function (fileEntry) {
 
                                 showMessage("fileEntry is file?" + fileEntry.isFile.toString());
@@ -978,8 +979,11 @@
                         }, onErrorLoadFs);                    
                     }
                 }
-                function onErrorLoadFs(er) {
+                function onErrorLoadFs(error) {
                     showMessage('onErrorLoadFs: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                }
+                function onErrorCreateFile(error) {
+                    showMessage('onErrorCreateFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function writeFile(fileEntry, dataObj) {
                     // Create a FileWriter object for our FileEntry (log.txt).
