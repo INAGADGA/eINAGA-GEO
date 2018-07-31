@@ -17,7 +17,7 @@
         var loading; var edicion = false;
         var visible = [];
         var visibleFiguras = [];
-        var prefijo, ultpos = 0;
+        var prefijo, nomCapa,  ultpos = 0;
         var prefijoParce = "Catastro_Parcela_";
         var campoRefpar = "REFPAR";
         var geomBuffer;
@@ -294,6 +294,7 @@
                     reseteaMedicion();
                     var g = map.getLayer("Geodesic");
                     g.clear();
+                    $("#checkbox-1").prop('checked', false).checkboxradio("refresh");
 
                     if (evt.target.id.substring(0, 4) != "rec_") {
                         map.graphics.clear();
@@ -581,12 +582,15 @@
                         query.outFields = ["*"];
                         var dropd = $("#select-choice-1").find('option:selected').val();
                         if (dropd === "01") {
+                            nomCapa = "{0} Parcelas Seleccionadas";
                             fc_parce.queryFeatures(query, dameParce);
                         }
                         else if (dropd === "02") {
+                            nomCapa = "{0} Subparcelas Seleccionadas";
                             fc_subparce.queryFeatures(query, dameParce);
                         }
                         else {
+                            nomCapa = "{0} Recintos Seleccionados";
                             fc_recintos.queryFeatures(query, dameParce);
                         }
                     }
@@ -850,7 +854,7 @@
                     if (textoParcelas.indexOf(valor) == -1) {
                         dom.byId("ArrayParcelas").innerHTML += "</p>" + valor;
                         contadorParcelas++;
-                        dom.byId("ParcelasSel").innerHTML = contadorParcelas + " Parcelas Seleccionadas";
+                        dom.byId("ParcelasSel").innerHTML = nomCapa.format(contadorParcelas);
                         if (dropd === "01") {
                             textoParcelasDesglosado += "\r" +
                                 features[0].attributes["DELEGACIO"] + "\t" +
@@ -934,7 +938,15 @@
                     textoDescarga += "</tr>";
                     return textoDescarga;
                 }
-
+                String.prototype.format = function () {
+                    var args = arguments;
+                    return this.replace(/{(\d+)}/g, function (match, number) {
+                        return typeof args[number] != 'undefined'
+                            ? args[number]
+                            : match
+                            ;
+                    });
+                };
                 //function writeToFile2(fileName, data) {
                 //    if (cordova.platformId === 'ios') {
                 //    }

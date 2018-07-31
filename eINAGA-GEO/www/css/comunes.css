@@ -74,8 +74,10 @@ body {
 }
 #ParcelasSel {
     position: absolute;
+    width: 100%;
+    text-align:center;
     top: 10px;
-    left: 40%;
+    /*left: 25%;*/
     z-index: 30;
     text-shadow: 0 0 3px #000, 0 0 5px #000;
     /*background-color: rgba(22, 22, 22, 0.54);*/
@@ -453,8 +455,7 @@ button {
         -webkit-transform: scale3d(1.1, 1.1, 1.1);
         transform: scale3d(1.1, 1.1, 1.1);
     }
-
-    40% {
+    ParcelasSel 40% {
         -webkit-transform: scale3d(.9, .9, .9);
         transform: scale3d(.9, .9, .9);
     }
