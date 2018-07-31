@@ -933,7 +933,7 @@
                     return textoDescarga;
                 }
 
-                function writeToFile(fileName, data) {
+                function writeToFile2(fileName, data) {
                     if (cordova.platformId === 'ios') {
                     }
                     else {
@@ -958,6 +958,42 @@
                             }, errorHandler.bind(null, fileName));
                         }, errorHandler.bind(null, fileName));                        
                     }
+                }
+                function writeToFile(fileName, data) {
+                    if (cordova.platformId === 'ios') {
+                    }
+                    else {
+                        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+
+                            console.log('file system open: ' + fs.name);
+                            fs.root.getFile(fileName, { create: true, exclusive: false }, function (fileEntry) {
+
+                                console.log("fileEntry is file?" + fileEntry.isFile.toString());
+                                // fileEntry.name == 'someFile.txt'
+                                // fileEntry.fullPath == '/someFile.txt'
+                                writeFile(fileEntry, data);
+
+                            }, onErrorCreateFile);
+
+                        }, onErrorLoadFs);                    
+                    }
+                }
+                function writeFile(fileEntry, dataObj) {
+                    // Create a FileWriter object for our FileEntry (log.txt).
+                    fileEntry.createWriter(function (fileWriter) {
+
+                        fileWriter.onwriteend = function () {
+                            console.log("Successful file write...");
+                            readFile(fileEntry);
+                        };
+
+                        fileWriter.onerror = function (e) {
+                            console.log("Failed file write: " + e.toString());
+                        };
+
+                        var blob = new Blob([dataObj], { type: 'text/plain' });
+                        fileWriter.write(blob);
+                    });
                 }
 
                 var errorHandler = function (fileName, e) {

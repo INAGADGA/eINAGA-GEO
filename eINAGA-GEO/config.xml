@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<widget xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:vs="http://schemas.microsoft.com/appx/2014/htmlapps" id="io.cordova.myappf0220e" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" defaultlocale="es-ES">
+<widget xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:vs="http://schemas.microsoft.com/appx/2014/htmlapps" id="es.aragon.inageo" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" defaultlocale="es-ES" android-versionCode="100">
   <name>eINAGA-GEO</name>
   <description>Aplicación que obtiene componentes territoriales de Aragón para adjuntarlas a solicitudes de INAGA y realizar análisis de afecciones sencillos. Compatible con dispositivos Android e iOS </description>
   <author href="http://cordova.io" email="dev@cordova.apache.org">Instituto Aragonés de Gestión Ambiental</author>
@@ -12,6 +12,8 @@
   <access origin="*" />
   <preference name="SplashScreen" value="screen" />
   <preference name="windows-target-version" value="10.0" />
+  <preference name="AndroidPersistentFileLocation" value="Compatibility" />
+  <preference name="iosPersistentFileLocation" value="Compatibility" />
   <!-- Support for Cordova 5.0.0 plugin system -->
   <plugin name="cordova-plugin-whitelist" spec="1.2.2" />
   <allow-intent href="http://*/*" />
@@ -103,8 +105,13 @@
     <splash src="res/screens/windows/SplashScreen.scale-240.png" width="1152" height="1920" />
     <splash src="res/screens/windows/SplashScreenPhone.scale-240.png" width="1152" height="1920" />
   </platform>
-  <plugin name="cordova-plugin-geolocation" spec="~4.0.1" />
   <preference name="Fullscreen" value="True" />
   <plugin name="cordova-pdf-generator" spec="~2.0.4" src="https://github.com/cesarvr/pdf-generator" />
   <plugin name="cordova-plugin-file" spec="~4.3.3" />
+  <plugin name="cordova-plugin-geolocation" spec="~2.4.3" />
+  <preference name="android-minSdkVersion" value="16" />
+  <preference name="android-maxSdkVersion" value="27" />
+  <preference name="android-targetSdkVersion" value="16" />
+  <preference name="deployment-target" value="8.0" />
+  <preference name="BackupWebStorage" value="local" />
 </widget>
