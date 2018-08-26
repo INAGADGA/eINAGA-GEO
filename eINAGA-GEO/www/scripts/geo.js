@@ -355,10 +355,15 @@
                     coordx = evt.mapPoint.x.toFixed(2).replace('.', ',');
                     coordy = evt.mapPoint.y.toFixed(2).replace('.', ',');
                 });
+                map.on("zoom-end", function () {
+
+                    $("#escala").text("Escala 1:" + map.getScale().toFixed(0));
+                });
 
                 map.on("update-end", function () {
                     map.setMapCursor("default");
-                    domStyle.set(dom.byId("procesando"), "display", "none");                    
+                    domStyle.set(dom.byId("procesando"), "display", "none");
+                    $("#escala").text("Escala 1:" + map.getScale().toFixed(0));
                 });
                 map.on("update-start", function () {
                     map.setMapCursor("wait");
