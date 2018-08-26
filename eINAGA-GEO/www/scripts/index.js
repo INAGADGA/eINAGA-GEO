@@ -83,9 +83,9 @@
             default:
                 msg = 'Unknown error';
                 break;
-        };
+        }
 
         console.log('Error (' + fileName + '): ' + msg);
-    }
+    };
 
 })();
