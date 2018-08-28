@@ -920,16 +920,19 @@
                         showMessage("Ya está seleccionada");
                     }
                 }
-                function obtieneDatosConsulta(response, texto, texto2) {
-                    var Granjas = "<b>" + texto + ":</b>  ";
+                function obtieneDatosConsulta(response, texto, texto2) {                    
                     textoDescarga += "<table><h2>" + texto + "</h2>";
                     textoDescarga += "<thead><tr>";
                     var contador = obtieneDatosRtdo(response);
-                    if (contador == 0) { Granjas += "No se han localizado<br>"; }
+                    //var Afeccion = "<b>" + texto + ":</b>  ";
+                    ////if (contador == 0) { Granjas += "No se han localizado<br>"; }
+                    //if (contador == 0) { Afeccion += "Sin afección<br>"; }
+                    //else { Afeccion += " (" + contador + ") <br>"; }
+                    var Afeccion = "";                    
+                    if (contador == 0) { Afeccion += "<b>" + texto + ":</b><span style='color:blue;font-weight:bold'> (" + contador + ")</span><br>"; }
+                    else { Afeccion += "<b>" + texto + ":</b><span style='color:red; font-weight:bold'> (" + contador + ")</span><br>"; }
 
-                    //else { Granjas += contador + " " + texto2 + "<br>"; }
-                    else { Granjas += " (" + contador + ") <br>"; }
-                    consultaDistancias += Granjas;
+                    consultaDistancias += Afeccion;
                     dom.byId("listadoRtdos").innerHTML = consultaDistancias;
                 }
 
