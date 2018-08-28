@@ -388,9 +388,12 @@
                     $("#checkMontes").click(function () {
                         cambiaVisibilidad("Montes");
                     });
-                    //$("#checkVVPP").click(function () {
-                    //    cambiaVisibilidad("Vvpp");
-                    //});
+                    $("#checkVVPP").click(function () {
+                        cambiaVisibilidad("VVPP");
+                    });
+                    $("#checkGranjas").click(function () {
+                        cambiaVisibilidad("Granjas");
+                    });
                     $("#checkRaster").click(function () {
                         cambiaVisibilidad("IGN");
                     });
@@ -763,9 +766,19 @@
                         if ($('#checkCotos').is(":checked")) {
                             contadorConsultas++; 
                             fc_cotos.queryFeatures(query, dameCotos);
-                        }if ($('#checkMontes').is(":checked")) {
-                            contadorConsultas++; 
+                        } if ($('#checkMontes').is(":checked")) {
+                            contadorConsultas++;
                             fc_montes.queryFeatures(query, dameMontes);
+                        }if ($('#checkVVPP').is(":checked")) {
+                            contadorConsultas++; 
+                            fc_vvpp.queryFeatures(query, dameVVPP);
+                        } if ($('#checkGranjas').is(":checked")) {
+                            contadorConsultas++; 
+                            contadorConsultas++; 
+                            contadorConsultas++; 
+                            fc_granjasRega.queryFeatures(query, dameGranjasRega);
+                            fc_granjasTram.queryFeatures(query, dameGranjasTrami);
+                            fc_granjasReso.queryFeatures(query, dameGranjasReso);
                         } if ($('#checkboxhmd').is(":checked")) {
                             contadorConsultas++; 
                             fc_humedales.queryFeatures(query, dameHumedales);
@@ -802,6 +815,7 @@
                     }
                     else {
                         showMessage("Debes seleccionar alguna capa de análisis");
+                        $("#collapCapasAnalisis").collapsible("expand");
                     }
                 }
                 function dameCotos(response) {                    
@@ -810,6 +824,22 @@
                 }                
                 function dameMontes(response) {                    
                     obtieneDatosConsulta(response, "Montes", "Montes");                    
+                    semaforoResta();
+                }
+                function dameVVPP(response) {                    
+                    obtieneDatosConsulta(response, "Vías Pecuarias", "VVPP");                    
+                    semaforoResta();
+                }
+                function dameGranjasRega(response) {                    
+                    obtieneDatosConsulta(response, "Granjas REGA", "Granjas");                    
+                    semaforoResta();
+                }
+                function dameGranjasTrami(response) {
+                    obtieneDatosConsulta(response, "Granjas Tramitación", "Granjas");
+                    semaforoResta();
+                }
+                function dameGranjasReso(response) {
+                    obtieneDatosConsulta(response, "Granjas Resolución", "Granjas");
                     semaforoResta();
                 }
                 function dameHumedales(response) {                    
@@ -891,12 +921,14 @@
                     }
                 }
                 function obtieneDatosConsulta(response, texto, texto2) {
-                    var Granjas = "<b>" + texto + ":</b><br>";
+                    var Granjas = "<b>" + texto + ":</b>  ";
                     textoDescarga += "<table><h2>" + texto + "</h2>";
                     textoDescarga += "<thead><tr>";
                     var contador = obtieneDatosRtdo(response);
                     if (contador == 0) { Granjas += "No se han localizado<br>"; }
-                    else { Granjas += contador + " " + texto2 + "<br>"; }
+
+                    //else { Granjas += contador + " " + texto2 + "<br>"; }
+                    else { Granjas += " (" + contador + ") <br>"; }
                     consultaDistancias += Granjas;
                     dom.byId("listadoRtdos").innerHTML = consultaDistancias;
                 }
@@ -1105,7 +1137,7 @@
 
                 function generaTextoDescarga(nombre) {
                     //var texto = [];
-                    var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Consulta de afecciones</h1><b>Fecha: " + fecha
+                    var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Instituto Aragonés de Gestión Ambiental</h1><h3>Informe sin carácter vinculante a la Administración</h3><hr><h2>Consulta de afecciones</h2><b>Fecha: " + fecha
                         + "</b><br><b>Distancia análisis: " + distancia + " m</b>"
                         + textoDescarga
                         + "<br><hr><br><b>Geometría de consulta en geojson (SRS 25830): </b>" + stringGeoJson
@@ -1276,7 +1308,11 @@
                 var fc_appe = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer/7");  
                 var fc_parce = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/5");  
                 var fc_subparce = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/6");  
-                var fc_recintos = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/8");  
+                var fc_recintos = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/8");
+                var fc_granjasRega = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_Ganaderas/MapServer/0");
+                var fc_granjasTram = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_Ganaderas/MapServer/1");
+                var fc_granjasReso = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_Ganaderas/MapServer/2");
+
                 
                 // busquedas -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 var s = new Search({
@@ -1380,7 +1416,33 @@
                     5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes Gen", "<h3>Montes:</h3><b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${DENOMINACION}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${TIPO}")) },
                     6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Vías Pecuarias", "<h3>Vías Pecuarias:</h3><b>Municipio:</b> ${MUNICIPIO}<br><b>Nombre:</b> ${NOMBRE_VIA}<br><b>Tipo:</b> ${DTIPVIA}")) }
                 });
+                dynamicMSLayerMontes.setVisibleLayers([4,5]);
                 dynamicMSLayerMontes.setImageFormat("png32", true);
+
+                var dynamicMSLayerVVPP = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer", {
+                    id: "VVPP",
+                    outFields: ["*"],                    
+                    visible: false,
+                    infoTemplates : {
+                        6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Vías Pecuarias", "<h3>Vías Pecuarias:</h3><b>Municipio:</b> ${MUNICIPIO}<br><b>Nombre:</b> ${NOMBRE_VIA}<br><b>Tipo:</b> ${DTIPVIA}")) }
+                    }
+                });
+                dynamicMSLayerVVPP.setVisibleLayers([6]);
+                dynamicMSLayerVVPP.setImageFormat("png32", true);
+
+                var dynamicMSLayerGranjas = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_Ganaderas/MapServer", {
+                    id: "Granjas",
+                    outFields: ["*"],                    
+                    visible: false,
+                    infoTemplates : {
+                        0: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Granja REGA", "<h3>Granja REGA:</h3><b>Codigo:</b> ${CODIGO}<br><b>Explotacion:</b> ${EXPLOTACION}<br><b>Especie:</b> ${ESPECIE}<br><b>Familia:</b> ${FAMILIA}")) },
+                        1: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Granja Tramitación", "<h3>Granja Tramitación:</h3><b>Codigo:</b> ${CODIGO}<br><b>Explotacion:</b> ${EXPLOTACION}<br><b>Especie:</b> ${ESPECIE}<br><b>Familia:</b> ${FAMILIA}")) },
+                        2: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Granja Resuelta", "<h3>Granja Resuelta:</h3><b>Codigo:</b> ${CODIGO}<br><b>Explotacion:</b> ${EXPLOTACION}<br><b>Especie:</b> ${ESPECIE}<br><b>Familia:</b> ${FAMILIA}")) }
+                    }
+                });
+                dynamicMSLayerGranjas.setVisibleLayers([0,1,2]);
+                dynamicMSLayerGranjas.setImageFormat("png32", true);
+
                 var dynamicMSLayerCotos = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Cotos_Caza/MapServer", {
                     id: "Cotos",
                     outFields: ["*"]
@@ -1478,7 +1540,7 @@
                 wmsLayeriGN.spatialReferences[0] = 3857;
 
 
-                map.addLayers([wmsLayeriGN, dynamicMSLayerMontes, dynamicMSLayerCotos, dynamicMSLayerFPA, dynamicMSLayerLimites, wmsSigpac, layerCat]);
+                map.addLayers([wmsLayeriGN, dynamicMSLayerMontes, dynamicMSLayerVVPP, dynamicMSLayerGranjas, dynamicMSLayerCotos, dynamicMSLayerFPA, dynamicMSLayerLimites, wmsSigpac, layerCat]);
                 //map.addLayers([wmsLayeriGN, fc_montes,fc_vvpp, fc_cotos, fc_humedales, fc_lics, fc_zepas, fc_ligs, fc_enp, fc_porn, fc_acrit, fc_acrit, dynamicMSLayerLimites, wmsSigpac, layerCat]);
 
             });

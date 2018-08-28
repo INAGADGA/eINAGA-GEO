@@ -130,7 +130,7 @@
                             <div id="etrs" style="font-size: 12px;text-align: left;vertical-align: middle;"></div>
                             <button type="button" id="clearGraphicsM"  style="display:block;height: 30px;font-size: 10px;text-align: center;vertical-align: middle;position:relative;">Borra medición</button>
                         </div>
-                        <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <div id="collapCapasAnalisis" data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                             <h3>Capas Análisis Distancias</h3>
                             <form action="" method="get">
                                 <fieldset data-role="controlgroup">
@@ -144,6 +144,8 @@
                                     <input type="checkbox" name="checkboxappe" id="checkboxappe" data-mini="true"><label for="checkboxappe">Ámbitos de protección especies amenazadas</label>
                                     <input type="checkbox" name="checkCotos" id="checkCotos" data-mini="true"><label for="checkCotos">Terrenos Cinegéticos</label>
                                     <input type="checkbox" name="checkMontes" id="checkMontes" data-mini="true"><label for="checkMontes">Montes</label>
+                                    <input type="checkbox" name="checkVVPP" id="checkVVPP" data-mini="true"><label for="checkVVPP">Vías Pecuarias</label>
+                                    <input type="checkbox" name="checkGranjas" id="checkGranjas" data-mini="true"><label for="checkGranjas">Granjas</label>
                                 </fieldset>
                             </form>
                         </div>
@@ -181,7 +183,7 @@
                 </div>
                 <input type="hidden" value="0" id="thisOne" />
                 <p />
-                <a id="descarga" data-role="button" data-mini="true">Más detalles</a>
+                <a id="descarga" data-role="button" data-mini="true">Generar Informe</a>
                 <p />
                 <div id="resultadoImpacto"></div>
             </div>
