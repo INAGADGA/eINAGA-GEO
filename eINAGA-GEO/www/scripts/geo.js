@@ -437,7 +437,9 @@
                         else { quitaValoresVisibilidad("7"); }
                         dynamicMSLayerFPA.setVisibleLayers(visibleFiguras);
                     });
-
+                    $("#myonoffswitch").change(function () {
+                        cambiaVisibilidadOVC();
+                    });
                 });
                 
 
@@ -575,6 +577,7 @@
                         }
                     }
                 });
+                                
                 on(dom.byId("select-choice-1"), "click", function () {                    
                     if (textoParcelasDesglosado.length > 0) {
                         showMessage("Para cambiar de tipo de parcesa es necesario que borre la selección actual");
@@ -582,7 +585,17 @@
                     }
                 });
                 //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                
+                function cambiaVisibilidadOVC() {
+                    var x = document.getElementById("select-choice-1").value;                    
+                    if (dom.byId("myonoffswitch").checked ) {
+                        $("#checkCatastro").prop('checked', true).checkboxradio("refresh");
+                        setVisible("OVC");
+                    }
+                    else if (x === "03" || !dom.byId("consultaParcelas").checked) {
+                        $("#checkCatastro").prop('checked', false).checkboxradio("refresh");
+                        setInVisible("OVC");
+                    }
+                };
                 function dameParcela() {
                     try {
                         var query = new Query();
@@ -883,8 +896,7 @@
                 function dameParce(response) {
                     var features = response.features;
                     if (features.length === 0) { return; }
-                    var dropd = $("#select-choice-1").find('option:selected').val();
-                    
+                    var dropd = $("#select-choice-1").find('option:selected').val();                    
                     var valor = features[0].attributes[campoRefpar];                                        
                     if (textoParcelas.indexOf(valor) == -1) {
                         dom.byId("ArrayParcelas").innerHTML += "</p>" + valor;
@@ -1140,7 +1152,7 @@
 
                 function generaTextoDescarga(nombre) {
                     //var texto = [];
-                    var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Instituto Aragonés de Gestión Ambiental</h1><h3>Informe sin carácter vinculante a la Administración</h3><hr><h2>Consulta de afecciones</h2><b>Fecha: " + fecha
+                    var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Instituto Aragonés de Gestión Ambiental</h1><h2>Aplicación eINAGA-GEO. Consulta de afecciones</h2><hr><h3>Informe sin carácter vinculante a la Administración</h3><b>Fecha: " + fecha
                         + "</b><br><b>Distancia análisis: " + distancia + " m</b>"
                         + textoDescarga
                         + "<br><hr><br><b>Geometría de consulta en geojson (SRS 25830): </b>" + stringGeoJson
@@ -1463,7 +1475,9 @@
                     outFields: ["*"]
                 });
                 dynamicMSLayerLimites.setImageFormat("png32", true);
-
+                dynamicMSLayerLimites.setInfoTemplates({
+                    3: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Municipios", "<h3>Municipios:</h3><b>Código INE:</b> ${C_MUNI_INE}<br><b>Nombre:</b> ${D_MUNI_INE}<br><b>Comarca:</b> ${D_COMARCA}")) }                    
+                });
                 var dynamicMSLayerFPA = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer", {
                     id: "Figuras",
                     outFields: ["*"]

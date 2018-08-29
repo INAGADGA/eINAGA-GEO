@@ -64,19 +64,22 @@
             <div data-role="main" class="ui-content">
                 <div data-role="collapsible-set">
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                        <h3>Análisis Distancia</h3>
+                        <h3>Digitalización</h3>
                         <button type="button" class="tool" id="point"></button>
                         <button type="button" class="tool" id="polyline"></button>
                         <button type="button" class="tool" id="polygon"></button>
-                        <label id="escala">escala 1:</label>
-                        <hr />
-                        <label for="km">Área de influencia en metros:</label>
-                        <input type="number" data-clear-btn="false" name="number-1" id="km" value="">
-                        <button type="button" id="analisisDistancias">Análisis Distancia</button>
+                        <label id="escala">escala 1:</label>                        
                         <button type="button" id="descargaGeom">Guarda Geometría</button>
                     </div>
+                    <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <h3>Análisis Distancia</h3>
+                        <p>Con la geometría digitalizada en pantalla</p>
+                            <label for="km">Área de influencia en metros:</label>
+                            <input type="number" data-clear-btn="false" name="number-1" id="km" value="">
+                            <button type="button" id="analisisDistancias">Análisis Distancia</button>
+                    </div>
                     <div data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                        <h3>Localización Parcelas</h3>
+                        <h3>Listados Catastrales</h3>
                         <label>
                             <input type="checkbox" name="checkbox-1" id="consultaParcelas" data-mini="true">Consulta Parcelas
                         </label>
