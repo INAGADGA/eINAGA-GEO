@@ -14,7 +14,7 @@
         var textoParcelasDesglosado = ""; 
         var contadorParcelas = 0;
         var listcoor = []; var orden = 0;
-        var loading; var edicion = false;
+        var loading; var edicion = false; medicion = false;
         var visible = [];
         var visibleFiguras = [];
         var prefijo, nomCapa,  ultpos = 0;
@@ -104,6 +104,10 @@
 
                 var sls = new SimpleLineSymbol("solid", new Color("#444444"), 3);
                 var sfs = new SimpleFillSymbol("solid", sls, new Color([68, 68, 68, 0.25]));
+                var iconParcelas = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
+                    new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                        new Color([255, 255, 255]), 2), new Color([0, 0, 255, 0.25])
+                );
                 var gsvc = new esri.tasks.GeometryService("http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
                 esriConfig.defaults.geometryService = gsvc;
                 esriConfig.defaults.io.alwaysUseProxy = false;
@@ -127,6 +131,7 @@
                 map.disableKeyboardNavigation();
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Geodesic" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Buffer" }));
+                map.addLayer(new esri.layers.GraphicsLayer({ "id": "Parcelas" }));
 
                 //map.infoWindow.resize(400, 300);
 
@@ -303,6 +308,7 @@
                                 tb.activate(evt.target.id);
                                 map.setInfoWindowOnClick(false);
                                 $("#myPanel").panel("close");
+                                edicion = true;
                             }
                         }
                         else {
@@ -327,30 +333,32 @@
                 });
                 map.on("click", function (evt) {
                     $(".esriMobileInfoView").css("display", "none");
-                    if (dom.byId("myonoffswitch").checked) {
-                        map.setInfoWindowOnClick(false);
-                        var outSR = new esri.SpatialReference(25830);
-                        var params = new esri.tasks.ProjectParameters();
-                        params.geometries = [evt.mapPoint]; //map.extent]; //[pt.normalize()];
-                        params.outSR = outSR;
-                        var pt;
-                        var newurl = "";
-                        gsvc.project(params, function (projectedPoints) {
-                            pt = projectedPoints[0];
-                            var urlCat = "https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx?&REQUEST=GetFeatureInfo&VERSION=1.1.1&SRS=EPSG%3A25830&BBOX=" + pt.x + "," + pt.y + "," + (pt.x + 1) + "," + (pt.y + 1) + "&WIDTH=" + map.width + "&HEIGHT=" + map.height + "&X=" + evt.layerX + "&Y=" + evt.offsetY;
-                            popup.setContent('<iframe style="float:left; height:30em; width:100%" src=' + urlCat + ' frameborder="0" scrolling="yes"></iframe>');
-                            popup.setTitle("Información catastral");       
-                            // cerrar ventana datos
-                            $(".esriMobileInfoView").css("display", "inline-block");
-                            $(".esriMobileNavigationBar").css("display", "inline-block");
-                        });
-                    }
-                    else if (dom.byId("consultaParcelas").checked) {
-                        map.setInfoWindowOnClick(false);
-                        dameParcela(evt.mapPoint);
-                    }
-                    else {
-                        map.infoWindow.resize(280, 300);
+                    if (!edicion && measurement.activeTool === null) {
+                        if (dom.byId("myonoffswitch").checked) {
+                            map.setInfoWindowOnClick(false);
+                            var outSR = new esri.SpatialReference(25830);
+                            var params = new esri.tasks.ProjectParameters();
+                            params.geometries = [evt.mapPoint]; //map.extent]; //[pt.normalize()];
+                            params.outSR = outSR;
+                            var pt;
+                            var newurl = "";
+                            gsvc.project(params, function (projectedPoints) {
+                                pt = projectedPoints[0];
+                                var urlCat = "https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx?&REQUEST=GetFeatureInfo&VERSION=1.1.1&SRS=EPSG%3A25830&BBOX=" + pt.x + "," + pt.y + "," + (pt.x + 1) + "," + (pt.y + 1) + "&WIDTH=" + map.width + "&HEIGHT=" + map.height + "&X=" + evt.layerX + "&Y=" + evt.offsetY;
+                                popup.setContent('<iframe style="float:left; height:30em; width:100%" src=' + urlCat + ' frameborder="0" scrolling="yes"></iframe>');
+                                popup.setTitle("Información catastral");
+                                // cerrar ventana datos
+                                $(".esriMobileInfoView").css("display", "inline-block");
+                                $(".esriMobileNavigationBar").css("display", "inline-block");
+                            });
+                        }
+                        else if (dom.byId("consultaParcelas").checked) {
+                            map.setInfoWindowOnClick(false);
+                            dameParcela(evt.mapPoint);
+                        }
+                        else {
+                            map.infoWindow.resize(280, 300);
+                        }
                     }
                     coordx = evt.mapPoint.x.toFixed(2).replace('.', ',');
                     coordy = evt.mapPoint.y.toFixed(2).replace('.', ',');
@@ -440,6 +448,9 @@
                     $("#myonoffswitch").change(function () {
                         cambiaVisibilidadOVC();
                     });
+                    $("#consultaParcelas").change(function () {
+                        toogleVisibilidadOvcSigpac();
+                    });
                 });
                 
 
@@ -465,10 +476,12 @@
                         });
                     }
                     $("#myPanel").panel("open");
+                    medicion = false;
                 });
                 measurement.on("tool-change", function (evt) {
                     map.setInfoWindowOnClick(false); dom.byId("etrs").innerHTML = "";
                     $("#myPanel").panel("close");
+                    medicion = true;
                 });
 
                
@@ -540,40 +553,34 @@
                     writeToFile(prefijoParce + fecha2 + '.txt', textoParcelasDesglosado);
                 });
                 on(dom.byId("limpiaParcelas"), "click", function () {
+                    var g = map.getLayer("Parcelas");
+                    g.clear();
                     textoParcelasDesglosado = "";
+                    textoParcelas = "";
                     dom.byId("ArrayParcelas").innerHTML = "";
                     contadorParcelas = 0;
                     dom.byId("ParcelasSel").innerHTML = "";
                 });
                 on(dom.byId("select-choice-1"), "change", function () {
-                    var x = document.getElementById("select-choice-1").value;
-                    if (textoParcelasDesglosado.length > 0) {
-                        showMessage("Para cambiar de tipo de parcesa es necesario que borre la selección actual");
-                    }
-                    else {
-                        if (x === "01") {
-                            prefijoParce = "Catastro_Parcela_";
-                            campoRefpar = "REFPAR";         
-                            $("#checkCatastro").prop('checked', true).checkboxradio('refresh');                        
-                            setVisible("OVC");
-                            $("#checkSigpac").prop('checked', false).checkboxradio('refresh');
-                            setInVisible("SIGPAC");
-                        }
-                        else if (x === "02") {
-                            prefijoParce = "Catastro_Subparcela_";
-                            campoRefpar = "REFPAR_SUBP";
-                            $("#checkCatastro").prop('checked', true).checkboxradio("refresh");
-                            setVisible("OVC");
-                            $("#checkSigpac").prop('checked', false).checkboxradio("refresh");
-                            setInVisible("SIGPAC");
+                    if (dom.byId("consultaParcelas").checked) {
+                        var x = document.getElementById("select-choice-1").value;
+                        if (textoParcelasDesglosado.length > 0) {
+                            showMessage("Para cambiar de tipo de parcesa es necesario que borre la selección actual");
                         }
                         else {
-                            prefijoParce = "Sigpac_";
-                            campoRefpar = "REFREC";                
-                            $("#checkSigpac").prop('checked', true).checkboxradio("refresh");
-                            setVisible("SIGPAC");
-                            $("#checkCatastro").prop('checked', false).checkboxradio("refresh");
-                            setInVisible("OVC");
+                            if (x === "01") {
+                                prefijoParce = "Catastro_Parcela_";
+                                campoRefpar = "REFPAR";
+                            }
+                            else if (x === "02") {
+                                prefijoParce = "Catastro_Subparcela_";
+                                campoRefpar = "REFPAR_SUBP";
+                            }
+                            else {
+                                prefijoParce = "Sigpac_";
+                                campoRefpar = "REFREC";
+                            }
+                            toogleVisibilidadOvcSigpac();
                         }
                     }
                 });
@@ -596,6 +603,21 @@
                         setInVisible("OVC");
                     }
                 };
+                function toogleVisibilidadOvcSigpac() {
+                    var x = document.getElementById("select-choice-1").value;
+                    if (x == "01" || x == "02") {
+                        $("#checkCatastro").prop('checked', true).checkboxradio('refresh');
+                        setVisible("OVC");
+                        $("#checkSigpac").prop('checked', false).checkboxradio('refresh');
+                        setInVisible("SIGPAC");
+                    }
+                    else {
+                        $("#checkSigpac").prop('checked', true).checkboxradio("refresh");
+                        setVisible("SIGPAC");
+                        $("#checkCatastro").prop('checked', false).checkboxradio("refresh");
+                        setInVisible("OVC");
+                    }
+                }
                 function dameParcela() {
                     try {
                         var query = new Query();
@@ -613,7 +635,7 @@
                         else {
                             nomCapa = "{0} Recintos Seleccionados";
                             fc_recintos.queryFeatures(query, dameParce);
-                        }
+                        }                       
                     }
                     catch (ex) {
                         showMessage(ex);
@@ -652,6 +674,7 @@
 
                     geomGoogle = evtObj.geometry;
                     dameGeomEtrs89(evtObj.geometry);
+                    edicion = false;
                 }
 
                 function dameGeomEtrs89() {
@@ -682,7 +705,7 @@
                                 symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
                                 break;
                         }
-                        addGraphic("Geodesic", geomGoogle, symbol);
+                        addGraphic("Geodesic", geomGoogle, symbol,true);
                         map.getLayer("Buffer").clear();
                         map.graphics.clear();
                         var feature = L.esri.Util.arcgisToGeoJSON(geometry, "FID");
@@ -740,20 +763,23 @@
                     var sym = new esri.symbol.SimpleFillSymbol();
                     sym.setColor(null);
                     sym.setOutline(new esri.symbol.SimpleLineSymbol("solid", new dojo.Color([255, 0, 0, 1]), 2));
-                    addGraphic("Buffer", b[0], sym);
+                    addGraphic("Buffer", b[0], sym,true);
                     dameInf();
                 }
-                function addGraphic(capa, geom,  sym) {
+                function addGraphic(capa, geom,  sym, zoom) {
                     var attrs = { "type": "Geodesic" };
                     var template, g, s;
                     geomBuffer = geom;
                     template = new esri.InfoTemplate("", "Type: ${type}");
                     g = map.getLayer(capa);
-                    g.add( new esri.Graphic(geom, sym, attrs, template) );
-                    if (g.graphics.length > 0) {
-                        map.setExtent(esri.graphicsExtent([g.graphics[0]]).expand(1.4), true);
+                    g.add(new esri.Graphic(geom, sym, attrs, template));
+                    if (zoom) {
+                        if (g.graphics.length > 0) {
+                            map.setExtent(esri.graphicsExtent([g.graphics[0]]).expand(1.4), true);
+                        }
                     }
-                }               
+                }       
+            
                 function dameInf() {
                     
                     
@@ -927,6 +953,7 @@
                         }
                         textoParcelas += ";" + valor;
                         activaAnimacion();
+                        addGraphic("Parcelas", features[0].geometry, iconParcelas,false);
                     }
                     else {
                         showMessage("Ya está seleccionada");
