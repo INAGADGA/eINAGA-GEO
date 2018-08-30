@@ -714,11 +714,16 @@
                     gsvc.project(params, function (rtdos) {
                         geometry = rtdos[0];
                         var i = 0;
-                        for (i = 0; i <= geometry.paths[0].length; i++) {
-                            var vertice = geometry.getPoint(0, i);
-                            mitracking += contadorTrack++ + "\t" + vertice.x + "\t" + vertice.y + "\r\n";
+                        if (geometry.paths.length > 0) {
+                            for (i = 0; i < geometry.paths[0].length; i++) {
+                                var vertice = geometry.getPoint(0, i);
+                                mitracking += contadorTrack++ + "\t" + vertice.x + "\t" + vertice.y + "\r\n";
+                            }
+                            writeToFile("track_" + fecha2 + '.txt', mitracking);
                         }
-                        writeToFile("track_" + fecha2 + '.txt', mitracking);                        
+                        else {
+                            showMessage("No se ha podido generar el track");
+                        }
                     });
                 }
                 function dameGeomEtrs89() {
