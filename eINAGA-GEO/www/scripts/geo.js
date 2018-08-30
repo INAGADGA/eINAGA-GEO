@@ -27,7 +27,8 @@
         var valores;
         var contadorConsultas = 0;
         var mitracking = ""; var contadorTrack = 0;
-               
+        var coordsTracking = [];
+
         require([
             "dojo/dom",
             "dojo/dom-style",
@@ -598,7 +599,6 @@
                 });
 
                 
-                //on(dom.byId("tracking_stop"), "click", clearTimeout(_timer));
                 const buttonStart = document.getElementById('tracking_start');
                 const buttonStop = document.getElementById('tracking_stop');
                 buttonStart.addEventListener('click', iniciaTracking);
@@ -613,14 +613,12 @@
                 }
                 function finalizaTracking() {
                     clearTimeout(_timer);
-                    guardaTrack();
+                    var singlePathPolyline = new esri.geometry.Polyline([coordsTracking]);
+                    guardaTracking(singlePathPolyline, "track_" + fecha2 + '.txt');
                 }
                 function myFunction() {
                     console.log('posición');
                     getPosition(true);
-                }
-                function guardaTrack() {
-                    writeToFile("track_" + fecha2 + '.txt', mitracking);
                 }
                 function cambiaVisibilidadOVC() {
                     var x = document.getElementById("select-choice-1").value;                    
@@ -683,7 +681,6 @@
                     }
                     visibleFiguras = capas;
                 };
-
                 function dibujaGeometria(evtObj) {
                    
                     var distancia = $("#km").val();
@@ -706,7 +703,24 @@
                     dameGeomEtrs89(evtObj.geometry);
                     edicion = false;
                 }
-
+                function guardaTracking() {                   
+                    var outSR = new esri.SpatialReference(25830);
+                    var params = new esri.tasks.ProjectParameters();
+                    var geomGoogle = arguments[0];
+                    params.geometries = [geomGoogle]; //[pt.normalize()];
+                    params.outSR = outSR;
+                    var geometry;
+                    var newurl = "";
+                    gsvc.project(params, function (rtdos) {
+                        geometry = rtdos[0];
+                        var i = 0;
+                        for (i = 0; i <= geometry.paths[0].length; i++) {
+                            var vertice = geometry.getPoint(0, i);
+                            mitracking += contadorTrack++ + "\t" + vertice.x + "\t" + vertice.y + "\r\n";
+                        }
+                        writeToFile("track_" + fecha2 + '.txt', mitracking);                        
+                    });
+                }
                 function dameGeomEtrs89() {
                    
                     map.graphics.clear();
@@ -1287,7 +1301,7 @@
                        
                         if (track) {
                             addGraphicTrack("Tracking", miposicion, symbolTrack, true);
-                            mitracking += contadorTrack++ + "\t" + miposicion.x + "\t" + miposicion.y + "\r\n";
+                            coordsTracking.push([miposicion.x,miposicion.y]);                            
                         }
                         else {
                             map.centerAndZoom(miposicion, 17);
