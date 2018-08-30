@@ -56,7 +56,7 @@
     <link rel="stylesheet" type="text/css" href="css/popup.css">
     <link rel="stylesheet" type="text/css" href="css/comunes.css">
     <link rel="stylesheet" type="text/css" href="css/geo.css">
-
+    <script type="text/javascript" src="scripts/geo.js"></script>
 </head>
 <body>
     <div data-role="page" id="pageone">
@@ -68,15 +68,15 @@
                         <button type="button" class="tool" id="point"></button>
                         <button type="button" class="tool" id="polyline"></button>
                         <button type="button" class="tool" id="polygon"></button>
-                        <label id="escala">escala 1:</label>                        
+                        <label id="escala">escala 1:</label>
                         <button type="button" id="descargaGeom">Guarda Geometría</button>
                     </div>
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Análisis Distancia</h3>
                         <p>Con la geometría digitalizada en pantalla</p>
-                            <label for="km">Área de influencia en metros:</label>
-                            <input type="number" data-clear-btn="false" name="number-1" id="km" value="">
-                            <button type="button" id="analisisDistancias">Análisis Distancia</button>
+                        <label for="km">Área de influencia en metros:</label>
+                        <input type="number" data-clear-btn="false" name="number-1" id="km" value="">
+                        <button type="button" id="analisisDistancias">Análisis Distancia</button>
                     </div>
                     <div data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Listados Catastrales</h3>
@@ -94,85 +94,93 @@
                         <button type="button" id="descargaParcelas" style="width: 50%;float: left;height: 30px;font-size: 10px;background-color:#A4A4A4;color:#FFFFFF;text-shadow: 0 0px;margin-left: 0;"><b>Descarga</b></button>
                         <button type="button" id="limpiaParcelas" style="width: 50%;height: 30px;font-size: 10px;background-color:#A4A4A4;color:#FFFFFF;text-shadow: 0 0px;margin-left: 0;"><b>Limpia</b></button>
                         <!--<button type="button" class="tool" id="point"></button>
-                        <button type="button" class="tool" id="polyline"></button>-->
+        <button type="button" class="tool" id="polyline"></button>-->
+                        
                     </div>
-                        <div data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                            <h3>Localización Coordenadas</h3>
-                            <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                                <h6>ETRS89 Zona 30N</h6>
-                                <div data-role="fieldcontain">
-                                    <label for="CoordX">X:</label>
-                                    <input type="number" data-mini="true" data-clear-btn="false" name="name" id="CoordX" value="676644" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
-                                </div>
-                                <div data-role="fieldcontain">
-                                    <label for="CoordY">Y:</label>
-                                    <input type="number" data-mini="true" data-clear-btn="false" name="name" id="CoordY" value="4613859" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
-                                </div>
-                                <button type="button" id="localizaCoord" style="display:block;height: 30px;font-size: 10px"><b>Localizar Coordenada</b></button>
-                                <div id="transformacion2wgs84" style="font-size: 11px"></div>
-                                <div id="seleccion"></div>
+                    <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <h3>Tracking</h3>
+                        <label for="intervalo">Intervalo en segundos:</label>
+                        <input type="number" data-clear-btn="false" name="number-1" id="intervalo" value="3000">
+                        <button type="button" id="tracking_start">Inicio</button>
+                        <button type="button" id="tracking_stop">Parar</button>                        
+                    </div>
+                    <div data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <h3>Localización Coordenadas</h3>
+                        <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                            <h6>ETRS89 Zona 30N</h6>
+                            <div data-role="fieldcontain">
+                                <label for="CoordX">X:</label>
+                                <input type="number" data-mini="true" data-clear-btn="false" name="name" id="CoordX" value="676644" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                             </div>
-                            <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                                <h6>Decimales WGS84</h6>
-                                <div data-role="fieldcontain">
-                                    <label for="Longitud" style="font-size: 11px">Longitud:</label>
-                                    <input type="number" data-mini="true" name="name" id="Longitud" value="-0.905" />
-                                </div>
-                                <div data-role="fieldcontain">
-                                    <label for="Latitud" style="font-size: 11px">Latitud:</label>
-                                    <input type="number" data-mini="true" name="name" id="Latitud" value="41.671" />
-                                </div>
-                                <button type="button" id="convierteCoord" style="display:block; align-items:center;height: 30px;font-size: 10px"><b>Transforma y Localiza Coordenada</b></button>
-                                <div id="transformacion" style="font-size: 11px"></div>
+                            <div data-role="fieldcontain">
+                                <label for="CoordY">Y:</label>
+                                <input type="number" data-mini="true" data-clear-btn="false" name="name" id="CoordY" value="4613859" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                             </div>
+                            <button type="button" id="localizaCoord" style="display:block;height: 30px;font-size: 10px"><b>Localizar Coordenada</b></button>
+                            <div id="transformacion2wgs84" style="font-size: 11px"></div>
+                            <div id="seleccion"></div>
                         </div>
+                        <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                            <h6>Decimales WGS84</h6>
+                            <div data-role="fieldcontain">
+                                <label for="Longitud" style="font-size: 11px">Longitud:</label>
+                                <input type="number" data-mini="true" name="name" id="Longitud" value="-0.905" />
+                            </div>
+                            <div data-role="fieldcontain">
+                                <label for="Latitud" style="font-size: 11px">Latitud:</label>
+                                <input type="number" data-mini="true" name="name" id="Latitud" value="41.671" />
+                            </div>
+                            <button type="button" id="convierteCoord" style="display:block; align-items:center;height: 30px;font-size: 10px"><b>Transforma y Localiza Coordenada</b></button>
+                            <div id="transformacion" style="font-size: 11px"></div>
+                        </div>
+                    </div>
 
-                        <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                            <h3>Medición</h3>
-                            <div id="measurementDiv"></div>
-                            <div id="etrs" style="font-size: 12px;text-align: left;vertical-align: middle;"></div>
-                            <button type="button" id="clearGraphicsM"  style="display:block;height: 30px;font-size: 10px;text-align: center;vertical-align: middle;position:relative;">Borra medición</button>
-                        </div>
-                        <div id="collapCapasAnalisis" data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                            <h3>Capas Análisis Distancias</h3>
-                            <form action="" method="get">
-                                <fieldset data-role="controlgroup">
-                                    <input type="checkbox" name="checkboxhmd" id="checkboxhmd" data-mini="true"><label for="checkboxhmd">Humedales</label>
-                                    <input type="checkbox" name="checkboxlics" id="checkboxlics" data-mini="true"><label for="checkboxlics">LICS (RN2000)</label>
-                                    <input type="checkbox" name="checkboxzepas" id="checkboxzepas" data-mini="true"><label for="checkboxzepas">ZEPAS (RN2000)</label>
-                                    <input type="checkbox" name="checkboxlig" id="checkboxlig" data-mini="true"><label for="checkboxlig">Lugares Interés Geológico</label>
-                                    <input type="checkbox" name="checkboxenp" id="checkboxenp" data-mini="true"><label for="checkboxenp">Espacios Naturales Protegidos (ENP)</label>
-                                    <input type="checkbox" name="checkboxporn" id="checkboxporn" data-mini="true"><label for="checkboxporn">PORN</label>
-                                    <input type="checkbox" name="checkboxacrit" id="checkboxacrit" data-mini="true"><label for="checkboxacrit">Áreas críticas especies amenazadas</label>
-                                    <input type="checkbox" name="checkboxappe" id="checkboxappe" data-mini="true"><label for="checkboxappe">Ámbitos de protección especies amenazadas</label>
-                                    <input type="checkbox" name="checkCotos" id="checkCotos" data-mini="true"><label for="checkCotos">Terrenos Cinegéticos</label>
-                                    <input type="checkbox" name="checkMontes" id="checkMontes" data-mini="true"><label for="checkMontes">Montes</label>
-                                    <input type="checkbox" name="checkVVPP" id="checkVVPP" data-mini="true"><label for="checkVVPP">Vías Pecuarias</label>
-                                    <input type="checkbox" name="checkGranjas" id="checkGranjas" data-mini="true"><label for="checkGranjas">Granjas</label>
-                                </fieldset>
-                            </form>
-                        </div>
-                        <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                            <h3>Capas solo visualización</h3>
-                            <form action="" method="get">
-                                <fieldset data-role="controlgroup">
-                                    <input type="checkbox" name="checkCatastro" id="checkCatastro" data-mini="true"><label for="checkCatastro">OVC Catastro</label>
-                                    <input type="checkbox" name="checkSigpac" id="checkSigpac" data-mini="true"><label for="checkSigpac">SIGPAC</label>
-                                    <input type="checkbox" name="checkLimites" id="checkLimites" data-mini="true" checked><label for="checkLimites">Límites</label>
-                                    <input type="checkbox" name="checkRaster" id="checkRaster" data-mini="true"><label for="checkRaster">IGN Raster</label>
-                                </fieldset>
-                            </form>
-                        </div>
-                        <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                            <h3>Leyenda</h3>
-                            <div id="legendDiv"></div>
-                        </div>
-                        <form>
-                            <label>
-                                <input type="checkbox" name="checkbox-0" id="myonoffswitch" data-mini="true">Consulta OVC
-                            </label>                           
-                        </form><hr /><br />
+                    <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <h3>Medición</h3>
+                        <div id="measurementDiv"></div>
+                        <div id="etrs" style="font-size: 12px;text-align: left;vertical-align: middle;"></div>
+                        <button type="button" id="clearGraphicsM" style="display:block;height: 30px;font-size: 10px;text-align: center;vertical-align: middle;position:relative;">Borra medición</button>
                     </div>
+                    <div id="collapCapasAnalisis" data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <h3>Capas Análisis Distancias</h3>
+                        <form action="" method="get">
+                            <fieldset data-role="controlgroup">
+                                <input type="checkbox" name="checkboxhmd" id="checkboxhmd" data-mini="true"><label for="checkboxhmd">Humedales</label>
+                                <input type="checkbox" name="checkboxlics" id="checkboxlics" data-mini="true"><label for="checkboxlics">LICS (RN2000)</label>
+                                <input type="checkbox" name="checkboxzepas" id="checkboxzepas" data-mini="true"><label for="checkboxzepas">ZEPAS (RN2000)</label>
+                                <input type="checkbox" name="checkboxlig" id="checkboxlig" data-mini="true"><label for="checkboxlig">Lugares Interés Geológico</label>
+                                <input type="checkbox" name="checkboxenp" id="checkboxenp" data-mini="true"><label for="checkboxenp">Espacios Naturales Protegidos (ENP)</label>
+                                <input type="checkbox" name="checkboxporn" id="checkboxporn" data-mini="true"><label for="checkboxporn">PORN</label>
+                                <input type="checkbox" name="checkboxacrit" id="checkboxacrit" data-mini="true"><label for="checkboxacrit">Áreas críticas especies amenazadas</label>
+                                <input type="checkbox" name="checkboxappe" id="checkboxappe" data-mini="true"><label for="checkboxappe">Ámbitos de protección especies amenazadas</label>
+                                <input type="checkbox" name="checkCotos" id="checkCotos" data-mini="true"><label for="checkCotos">Terrenos Cinegéticos</label>
+                                <input type="checkbox" name="checkMontes" id="checkMontes" data-mini="true"><label for="checkMontes">Montes</label>
+                                <input type="checkbox" name="checkVVPP" id="checkVVPP" data-mini="true"><label for="checkVVPP">Vías Pecuarias</label>
+                                <input type="checkbox" name="checkGranjas" id="checkGranjas" data-mini="true"><label for="checkGranjas">Granjas</label>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <h3>Capas solo visualización</h3>
+                        <form action="" method="get">
+                            <fieldset data-role="controlgroup">
+                                <input type="checkbox" name="checkCatastro" id="checkCatastro" data-mini="true"><label for="checkCatastro">OVC Catastro</label>
+                                <input type="checkbox" name="checkSigpac" id="checkSigpac" data-mini="true"><label for="checkSigpac">SIGPAC</label>
+                                <input type="checkbox" name="checkLimites" id="checkLimites" data-mini="true" checked><label for="checkLimites">Límites</label>
+                                <input type="checkbox" name="checkRaster" id="checkRaster" data-mini="true"><label for="checkRaster">IGN Raster</label>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <h3>Leyenda</h3>
+                        <div id="legendDiv"></div>
+                    </div>
+                    <form>
+                        <label>
+                            <input type="checkbox" name="checkbox-0" id="myonoffswitch" data-mini="true">Consulta OVC
+                        </label>
+                    </form><hr /><br />
+                </div>
                 </div>
 
         </div>
@@ -223,6 +231,6 @@
     </div>
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="scripts/platformOverrides.js"></script>
-    <script type="text/javascript" src="scripts/geo.js"></script>
+    
 </body>
 </html>

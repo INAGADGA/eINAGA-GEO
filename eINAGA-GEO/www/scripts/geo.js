@@ -6,6 +6,7 @@
     function onDeviceReady() {
 
         console.log('inicio visor **************************************************************************');
+        var _timer;
         var geomGoogle, geomINAGA;
         var map, tb, coordx, coordy, geom, url;
         var coordConsulta;  
@@ -25,6 +26,7 @@
         var myVar;
         var valores;
         var contadorConsultas = 0;
+        var mitracking = ""; var contadorTrack = 0;
                
         require([
             "dojo/dom",
@@ -104,6 +106,7 @@
 
                 var sls = new SimpleLineSymbol("solid", new Color("#444444"), 3);
                 var sfs = new SimpleFillSymbol("solid", sls, new Color([68, 68, 68, 0.25]));
+                var symbolTrack = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_DIAMOND, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 1]));
                 var iconParcelas = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
                     new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
                         new Color([255, 255, 255]), 2), new Color([0, 0, 255, 0.25])
@@ -132,6 +135,7 @@
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Geodesic" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Buffer" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Parcelas" }));
+                map.addLayer(new esri.layers.GraphicsLayer({ "id": "Tracking" }));
 
                 //map.infoWindow.resize(400, 300);
 
@@ -290,7 +294,7 @@
 
                 //Eventos -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 on(dom.byId("posicion"), "click", function () {
-                    getPosition();
+                    getPosition(false);
                 });
 
                 tb = new esri.toolbars.Draw(map);
@@ -452,6 +456,7 @@
                         toogleVisibilidadOvcSigpac();
                     });
                 });
+
                 
 
                 on(dom.byId("clearGraphicsM"), "click", function () {
@@ -591,7 +596,32 @@
                         return;
                     }
                 });
+
+                
+                //on(dom.byId("tracking_stop"), "click", clearTimeout(_timer));
+                const buttonStart = document.getElementById('tracking_start');
+                const buttonStop = document.getElementById('tracking_stop');
+                buttonStart.addEventListener('click', iniciaTracking);
+                buttonStop.addEventListener('click', finalizaTracking);
                 //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                function iniciaTracking() {
+                    var numero = $("#intervalo").val();
+                    mitracking = "";
+                    contadorTrack = 0;
+                    map.getLayer("Tracking").clear();
+                    _timer = setInterval(myFunction, numero);
+                }
+                function finalizaTracking() {
+                    clearTimeout(_timer);
+                    guardaTrack();
+                }
+                function myFunction() {
+                    console.log('posición');
+                    getPosition(true);
+                }
+                function guardaTrack() {
+                    writeToFile("track_" + fecha2 + '.txt', mitracking);
+                }
                 function cambiaVisibilidadOVC() {
                     var x = document.getElementById("select-choice-1").value;                    
                     if (dom.byId("myonoffswitch").checked ) {
@@ -775,10 +805,20 @@
                     g.add(new esri.Graphic(geom, sym, attrs, template));
                     if (zoom) {
                         if (g.graphics.length > 0) {
-                            map.setExtent(esri.graphicsExtent([g.graphics[0]]).expand(1.4), true);
+                            map.setExtent(esri.graphicsExtent([g.graphics[g.graphics.length - 1]]).expand(1.4), true);
                         }
                     }
-                }       
+                }
+                function addGraphicTrack(capa, geom, sym, zoom) {
+                    var attrs = { "type": "Geodesic" };
+                    var template, g, s;
+                    template = new esri.InfoTemplate("", "Type: ${type}");
+                    g = map.getLayer(capa);
+                    g.add(new esri.Graphic(geom, sym, attrs, template));
+                    var zoomMapa = map.getZoom();
+                    map.centerAndZoom(geom, zoomMapa);
+                }                        
+                       
             
                 function dameInf() {
                     
@@ -963,10 +1003,6 @@
                     textoDescarga += "<table><h2>" + texto + "</h2>";
                     textoDescarga += "<thead><tr>";
                     var contador = obtieneDatosRtdo(response);
-                    //var Afeccion = "<b>" + texto + ":</b>  ";
-                    ////if (contador == 0) { Granjas += "No se han localizado<br>"; }
-                    //if (contador == 0) { Afeccion += "Sin afección<br>"; }
-                    //else { Afeccion += " (" + contador + ") <br>"; }
                     var Afeccion = "";                    
                     if (contador == 0) { Afeccion += "<b>" + texto + ":</b><span style='color:blue;font-weight:bold'> (" + contador + ")</span><br>"; }
                     else { Afeccion += "<b>" + texto + ":</b><span style='color:red; font-weight:bold'> (" + contador + ")</span><br>"; }
@@ -1233,8 +1269,9 @@
                     }
                 }
 
+                
 
-                function getPosition() {
+                function getPosition(track) {
                     var options = {
                         enableHighAccuracy: true
                         //,maximumAge: 3600000
@@ -1247,13 +1284,20 @@
                         miposicion.x = position.coords.longitude;
                         miposicion.y = position.coords.latitude;
                         projectToEtrs89(miposicion);
-                        map.centerAndZoom(miposicion, 17);
-                        var markerSymbol = new SimpleMarkerSymbol();
-                        markerSymbol.setPath("M40.94,5.617C37.318,1.995,32.502,0,27.38,0c-5.123,0-9.938,1.995-13.56,5.617c-6.703,6.702-7.536,19.312-1.804,26.952  L27.38,54.757L42.721,32.6C48.476,24.929,47.643,12.319,40.94,5.617z M27.557,26c-3.859,0-7-3.141-7-7s3.141-7,7-7s7,3.141,7,7  S31.416,26,27.557,26z");
-                        markerSymbol.setColor(new Color([19, 24, 175, 0.80]));
-                        markerSymbol.setSize(40);
-                        map.graphics.clear();
-                        map.graphics.add(new Graphic(miposicion, markerSymbol));
+                       
+                        if (track) {
+                            addGraphicTrack("Tracking", miposicion, symbolTrack, true);
+                            mitracking += contadorTrack++ + "\t" + miposicion.x + "\t" + miposicion.y + "\r\n";
+                        }
+                        else {
+                            map.centerAndZoom(miposicion, 17);
+                            var markerSymbol = new SimpleMarkerSymbol();
+                            markerSymbol.setPath("M40.94,5.617C37.318,1.995,32.502,0,27.38,0c-5.123,0-9.938,1.995-13.56,5.617c-6.703,6.702-7.536,19.312-1.804,26.952  L27.38,54.757L42.721,32.6C48.476,24.929,47.643,12.319,40.94,5.617z M27.557,26c-3.859,0-7-3.141-7-7s3.141-7,7-7s7,3.141,7,7  S31.416,26,27.557,26z");
+                            markerSymbol.setColor(new Color([19, 24, 175, 0.80]));
+                            markerSymbol.setSize(40);
+                            map.graphics.clear();
+                            map.graphics.add(new Graphic(miposicion, markerSymbol));
+                        }
                     };
 
                     function onError(error) {
