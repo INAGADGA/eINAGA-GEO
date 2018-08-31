@@ -72,7 +72,7 @@ body {
     border-radius: 5px;*/
     /*padding:7px;*/
 }
-#ParcelasSel {
+#ParcelasSel, #gps{
     position: absolute;
     width: 100%;
     text-align:center;
@@ -81,7 +81,7 @@ body {
     z-index: 30;
     text-shadow: 0 0 3px #000, 0 0 5px #000;
     /*background-color: rgba(22, 22, 22, 0.54);*/
-    color: #fff !important;
+    color: #fff;
     font-weight: 700;
     font-size: 0.8em
 }
