@@ -1312,7 +1312,7 @@
                                                
                         if (track) {                            
                             if (dom.byId("checkGPSprecision").checked) {
-                                if (Accuracy < 20) {
+                                if (Accuracy < dom.byId("Precision").value) {
                                     coordsTracking.push([miposicion.x, miposicion.y]);
                                     addGraphicTrack("Tracking", miposicion, symbolTrack, true);
                                     document.getElementById("gps").style.color = "white";
@@ -1443,9 +1443,9 @@
                 var fc_parce = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/5");  
                 var fc_subparce = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/6");  
                 var fc_recintos = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Ambitos/MapServer/8");
-                var fc_granjasRega = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_Ganaderas/MapServer/0");
-                var fc_granjasTram = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_Ganaderas/MapServer/1");
-                var fc_granjasReso = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_Ganaderas/MapServer/2");
+                var fc_granjasRega = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_G/MapServer/0");
+                var fc_granjasTram = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_G/MapServer/1");
+                var fc_granjasReso = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Explotaciones_G/MapServer/2");
 
                 
                 // busquedas -------------------------------------------------------------------------------------------------------------------------------------------------------------------
