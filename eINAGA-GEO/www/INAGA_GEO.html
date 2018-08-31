@@ -91,8 +91,8 @@
                             </select>
                         </div>
                         <div id="ArrayParcelas" style="font-size:11px;overflow:scroll;height:150px"></div>
-                        <button type="button" id="descargaParcelas" style="width: 50%;float: left;height: 30px;font-size: 10px;background-color:#A4A4A4;color:#FFFFFF;text-shadow: 0 0px;margin-left: 0;"><b>Descarga</b></button>
-                        <button type="button" id="limpiaParcelas" style="width: 50%;height: 30px;font-size: 10px;background-color:#A4A4A4;color:#FFFFFF;text-shadow: 0 0px;margin-left: 0;"><b>Limpia</b></button>
+                        <button type="button" id="descargaParcelas" style="width: 40%;float: left;height: 30px;font-size: 10px;background-color:#A4A4A4;color:#FFFFFF;text-shadow: 0 0px;margin-left: 0;"><b>Descarga</b></button>
+                        <button type="button" id="limpiaParcelas" style="width: 40%;height: 30px;font-size: 10px;background-color:#A4A4A4;color:#FFFFFF;text-shadow: 0 0px;margin-left: 0;"><b>Limpia</b></button>
                         <!--<button type="button" class="tool" id="point"></button>
         <button type="button" class="tool" id="polyline"></button>-->
                         
@@ -101,9 +101,13 @@
                         <h3>Tracking</h3>
                         <label for="intervalo">Intervalo en segundos:</label>
                         <input type="number" data-clear-btn="false" name="number-1" id="intervalo" value="3000">
-                        <button type="button" id="tracking_start">Inicio</button>
-                        <button type="button" id="tracking_stop">Parar</button>
-                        <input type="checkbox" name="checkGPSprecision" id="checkGPSprecision" data-mini="true"><label for="checkGPSprecision">No incluir coordenadas con precisión inferior a 20 m</label>
+                        <div>
+                            <button type="button" id="tracking_start" style="width: 48%;float: left;margin-left: 0;display: block;"><b>Inicio</b></button>
+                            <button type="button" id="tracking_stop" style="width: 48%;float: right;margin-left: 0;display: block;"><b>Parar</b></button>
+                        </div>
+                        <div style="clear:both;">
+                            <input type="checkbox" name="checkGPSprecision" id="checkGPSprecision" data-mini="true"><label for="checkGPSprecision">No incluir coordenadas con precisión superior a 20 m</label>
+                        </div>
                     </div>
                     <div data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Localización Coordenadas</h3>
