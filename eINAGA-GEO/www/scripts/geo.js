@@ -627,9 +627,9 @@
                     guardaTracking(singlePathPolyline, "track_" + fecha2 + '.txt');
                 }
 
-                function finalizaTracking_rafa(ID) {
+                function finalizaTracking_rafa() {
                     dom.byId("gps").innerHTML = "";
-                    navigator.geolocation.clearWatch(ID);
+                    navigator.geolocation.clearWatch(watchID);
                     var singlePathPolyline = new esri.geometry.Polyline([coordsTracking]);
                     guardaTracking(singlePathPolyline, "track_" + fecha2 + '.txt');
                 }
