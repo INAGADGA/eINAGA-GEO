@@ -601,9 +601,11 @@
                 
                 const buttonStart = document.getElementById('tracking_start');
                 const buttonStop = document.getElementById('tracking_stop');
-                buttonStart.addEventListener('click', iniciaTracking);
-                buttonStop.addEventListener('click', finalizaTracking);
-                //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                buttonStart.addEventListener('click', iniciaTracking_rafa);
+                buttonStop.addEventListener('click', finalizaTracking_rafa);
+
+               //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                var watchID;
                 function iniciaTracking() {
                     var numero = $("#intervalo").val();
                     mitracking = "";
@@ -611,16 +613,38 @@
                     map.getLayer("Tracking").clear();
                     _timer = setInterval(myFunction, numero);
                 }
+                function iniciaTracking_rafa() {
+                    var numero = $("#intervalo").val();
+                    mitracking = "";
+                    contadorTrack = 0;
+                    map.getLayer("Tracking").clear();
+                    myFunction_rafa(numero);
+                }
                 function finalizaTracking() {
                     dom.byId("gps").innerHTML = "";
                     clearTimeout(_timer);
                     var singlePathPolyline = new esri.geometry.Polyline([coordsTracking]);
                     guardaTracking(singlePathPolyline, "track_" + fecha2 + '.txt');
                 }
+
+                function finalizaTracking_rafa(ID) {
+                    dom.byId("gps").innerHTML = "";
+                    navigator.geolocation.clearWatch(ID);
+                    var singlePathPolyline = new esri.geometry.Polyline([coordsTracking]);
+                    guardaTracking(singlePathPolyline, "track_" + fecha2 + '.txt');
+                }
+
                 function myFunction() {
                     console.log('posición');
                     getPosition(true);
                 }
+                function myFunction_rafa(numero) {
+                  
+                   watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 30000, enableHighAccuracy: true,maximumAge: numero});
+                   
+                }
+
+
                 function cambiaVisibilidadOVC() {
                     var x = document.getElementById("select-choice-1").value;                    
                     if (dom.byId("myonoffswitch").checked ) {
@@ -1646,7 +1670,7 @@
                     extent: customExtentAndSR,
                     layerInfos: [layerSigpacPar, layerSigpacRec]
                 };
-                var wmsSigpac = new WMSLayer('http://wms.magrama.es/wms/wms.aspx?', {
+                var wmsSigpac = new WMSLayer('https://wms.magrama.es/wms/wms.aspx?', {
                     resourceInfo: resourceInfo,
                     visibleLayers: ['PARCELA', 'RECINTO']
 
