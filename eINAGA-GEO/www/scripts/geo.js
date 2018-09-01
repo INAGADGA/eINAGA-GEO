@@ -638,11 +638,7 @@
                     console.log('posición');
                     getPosition(true);
                 }
-                function myFunction_rafa(numero) {
-                  
-                   watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 30000, enableHighAccuracy: true,maximumAge: numero});
-                   
-                }
+               
 
 
                 function cambiaVisibilidadOVC() {
@@ -1313,7 +1309,66 @@
                     }
                 }
 
-                
+
+                function onSuccess(position) {
+
+                    var miposicion = new esri.geometry.Point;
+                    miposicion.x = position.coords.longitude;
+                    miposicion.y = position.coords.latitude;
+                    var altitud = position.coords.altitude;
+                    var Accuracy = position.coords.accuracy;
+                    var AltitudeAccuracy = position.coords.altitudeAccuracy;
+                    var Heading = position.coords.heading;
+                    var Speed = position.coords.speed;
+                    var Timestamp = position.timestamp;
+
+                    if (track) {
+                        if (dom.byId("checkGPSprecision").checked) {
+                            if (Accuracy < dom.byId("Precision").value) {
+                                coordsTracking.push([miposicion.x, miposicion.y]);
+                                addGraphicTrack("Tracking", miposicion, symbolTrack, true);
+                                document.getElementById("gps").style.color = "white";
+                            }
+                            else {
+                                document.getElementById("gps").style.color = "red";
+                            }
+                        }
+                        else {
+                            coordsTracking.push([miposicion.x, miposicion.y]);
+                            addGraphicTrack("Tracking", miposicion, symbolTrack, true);
+                            document.getElementById("gps").style.color = "white";
+                        }
+                        dom.byId("gps").innerHTML =
+                            "Timestamp :" + Timestamp + "</p > " +
+                            "Accuracy:" + Accuracy + "</p>" +
+                            "X:" + miposicion.x + "</p>" +
+                            "Y:" + miposicion.y + "</p>" +
+                            "altitud:" + altitud + "</p>" +
+                            //"AltitudeAccuracy:" + AltitudeAccuracy + "</p>" +
+                            //"Heading:" + Heading + "</p>" +
+                            "speed:" + Speed + "</p>";
+                    }
+                    else {
+                        projectToEtrs89(miposicion);
+                        map.centerAndZoom(miposicion, 17);
+                        var markerSymbol = new SimpleMarkerSymbol();
+                        markerSymbol.setPath("M40.94,5.617C37.318,1.995,32.502,0,27.38,0c-5.123,0-9.938,1.995-13.56,5.617c-6.703,6.702-7.536,19.312-1.804,26.952  L27.38,54.757L42.721,32.6C48.476,24.929,47.643,12.319,40.94,5.617z M27.557,26c-3.859,0-7-3.141-7-7s3.141-7,7-7s7,3.141,7,7  S31.416,26,27.557,26z");
+                        markerSymbol.setColor(new Color([19, 24, 175, 0.80]));
+                        markerSymbol.setSize(40);
+                        map.graphics.clear();
+                        map.graphics.add(new Graphic(miposicion, markerSymbol));
+                    }
+                };
+
+                function onError(error) {
+                    showMessage('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                }
+
+                function myFunction_rafa(numero) {
+
+                    watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 30000, enableHighAccuracy: true, maximumAge: numero });
+
+                }
 
                 function getPosition(track) {
                     var options = {
@@ -1322,59 +1377,7 @@
                     }
                     var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
 
-                    function onSuccess(position) {
-
-                        var miposicion = new esri.geometry.Point;
-                        miposicion.x = position.coords.longitude;
-                        miposicion.y = position.coords.latitude;
-                        var altitud = position.coords.altitude;
-                        var Accuracy = position.coords.accuracy;
-                        var AltitudeAccuracy = position.coords.altitudeAccuracy;
-                        var Heading = position.coords.heading;
-                        var Speed = position.coords.speed;
-                        var Timestamp = position.timestamp;
-                                               
-                        if (track) {                            
-                            if (dom.byId("checkGPSprecision").checked) {
-                                if (Accuracy < dom.byId("Precision").value) {
-                                    coordsTracking.push([miposicion.x, miposicion.y]);
-                                    addGraphicTrack("Tracking", miposicion, symbolTrack, true);
-                                    document.getElementById("gps").style.color = "white";
-                                }
-                                else {
-                                    document.getElementById("gps").style.color = "red";
-                                }
-                            }
-                            else {
-                                coordsTracking.push([miposicion.x, miposicion.y]);
-                                addGraphicTrack("Tracking", miposicion, symbolTrack, true);
-                                document.getElementById("gps").style.color = "white";
-                            }
-                            dom.byId("gps").innerHTML =
-                                "Timestamp :" + Timestamp + "</p > " +
-                                "Accuracy:" + Accuracy + "</p>" +
-                                "X:" + miposicion.x + "</p>" +
-                                "Y:" + miposicion.y + "</p>" +
-                                "altitud:" + altitud + "</p>" +                                
-                                //"AltitudeAccuracy:" + AltitudeAccuracy + "</p>" +
-                                //"Heading:" + Heading + "</p>" +
-                                "speed:" + Speed + "</p>";
-                        }
-                        else {
-                            projectToEtrs89(miposicion);
-                            map.centerAndZoom(miposicion, 17);
-                            var markerSymbol = new SimpleMarkerSymbol();
-                            markerSymbol.setPath("M40.94,5.617C37.318,1.995,32.502,0,27.38,0c-5.123,0-9.938,1.995-13.56,5.617c-6.703,6.702-7.536,19.312-1.804,26.952  L27.38,54.757L42.721,32.6C48.476,24.929,47.643,12.319,40.94,5.617z M27.557,26c-3.859,0-7-3.141-7-7s3.141-7,7-7s7,3.141,7,7  S31.416,26,27.557,26z");
-                            markerSymbol.setColor(new Color([19, 24, 175, 0.80]));
-                            markerSymbol.setSize(40);
-                            map.graphics.clear();
-                            map.graphics.add(new Graphic(miposicion, markerSymbol));
-                        }
-                    };
-
-                    function onError(error) {
-                        showMessage('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
-                    }
+                   
                 }
                 function projectToEtrs89(geometry) {
                     var outSR = new esri.SpatialReference(25830);
