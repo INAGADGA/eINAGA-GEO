@@ -295,6 +295,7 @@
 
                 //Eventos -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 on(dom.byId("posicion"), "click", function () {
+                    track = false;
                     getPosition(false);
                 });
 
@@ -1309,7 +1310,7 @@
                     }
                 }
 
-
+                var track;
                 function onSuccess(position) {
 
                     var miposicion = new esri.geometry.Point;
@@ -1365,7 +1366,7 @@
                 }
 
                 function myFunction_rafa(numero) {
-
+                    track = true;
                     watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 30000, enableHighAccuracy: true, maximumAge: numero });
 
                 }
