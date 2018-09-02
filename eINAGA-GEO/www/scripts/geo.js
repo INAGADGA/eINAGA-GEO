@@ -1256,7 +1256,7 @@
 
                 function generaTextoDescarga(nombre) {
                     //var texto = [];
-                    var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Instituto Aragonés de Gestión Ambiental</h1><h2>Aplicación eINAGA-GEO. Consulta de afecciones</h2><hr><h3>Informe sin carácter vinculante a la Administración</h3><b>Fecha: " + fecha
+                    var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Instituto Aragonés de Gestión Ambiental</h1><h2>Aplicación eINAGA-GEO. Consulta de afecciones</h2><hr><h3>Informe sin carácter vinculante para la Administración</h3><b>Fecha: " + fecha
                         + "</b><br><b>Distancia análisis: " + distancia + " m</b>"
                         + textoDescarga
                         + "<br><hr><br><b>Geometría de consulta en geojson (SRS 25830): </b>" + stringGeoJson
@@ -1367,7 +1367,7 @@
 
                 function myFunction_rafa(numero) {
                     track = true;
-                    watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 30000, enableHighAccuracy: true, maximumAge: numero });
+                    watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 1800000, enableHighAccuracy: true, maximumAge: numero });
 
                 }
 

@@ -2,8 +2,8 @@
 <html lang="es-es">
 <head>
     <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline';
-                     script-src 'self' https://cdn.jsdelivr.net https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com  https://idearagon.aragon.es http://idearagon.aragon.es https://clarity.maptiles.arcgis.com https://tile.openstreetmap.org 'unsafe-eval' 'unsafe-inline' data: gap: https://ssl.gstatic.com 'unsafe-eval';
-                     style-src 'self' https://cdn.jsdelivr.net https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com  https://idearagon.aragon.es  http://idearagon.aragon.es https://dojotoolkit.org 'unsafe-inline';
+                     script-src 'self' https://unpkg.com  https://cdn.jsdelivr.net https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com  https://idearagon.aragon.es http://idearagon.aragon.es https://clarity.maptiles.arcgis.com https://tile.openstreetmap.org 'unsafe-eval' 'unsafe-inline' data: gap: https://ssl.gstatic.com 'unsafe-eval';
+                     style-src 'self'  https://unpkg.com https://cdn.jsdelivr.net https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com  https://idearagon.aragon.es  http://idearagon.aragon.es https://dojotoolkit.org 'unsafe-inline';
                      connect-src 'self' https://geocode.arcgis.com https://dojotoolkit.org https://dojotoolkit.org https://idearagon.aragon.es http://idearagon.aragon.es https://sampleserver6.arcgisonline.com  https://server.arcgisonline.com  https://www.arcgis.com https://server.arcgisonline.com https://clarity.maptiles.arcgis.com  https://services.arcgisonline.com https://ovc.catastro.meh.es  http://ovc.catastro.meh.es https://tile.openstreetmap.org https://aplicaciones.aragon.es 'unsafe-eval' 'unsafe-inline' 'self' ws:;
                      img-src 'self'  http://wms.magrama.es http://www.ign.es https://geocode.arcgis.com https://code.jquery.com  https://js.arcgis.com https://idearagon.aragon.es http://idearagon.aragon.es https://sampleserver6.arcgisonline.com  https://server.arcgisonline.com  https://www.arcgis.com https://server.arcgisonline.com https://clarity.maptiles.arcgis.com  https://services.arcgisonline.com https://ovc.catastro.meh.es  http://ovc.catastro.meh.es https://tile.openstreetmap.org https://aplicaciones.aragon.es 'unsafe-eval' 'unsafe-inline' blob: data: ; media-src *;
                      frame-src www.openstreetmap.org https://ovc.catastro.meh.es https://www1.sedecatastro.gob.es;
@@ -28,9 +28,18 @@
         var dojoConfig = { locale: "es-es" }
     </script>
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/leaflet/1.0.0-rc.1/leaflet.css" />
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.4/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin="anonymous" />
+    <script src="https://unpkg.com/leaflet@1.3.4/dist/leaflet.js" integrity="sha512-nMMmRyTVoLYqjP9hrbed9S+FzjZHW5gY1TWCHA5ckwXZBadntCNs8kEqAWdrb9O7rxbCaA4lKTIWjDXZxflOcA==" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/esri-leaflet@2.2.3/dist/esri-leaflet.js"
+            integrity="sha512-YZ6b5bXRVwipfqul5krehD9qlbJzc6KOGXYsDjU9HHXW2gK57xmWl2gU6nAegiErAqFXhygKIsWPKbjLPXVb2g=="
+            crossorigin="anonymous"></script>
+
+
+
+    <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/leaflet/1.0.0-rc.1/leaflet.css" />
     <script src="https://cdn.jsdelivr.net/leaflet/1.0.0-rc.1/leaflet-src.js"></script>
-    <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/leaflet.esri/2.0.0/esri-leaflet.js"></script>-->
 
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"
             integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
@@ -73,7 +82,7 @@
                     </div>
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Análisis Distancia</h3>
-                        <p>Con la geometría digitalizada en pantalla</p>
+                        <p>Digitalice primero la zona a analizar y elija capas para el análisis.</p>
                         <label for="km">Área de influencia en metros:</label>
                         <input type="number" data-clear-btn="false" name="number-1" id="km" value="">
                         <button type="button" id="analisisDistancias">Análisis Distancia</button>
