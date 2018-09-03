@@ -28,6 +28,8 @@
         var contadorConsultas = 0;
         var mitracking = ""; var contadorTrack = 0;
         var coordsTracking = [];
+        var track;
+        var watchID;
 
         require([
             "dojo/dom",
@@ -295,8 +297,8 @@
 
                 //Eventos -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 on(dom.byId("posicion"), "click", function () {
-                    track = false;
-                    getPosition(false);
+                    //track = false;
+                    getPosition();
                 });
 
                 tb = new esri.toolbars.Draw(map);
@@ -602,46 +604,26 @@
                 
                 const buttonStart = document.getElementById('tracking_start');
                 const buttonStop = document.getElementById('tracking_stop');
-                buttonStart.addEventListener('click', iniciaTracking_rafa);
-                buttonStop.addEventListener('click', finalizaTracking_rafa);
+                buttonStart.addEventListener('click', iniciaTracking);
+                buttonStop.addEventListener('click', finalizaTracking);
 
                //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                var watchID;
+                
                 function iniciaTracking() {
                     var numero = $("#intervalo").val();
+                    track = true;
                     mitracking = "";
                     contadorTrack = 0;
                     map.getLayer("Tracking").clear();
-                    _timer = setInterval(myFunction, numero);
-                }
-                function iniciaTracking_rafa() {
-                    var numero = $("#intervalo").val();
-                    mitracking = "";
-                    contadorTrack = 0;
-                    map.getLayer("Tracking").clear();
-                    myFunction_rafa(numero);
+                    getTrack(numero);
                 }
                 function finalizaTracking() {
-                    dom.byId("gps").innerHTML = "";
-                    clearTimeout(_timer);
-                    var singlePathPolyline = new esri.geometry.Polyline([coordsTracking]);
-                    guardaTracking(singlePathPolyline, "track_" + fecha2 + '.txt');
-                }
-
-                function finalizaTracking_rafa() {
+                    track = false;
                     dom.byId("gps").innerHTML = "";
                     navigator.geolocation.clearWatch(watchID);
                     var singlePathPolyline = new esri.geometry.Polyline([coordsTracking]);
                     guardaTracking(singlePathPolyline, "track_" + fecha2 + '.txt');
                 }
-
-                function myFunction() {
-                    console.log('posición');
-                    getPosition(true);
-                }
-               
-
-
                 function cambiaVisibilidadOVC() {
                     var x = document.getElementById("select-choice-1").value;                    
                     if (dom.byId("myonoffswitch").checked ) {
@@ -1310,9 +1292,8 @@
                     }
                 }
 
-                var track;
+                
                 function onSuccess(position) {
-
                     var miposicion = new esri.geometry.Point;
                     miposicion.x = position.coords.longitude;
                     miposicion.y = position.coords.latitude;
@@ -1365,21 +1346,18 @@
                     showMessage('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
 
-                function myFunction_rafa(numero) {
-                    track = true;
+                function getTrack(numero) {
                     watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 1800000, enableHighAccuracy: true, maximumAge: numero });
-
                 }
 
-                function getPosition(track) {
+                function getPosition() {
                     var options = {
                         enableHighAccuracy: true
                         //,maximumAge: 3600000
                     }
-                    var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);
-
-                   
+                    var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);                   
                 }
+
                 function projectToEtrs89(geometry) {
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
