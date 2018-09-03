@@ -79,6 +79,7 @@
                         <button type="button" class="tool" id="polygon"></button>
                         <label id="escala">escala 1:</label>
                         <button type="button" id="descargaGeom">Guarda Geometría</button>
+                        <button type="button" id="abreFichero">Abre Fichero</button>                        
                     </div>
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Análisis Distancia</h3>
@@ -119,9 +120,9 @@
                             <input type="number"  data-mini="true" name="name" id="Precision" value="20" />
                         </div>
                     </div>
-                    <div data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                    <div id="collapCoord" data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Localización Coordenadas</h3>
-                        <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <div id="collapCoordETRS" data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                             <h6>ETRS89 Zona 30N</h6>
                             <div data-role="fieldcontain">
                                 <label for="CoordX">X:</label>
@@ -135,7 +136,7 @@
                             <div id="transformacion2wgs84" style="font-size: 11px"></div>
                             <div id="seleccion"></div>
                         </div>
-                        <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
+                        <div id="collapCoordGEO" data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                             <h6>Decimales WGS84</h6>
                             <div data-role="fieldcontain">
                                 <label for="Longitud" style="font-size: 11px">Longitud:</label>

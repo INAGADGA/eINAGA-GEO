@@ -553,7 +553,9 @@
                     else
                         writeToFile(prefijo + fecha2 + '.geojson', stringGeoJson);
                 });
-
+                on(dom.byId("abreFichero"), "click", function () {
+                    getFiles();
+                });
                 on(dom.byId("descarga"), "click", function () {
                     generaTextoDescarga("INF_" + fecha2 + '.pdf')
                 });
@@ -1128,11 +1130,34 @@
                         }, onErrorLoadFs);                    
                     }
                 }
+
+                function getFiles() {
+                    if (cordova.platformId === 'ios') {
+                    }
+                    else {                        
+                        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+                                fs.root.getDirectory('Download', { create: false }, function (dirEntry) {
+                                    var directoryReader = dirEntry.createReader();
+                                directoryReader.readEntries(onSuccessReadDir, onErrorReadDir);
+                            }, onErrorReadDir);
+                        }, onErrorLoadFs);                    
+                    }
+                }
                 function onErrorLoadFs(error) {
                     showMessage('onErrorLoadFs: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorCreateFile(error) {
                     showMessage('onErrorCreateFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                }
+                function onErrorReadDir(error) {
+                    showMessage('onErrorReadDir: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');            
+                }
+                function onSuccessReadDir(entries) {                    
+                    var myarray = [];
+                    var myJSON = "";
+                    for (var i = 0; i < entries.length; i++) {
+                        showMessage(entries[i].name)
+                    }        
                 }
                 function writeFile(fileEntry, dataObj) {
                     // Create a FileWriter object for our FileEntry (log.txt).
@@ -1369,7 +1394,18 @@
                         coordx = pt.x.toFixed(0);
                         coordy = pt.y.toFixed(0);
                         dom.byId("etrs").innerHTML = "<hr /><b>Coordenada en ETRS89 30N</br><table style='width:100%'><tr><th>X</th><th>Y</th></tr><tr><td>" + pt.x.toFixed(0) + "</td><td>" + pt.y.toFixed(0) + "</td></tr></table><hr />";
+
+                        dom.byId("CoordX").value = pt.x.toFixed(0);
+                        dom.byId("CoordY").value = pt.y.toFixed(0);
+                        dom.byId("Longitud").value = geometry.x.toFixed(8);
+                        dom.byId("Latitud").value = geometry.y.toFixed(8);
+
+                        $("#myPanel").panel("open");
+                        $("#collapCoord").collapsible("expand");
+                        $("#collapCoordETRS").collapsible("expand");
+                        $("#collapCoordGEO").collapsible("expand");
                     });
+
                 }
                 function zoomToCoord(x, y) {
                     var _point = new esri.geometry.Point(x, y, new esri.SpatialReference({ wkid: 25830 }));
@@ -1383,6 +1419,24 @@
                         addPoint(pt);
                         map.centerAndZoom(pt, 18);
                     });
+                }
+
+                function listDir(path) {
+                    window.resolveLocalFileSystemURL(path,
+                        function (fileSystem) {
+                            var reader = fileSystem.createReader();
+                            reader.readEntries(
+                                function (entries) {
+                                    console.log(entries);
+                                },
+                                function (err) {
+                                    console.log(err);
+                                }
+                            );
+                        }, function (err) {
+                            console.log(err);
+                        }
+                    );
                 }
 
                 function generarTextoFromGeom(migeometry,nombre) {
