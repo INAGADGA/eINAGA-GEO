@@ -553,7 +553,7 @@
                     else
                         writeToFile(prefijo + fecha2 + '.geojson', stringGeoJson);
                 });
-                on(dom.byId("abreFichero"), "click", function () {
+                on(dom.byId("seleccionaFichero"), "click", function () {
                     getFiles();
                 });
                 on(dom.byId("descarga"), "click", function () {
@@ -1156,7 +1156,8 @@
                     var myarray = [];
                     var myJSON = "";
                     for (var i = 0; i < entries.length; i++) {
-                        showMessage(entries[i].name)
+                        //showMessage(entries[i].name)
+                        $('#fichero').append('<option value="a">' + entries[i].name + ' </option>');
                     }        
                 }
                 function writeFile(fileEntry, dataObj) {
