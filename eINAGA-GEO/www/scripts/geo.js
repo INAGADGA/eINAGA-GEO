@@ -106,7 +106,7 @@
                 var d = new Date();
                 var fecha = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
                 var fecha2 = d.getFullYear() + "" + ("00" + (d.getMonth() + 1)).slice(-2) + "" + ("00" + (d.getDate())).slice(-2);
-
+                
                 var sls = new SimpleLineSymbol("solid", new Color("#444444"), 3);
                 var sfs = new SimpleFillSymbol("solid", sls, new Color([68, 68, 68, 0.25]));
                 var symbolTrack = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_DIAMOND, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 1]));
@@ -551,11 +551,12 @@
                     // falta comprobar que existe geometría a descargar
                     if (stringGeoJson === undefined) { showMessage("Debe de dibujar la localización antes de descargarla");}
                     else
-                        writeToFile(prefijo + fecha2 + '.geojson', stringGeoJson);
+                        writeToFile(prefijo + dameFechaHora() + '.geojson', stringGeoJson);
                 });
-                on(dom.byId("seleccionaFichero"), "click", function () {
+                on(dom.byId("selector"), "click", function () {
                     getFiles();
                 });
+
                 on(dom.byId("descarga"), "click", function () {
                     generaTextoDescarga("INF_" + fecha2 + '.pdf')
                 });
@@ -610,7 +611,11 @@
                 buttonStop.addEventListener('click', finalizaTracking);
 
                //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-                
+                function dameFechaHora() {
+                    var local = new Date();
+                    var localdatetime = fecha2 + ("00" + (local.getHours())).slice(-2) + ("00" + (local.getMinutes())).slice(-2) + ("00" + (local.getSeconds())).slice(-2);
+                    return localdatetime;
+                }
                 function iniciaTracking() {
                     var numero = $("#intervalo").val();
                     track = true;
@@ -624,7 +629,7 @@
                     dom.byId("gps").innerHTML = "";
                     navigator.geolocation.clearWatch(watchID);
                     var singlePathPolyline = new esri.geometry.Polyline([coordsTracking]);
-                    guardaTracking(singlePathPolyline, "track_" + fecha2 + '.txt');
+                    guardaTracking(singlePathPolyline, "track_" + dameFechaHora() + '.txt');
                 }
                 function cambiaVisibilidadOVC() {
                     var x = document.getElementById("select-choice-1").value;                    
@@ -1155,18 +1160,37 @@
                 function onSuccessReadDir(entries) {                    
                     var myarray = [];
                     var myJSON = "";
-                    for (var i = 0; i < entries.length; i++) {
-                        //showMessage(entries[i].name)
-                        $('#fichero').append('<option value="a">' + entries[i].name + ' </option>');
+                    $('#fichero').empty();
+                    for (var i = 0; i < entries.length; i++) {                        
+                        var nameFile = entries[i].name;
+                        if (extension(nameFile) === 'geojson' && checkName(nameFile)){
+                            $('#fichero').append('<option value="a">' + entries[i].name + ' </option>');
+                        }
                     }        
+                    //$('#fichero').selectmenu("refresh", true);
+                    //document.getElementById("fichero").selectedIndex = 0;
                 }
+                function extension(element) {
+                    return element.split('.').pop();
+                };
+                function checkName(name) {
+                    var prefijos = ['track_', 'pnt_', 'pol_', 'lin_'];
+                    var resultado = false;
+                    for (x = 0; x < prefijos.length; x++) {
+                        var numero = name.indexOf(prefijos[x]);
+                        if (numero == 0) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }                
                 function writeFile(fileEntry, dataObj) {
                     // Create a FileWriter object for our FileEntry (log.txt).
                     fileEntry.createWriter(function (fileWriter) {
+
                         //showMessage(fileEntry.fullPath);
                         fileWriter.onwriteend = function () {
-                            showMessage("Almacenado en " + fileEntry.fullPath);
-                            
+                            showMessage("Almacenado en " + fileEntry.fullPath);                            
                         };
 
                         fileWriter.onerror = function (e) {
