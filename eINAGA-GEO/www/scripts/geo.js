@@ -560,13 +560,13 @@
                 $("#fichero").focus(function (e) {
                     getFiles();
                     $(this).change();
-                };
+                });
                 $("#fichero").change(function (e) {
                         fileGeo = $(this).val();
-                };
+                });
                 $("#abreFichero").click(function (e) {
                     showMessage(fileGeo);
-                };
+                });
 
 
                 on(dom.byId("descarga"), "click", function () {
