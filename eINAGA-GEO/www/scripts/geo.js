@@ -29,6 +29,7 @@
         var mitracking = ""; var contadorTrack = 0;
         var coordsTracking = [];
         var track;
+        var fileGeo;
         var watchID;
 
         require([
@@ -553,9 +554,20 @@
                     else
                         writeToFile(prefijo + dameFechaHora() + '.geojson', stringGeoJson);
                 });
-                on(dom.byId("selector"), "click", function () {
+                //on(dom.byId("fichero"), "click", function () {
+                //    getFiles();
+                //});
+                $("#fichero").focus(function (e) {
                     getFiles();
-                });
+                    $(this).change();
+                };
+                $("#fichero").change(function (e) {
+                        fileGeo = $(this).val();
+                };
+                $("#abreFichero").click(function (e) {
+                    showMessage(fileGeo);
+                };
+
 
                 on(dom.byId("descarga"), "click", function () {
                     generaTextoDescarga("INF_" + fecha2 + '.pdf')
@@ -1164,10 +1176,10 @@
                     for (var i = 0; i < entries.length; i++) {                        
                         var nameFile = entries[i].name;
                         if (extension(nameFile) === 'geojson' && checkName(nameFile)){
-                            $('#fichero').append('<option value="a">' + entries[i].name + ' </option>');
+                            $('#fichero').append('<option value="'+i+"'"+'>' + entries[i].name + ' </option>');
                         }
                     }        
-                    //$('#fichero').selectmenu("refresh", true);
+                    $('#fichero').selectmenu("refresh", true);
                     //document.getElementById("fichero").selectedIndex = 0;
                 }
                 function extension(element) {
