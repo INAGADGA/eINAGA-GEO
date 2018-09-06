@@ -71,28 +71,35 @@
     <div data-role="page" id="pageone">
         <div data-role="panel" id="myPanel" data-position="right" data-display="overlay" data-dismissible="true" data-swipe-close="false" style="z-Index:60;">
             <div data-role="main" class="ui-content">
-                <div data-role="collapsible-set">
+                <div data-role="collapsible-set" style="text-align: center;">
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Digitalización</h3>
-                        <button type="button" class="tool" id="point"></button>
-                        <button type="button" class="tool" id="polyline"></button>
-                        <button type="button" class="tool" id="polygon"></button>
-                        <label id="escala">escala 1:</label>
-                        <button type="button" class="ui-mini" id="descargaGeom">Guarda Geometría</button>
-                        
-                        <div id="selector" data-role="fieldcontain" class="ui-mini">
-                            <select name="select-choice-0" id="fichero" data-theme="b" data-mini="true" data-native-menu="false">        
+                        <label id="escala" style="">escala 1:</label>
+                        <div style="display: flex;margin: 0 auto;">
+                            <button type="button" class="tool" id="point"></button>
+                            <button type="button" class="tool" id="polyline"></button>
+                            <button type="button" class="tool" id="polygon"></button>
+                        </div>
+                        <button type="button" class="ui-mini botones" id="descargaGeom" data-mini="true" style="margin:1em 0px 0px 0px">Guarda Geometría</button>                        
+                        <div id="selectorFichero" >
+                            <select name="select-choice-0" id="fichero" data-theme="b" data-mini="true">
+                                <!--data-native-menu="false">-->
                                 <option value="a">"Seleccionar un archivo"</option>
                             </select>
+                            <button class="ui-mini" type="button" id="abreFichero" data-mini="true" style="width:70%;margin: 0 auto;">Abre Fichero</button>
                         </div>
-                        <button class="ui-mini" type="button" id="abreFichero">Abre Fichero</button>
+
                     </div>
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Análisis Distancia</h3>
-                        <p>Digitalice primero la zona a analizar y elija capas para el análisis.</p>
-                        <label for="km">Área de influencia en metros:</label>
-                        <input type="number" data-clear-btn="false" name="number-1" id="km" value="">
-                        <button type="button" id="analisisDistancias">Análisis Distancia</button>
+                        <p class="info">Digitalice primero la zona a analizar y elija capas para el análisis.</p>
+                        <!--<label class="info" for="km">Área de influencia en metros:</label>
+                        <input type="number" data-clear-btn="false" data-mini="true" name="number-1" id="km" value="">-->
+                        <div data-role="fieldcontain">
+                            <label for="km">Metros:</label>
+                            <input type="number" data-mini="true" data-clear-btn="false" name="name" id="km" value="1500" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
+                        </div>
+                        <button type="button" class="ui-mini botones" id="analisisDistancias" data-mini="true">Análisis Distancia</button>
                     </div>
                     <div data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Listados Catastrales</h3>
@@ -118,11 +125,11 @@
                         <label for="intervalo">Intervalo en segundos:</label>
                         <input type="number" data-clear-btn="false" name="number-1" id="intervalo" value="3000">
                         <div>
-                            <button type="button" id="tracking_start" style="width: 48%;float: left;margin-left: 0;display: block;"><b>Inicio</b></button>
-                            <button type="button" id="tracking_stop" style="width: 48%;float: right;margin-left: 0;display: block;"><b>Parar</b></button>
+                            <button class="ui-mini" type="button" id="tracking_start" style="width: 48%;float: left;margin-left: 0;display: block;"><b>Inicio</b></button>
+                            <button class="ui-mini" type="button" id="tracking_stop" style="width: 48%;float: right;margin-left: 0;display: block;"><b>Parar</b></button>
                         </div>
                         <div style="clear:both;">
-                            <input type="checkbox" name="checkGPSprecision" id="checkGPSprecision" data-mini="true"><label for="checkGPSprecision">No incluir coordenadas con precisión superior a:</label>
+                            <input type="checkbox" name="checkGPSprecision" id="checkGPSprecision" data-mini="true"><label for="checkGPSprecision">No incluir coordenadas con error superior a:</label>
                             <input type="number"  data-mini="true" name="name" id="Precision" value="20" />
                         </div>
                     </div>

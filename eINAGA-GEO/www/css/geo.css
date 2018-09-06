@@ -26,9 +26,27 @@ svg {
     height: 48px;
     width: 48px;
     font-size: 10px;
+   
 }
 #dialogoPop {
     margin: 20px;
     padding: 10px;
 }
- 
+#selectorFichero {
+    padding: 0.5em 0px 0.5em 0px;
+    margin: 1em 0 0 0;
+    background-color: #dadada;
+    border-radius: 0.5em;
+}
+.botones {
+    width: 70%;
+    margin: 0 auto;
+    clear: left;
+}
+.info {
+    font-size: 0.8em;
+}
+.ui-mobile label, div.ui-controlgroup-label {
+    font-weight: 400;
+    font-size: 0.8em;
+}

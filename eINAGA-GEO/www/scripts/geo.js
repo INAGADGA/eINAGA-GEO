@@ -28,10 +28,9 @@
         var contadorConsultas = 0;
         var mitracking = ""; var contadorTrack = 0;
         var coordsTracking = [];
-        var track;
-        var fileGeo;
+        var track;        
         var watchID;
-
+        var geometryProyectada;
         require([
             "dojo/dom",
             "dojo/dom-style",
@@ -56,6 +55,7 @@
             "esri/geometry/normalizeUtils",
             "esri/geometry/webMercatorUtils",
             "esri/geometry/geometryEngine",
+            "esri/geometry/jsonUtils",
             "esri/tasks/GeometryService",
             "esri/tasks/BufferParameters",
             "esri/tasks/query",
@@ -85,7 +85,7 @@
             "esri/layers/LabelClass",
             "esri/renderers/SimpleRenderer"
 
-        ], function (dom, domStyle, array, connect, parser, query, on, domConstruct, Color, esriConfig, Map, Graphic, Units, InfoTemplate, PopupMobile, Draw, Circle, normalizeUtils, webMercatorUtils, geometryEngine, GeometryService, BufferParameters, Query, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, TextSymbol,
+        ], function (dom, domStyle, array, connect, parser, query, on, domConstruct, Color, esriConfig, Map, Graphic, Units, InfoTemplate, PopupMobile, Draw, Circle, normalizeUtils, webMercatorUtils, geometryEngine, jsonUtils, GeometryService, BufferParameters, Query, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, TextSymbol,
             Font, Measurement, OverviewMap, BasemapGallery, Basemap, BasemapLayer, Scalebar, Search, HomeButton, Legend, LocateButton, FeatureLayer, ArcGISDynamicMapServiceLayer, WMSLayer, WMSLayerInfo, 
             LabelClass, SimpleRenderer
         ) {                
@@ -513,7 +513,7 @@
                         }
                     });
                 });
-
+                
                 on(dom.byId("convierteCoord"), "click", function () {
                     dom.byId("transformacion").innerHTML = "";
                     var _point = new esri.geometry.Point(dom.byId("Longitud").value.replace(',', '.'), dom.byId("Latitud").value.replace(',', '.'), new esri.SpatialReference({ wkid: 4326 }));
@@ -550,31 +550,43 @@
                 });
                 on(dom.byId("descargaGeom"), "click", function () {
                     // falta comprobar que existe geometría a descargar
-                    if (stringGeoJson === undefined) { showMessage("Debe de dibujar la localización antes de descargarla");}
-                    else
+                    if (stringGeoJson === undefined) { showMessage("Debe de dibujar la localización antes de descargarla"); }
+                    else {
                         writeToFile(prefijo + dameFechaHora() + '.geojson', stringGeoJson);
+                        generarTextoFromGeom(geometryProyectada, prefijo + dameFechaHora() + '.txt');
+                    }
                 });
                 //on(dom.byId("fichero"), "click", function () {
                 //    getFiles();
                 //});
-                $("#fichero").focus(function (e) {
-                    getFiles();
-                    $(this).change();
-                });
-                $("#fichero").change(function (e) {
-                        fileGeo = $(this).val();
-                });
+                //$("#fichero").focus(function (e) {
+                //    getFiles();
+                //    $(this).change();
+                //});
+                //$("#fichero").change(function (e) {
+                //        fileGeo = $(this).val();
+                //});
                 $("#abreFichero").click(function (e) {
-                    showMessage(fileGeo);
-                });
+                    var t = document.getElementById("fichero");
+                    var selFile = t.options[t.selectedIndex].text;
+                    readFile(selFile);
 
+                    //pintaGeometria('{"type":"Polygon","coordinates":[[[674758.2710015946,4615590.372484336],[674757.1802806852,4615378.44528815],[674752.4487425887,4615385.478633997],[674641.2633261753,4615367.6080085],[674663.1554010669,4615532.854491166],[674758.2710015946,4615590.372484336]]]}');
+                });
+                function pintaGeometria(textoGeojson) {
+                    var geojsonFeature = '{"type": "Feature","properties": {"name": "Coors Field","amenity": "Baseball Stadium","popupContent": "This is where the Rockies play!"},"geometry": {"type": "Point","coordinates": [-1, 42]}}';
+                    //var geomGeojson = L.geoJSON(JSON.parse(textoGeojson));
+                    var geom = jsonUtils.fromJson(JSON.parse(geojsonFeature));
+                    var feature = L.esri.Util.geojsonToArcGIS(geojsonFeature, "FID");
+                    addGraphic("Parcelas", feature[0].geometry, symbolTrack, true);
+                }
 
                 on(dom.byId("descarga"), "click", function () {
-                    generaTextoDescarga("INF_" + fecha2 + '.pdf')
+                    generaTextoDescarga("INF_" + dameFechaHora() + '.pdf')
                 });
 
                 on(dom.byId("descargaParcelas"), "click", function () {
-                    writeToFile(prefijoParce + fecha2 + '.txt', textoParcelasDesglosado);
+                    writeToFile(prefijoParce + dameFechaHora() + '.txt', textoParcelasDesglosado);
                 });
                 on(dom.byId("limpiaParcelas"), "click", function () {
                     var g = map.getLayer("Parcelas");
@@ -641,7 +653,7 @@
                     dom.byId("gps").innerHTML = "";
                     navigator.geolocation.clearWatch(watchID);
                     var singlePathPolyline = new esri.geometry.Polyline([coordsTracking]);
-                    guardaTracking(singlePathPolyline, "track_" + dameFechaHora() + '.txt');
+                    guardaTracking(singlePathPolyline, "track_" + dameFechaHora() + ".txt");
                 }
                 function cambiaVisibilidadOVC() {
                     var x = document.getElementById("select-choice-1").value;                    
@@ -742,7 +754,7 @@
                                 var vertice = geometry.getPoint(0, i);
                                 mitracking += contadorTrack++ + "\t" + vertice.x + "\t" + vertice.y + "\r\n";
                             }
-                            writeToFile("track_" + fecha2 + '.txt', mitracking);
+                            writeToFile(arguments[1], mitracking);
                         }
                         else {
                             showMessage("No se ha podido generar el track");
@@ -757,10 +769,10 @@
                     var geomGoogle = arguments[0];
                     params.geometries = [geomGoogle]; //[pt.normalize()];
                     params.outSR = outSR;
-                    var geometry;
+                    
                     var newurl = "";
                     gsvc.project(params, function (rtdos) {
-                        geometry = rtdos[0];
+                        geometryProyectada = rtdos[0];
                         console.log(geometry);
                         var symbol;
                         switch (geometry.type) {
@@ -780,7 +792,7 @@
                         addGraphic("Geodesic", geomGoogle, symbol,true);
                         map.getLayer("Buffer").clear();
                         map.graphics.clear();
-                        var feature = L.esri.Util.arcgisToGeoJSON(geometry, "FID");
+                        var feature = L.esri.Util.arcgisToGeoJSON(geometryProyectada, "FID");
                         stringGeoJson = JSON.stringify(feature);
                         tb.deactivate();
                         map.setInfoWindowOnClick(true);
@@ -838,7 +850,31 @@
                     addGraphic("Buffer", b[0], sym,true);
                     dameInf();
                 }
-                function addGraphic(capa, geom,  sym, zoom) {
+                function addGraphic(capa, geom, zoom) {
+                    var attrs = { "type": "Geodesic" };
+                    var template, g, s;                    
+                    template = new esri.InfoTemplate("", "Type: ${type}");
+                    g = map.getLayer(capa);
+                    var symbol;
+                    switch (geom.type) {
+                        case "point":
+                            symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
+                            break;
+                        case "polyline":
+                            symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
+                            break;
+                        case "polygon":                            
+                            symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
+                            break;
+                    }
+                    g.add(new esri.Graphic(geom, symbol, attrs, template));
+                    if (zoom) {
+                        if (g.graphics.length > 0) {
+                            map.setExtent(esri.graphicsExtent([g.graphics]).expand(1.4), true);
+                        }
+                    }
+                }
+                function addGraphic(capa, geom, sym, zoom) {
                     var attrs = { "type": "Geodesic" };
                     var template, g, s;
                     geomBuffer = geom;
@@ -1131,6 +1167,17 @@
                 //    }
                 //}
 
+                function readFile(fileName) {
+                    if (cordova.platformId === 'ios') {
+                    }
+                    else {
+                        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+                            fs.root.getFile("Download/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
+                                fileEntry.file(gotFile, fail);
+                            }, onErrorReadFile);
+                        }, onErrorLoadFs);
+                    }
+                }
                 function writeToFile(fileName, data) {
                     if (cordova.platformId === 'ios') {
                     }
@@ -1146,8 +1193,88 @@
 
                         }, onErrorLoadFs);                    
                     }
+                    
                 }
+                function gotFile(file) {
+                    //readDataUrl(file);
+                    readAsText(file);
+                }
+                function fail(error) {
+                    alert(error.code);
+                }
+                function readAsText(file) {
+                    var reader = new FileReader();
+                    reader.onloadend = function (evt) {
+                        showMessage(evt.target.result);
+                        AddCapaTxt(evt.target.result);
+                        //var geomText = evt.target.result;
+                        //var geomGeojson = L.geoJSON(geojsonFeature);
+                        //var feature = L.esri.Util.geojsonToArcGIS(geomGeojson, "FID");
+                        //addGraphic("Parcelas", feature, iconParcelas, true);
+                    };
+                    reader.readAsText(file);
+                }
+                function AddCapaTxt(listadoCoord) {
+                    try {
+                        //alert("addCapatxt: " + listadoCoord);
+                        var coordsTracking = [];
+                        var coordsFichero = listadoCoord.split("\t");
+                        //alert("numero de coord " + coordsFichero.length);
+                        for (x = 0; x < coordsFichero.length - 2; x++) {
+                            //alert(x);
+                            coordsTracking.push([coordsFichero[x + 1], coordsFichero[x + 2]]);
+                            x = x + 2;
+                        }
+                        var geomEtrs89;
+                        var t = document.getElementById("fichero");
+                        var selFile = t.options[t.selectedIndex].text.substring(0, 4);
+                        alert(selFile);
+                        switch (selFile) {
+                            case "pnt_":
+                                geomEtrs89 = new esri.geometry.Point(coordsTracking[0][0], coordsTracking[0][1], new esri.SpatialReference({ wkid: 25830 }));
+                                break;
+                            case "lin_":
+                            case "trac":
+                                //geomEtrs89 = new esri.geometry.Polyline(new esri.SpatialReference({wkid:25830})); //new esri.geometry.Polyline([coordsTracking]);
+                                geomEtrs89 = new esri.geometry.Polyline([coordsTracking]);
+                                //alert("genera polilinea");
+                                //geomEtrs89.addPath([coordsTracking]);
+                                //alert(geomEtrs89.paths.length);
+                                break;
+                            case "pol_":
+                                geomEtrs89 = new esri.geometry.Polygon([coordsTracking]);
+                                break;
+                        }
+                        geomEtrs89.setSpatialReference(new esri.SpatialReference({ wkid: 25830 }));
+                        //alert(geomEtrs89.spatialReference.wkid);
+                        projectToWGS84(geomEtrs89, true);
+                    }
+                    catch (err) {
+                        alert(err.message);
+                    }
+                }
+                function projectToWGS84(geometry, pintar) {
+                    try {
+                        alert("projectToWGS84 " + geometry.spatialReference.wkid);
+                        var outSR = new esri.SpatialReference(3857);
+                        var params = new esri.tasks.ProjectParameters();
+                        params.geometries = [geometry]; //[pt.normalize()];
+                        params.outSR = outSR;
+                        var pt;
+                        gsvc.project(params, function (projectedPoints) {
+                            alert("re projectToWGS84");
+                            pt = projectedPoints[0];
+                            if (pintar) {
+                                alert("pinta");
+                                addGraphic("Tracking", pt, true);;
+                            }
+                        });
+                    }
+                    catch (err) {
+                        alert(err.message);
+                    }
 
+                }
                 function getFiles() {
                     if (cordova.platformId === 'ios') {
                     }
@@ -1160,11 +1287,15 @@
                         }, onErrorLoadFs);                    
                     }
                 }
+                
                 function onErrorLoadFs(error) {
                     showMessage('onErrorLoadFs: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorCreateFile(error) {
                     showMessage('onErrorCreateFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                }
+                function onErrorReadFile(error) {
+                    showMessage('onErrorReadFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorReadDir(error) {
                     showMessage('onErrorReadDir: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');            
@@ -1174,16 +1305,22 @@
                     var myJSON = "";
                     $('#fichero').empty();
                     for (var i = 0; i < entries.length; i++) {                        
-                        var nameFile = entries[i].name;
-                        if (extension(nameFile) === 'geojson' && checkName(nameFile)){
-                            $('#fichero').append('<option value="'+i+"'"+'>' + entries[i].name + ' </option>');
+                        var nameFile = entries[i].name;                        
+                        if (extension(nameFile) && checkName(nameFile)){
+                            $('#fichero').append('<option value=' + i + '>' + entries[i].name + ' </option>');
                         }
                     }        
                     $('#fichero').selectmenu("refresh", true);
-                    //document.getElementById("fichero").selectedIndex = 0;
                 }
                 function extension(element) {
-                    return element.split('.').pop();
+                    var extensiones = ['txt', 'geojson'];
+                    var ext = element.split('.').pop();
+                    for (x = 0; x < extensiones.length; x++) {
+                        if (ext == extensiones[x]) {
+                            return true;
+                        }
+                    }
+                    return false;
                 };
                 function checkName(name) {
                     var prefijos = ['track_', 'pnt_', 'pol_', 'lin_'];
@@ -1202,7 +1339,8 @@
 
                         //showMessage(fileEntry.fullPath);
                         fileWriter.onwriteend = function () {
-                            showMessage("Almacenado en " + fileEntry.fullPath);                            
+                            showMessage("Almacenado en " + fileEntry.fullPath);   
+                            getFiles();
                         };
 
                         fileWriter.onerror = function (e) {
@@ -1444,6 +1582,7 @@
                     });
 
                 }
+                
                 function zoomToCoord(x, y) {
                     var _point = new esri.geometry.Point(x, y, new esri.SpatialReference({ wkid: 25830 }));
                     var outSR = new esri.SpatialReference(4326);
@@ -1775,6 +1914,8 @@
 
                 map.addLayers([wmsLayeriGN, dynamicMSLayerMontes, dynamicMSLayerVVPP, dynamicMSLayerGranjas, dynamicMSLayerCotos, dynamicMSLayerFPA, dynamicMSLayerLimites, wmsSigpac, layerCat]);
                 //map.addLayers([wmsLayeriGN, fc_montes,fc_vvpp, fc_cotos, fc_humedales, fc_lics, fc_zepas, fc_ligs, fc_enp, fc_porn, fc_acrit, fc_acrit, dynamicMSLayerLimites, wmsSigpac, layerCat]);
+
+                getFiles();
 
             });
     }
