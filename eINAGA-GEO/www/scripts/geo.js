@@ -552,8 +552,8 @@
                     // falta comprobar que existe geometría a descargar
                     if (stringGeoJson === undefined) { showMessage("Debe de dibujar la localización antes de descargarla"); }
                     else {
-                        writeToFile(prefijo + dameFechaHora() + '.geojson', stringGeoJson);
                         generarTextoFromGeom(geometryProyectada, prefijo + dameFechaHora() + '.txt');
+                        writeToFile(prefijo + dameFechaHora() + '.geojson', stringGeoJson);                        
                     }
                 });
                 //on(dom.byId("fichero"), "click", function () {
@@ -716,10 +716,10 @@
                     }
                     visibleFiguras = capas;
                 };
-                function dibujaGeometria(evtObj) {
+                function dibujaGeometriaAnalisis(evtObj) {
                    
                     var distancia = $("#km").val();
-                    console.log(evtObj.geometry.cache);
+                    //console.log(evtObj.geometry.cache);
                     switch (evtObj.geometry.type) {
                         case "point":
                             if (distancia > 3000) { showMessage("Se ha superado la superficie máxima"); return; }
@@ -735,7 +735,7 @@
                     }
 
                     geomGoogle = evtObj.geometry;
-                    dameGeomEtrs89(evtObj.geometry);
+                    dameGeomEtrs89Analisis(evtObj.geometry);
                     edicion = false;
                 }
                 function guardaTracking() {                   
@@ -761,8 +761,9 @@
                         }
                     });
                 }
-                function dameGeomEtrs89() {
-                   
+                function dameGeomEtrs89Analisis() {
+                    var g = map.getLayer("Geodesic");
+                    g.clear();
                     map.graphics.clear();
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
@@ -773,9 +774,9 @@
                     var newurl = "";
                     gsvc.project(params, function (rtdos) {
                         geometryProyectada = rtdos[0];
-                        console.log(geometry);
+                        console.log(geometryProyectada);
                         var symbol;
-                        switch (geometry.type) {
+                        switch (geometryProyectada.type) {
                             case "point":
                                 prefijo = "pnt_";
                                 symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
@@ -850,11 +851,14 @@
                     addGraphic("Buffer", b[0], sym,true);
                     dameInf();
                 }
-                function addGraphic(capa, geom, zoom) {
+                function addGraphicCapa(capa, geom, zoom) {
+                    geomGoogle = geom;
+                    alert(JSON.stringify(geomGoogle.toJson()));
                     var attrs = { "type": "Geodesic" };
                     var template, g, s;                    
                     template = new esri.InfoTemplate("", "Type: ${type}");
                     g = map.getLayer(capa);
+                    g.clear();
                     var symbol;
                     switch (geom.type) {
                         case "point":
@@ -870,7 +874,7 @@
                     g.add(new esri.Graphic(geom, symbol, attrs, template));
                     if (zoom) {
                         if (g.graphics.length > 0) {
-                            map.setExtent(esri.graphicsExtent([g.graphics]).expand(1.4), true);
+                            map.setExtent(esri.graphicsExtent([g.graphics[g.graphics.length - 1]]).expand(1.4), true);
                         }
                     }
                 }
@@ -1205,7 +1209,7 @@
                 function readAsText(file) {
                     var reader = new FileReader();
                     reader.onloadend = function (evt) {
-                        showMessage(evt.target.result);
+                       // showMessage(evt.target.result);
                         AddCapaTxt(evt.target.result);
                         //var geomText = evt.target.result;
                         //var geomGeojson = L.geoJSON(geojsonFeature);
@@ -1216,19 +1220,33 @@
                 }
                 function AddCapaTxt(listadoCoord) {
                     try {
-                        //alert("addCapatxt: " + listadoCoord);
+                       // alert("addCapatxt: " + listadoCoord);
                         var coordsTracking = [];
-                        var coordsFichero = listadoCoord.split("\t");
+                        listadoCoord = listadoCoord.replace(/\n|\r|\t/g, " ");
+                        //alert("addCapatxt2: " + listadoCoord);
+                        var coordsFichero = listadoCoord.split(" ");
+                        for (x = 0; x < coordsFichero.length; x++) {
+                            //alert(coordsFichero[x]);
+                            if (coordsFichero[x].trim() == "") {
+                                coordsFichero.splice(x, 1);
+                                //alert("borra indicie " + x);
+                            }
+                        }
+                        //alert("El array queda asi");
+                        for (x = 0; x < coordsFichero.length; x++) {
+                           // alert(coordsFichero[x]);
+                        }
                         //alert("numero de coord " + coordsFichero.length);
                         for (x = 0; x < coordsFichero.length - 2; x++) {
                             //alert(x);
                             coordsTracking.push([coordsFichero[x + 1], coordsFichero[x + 2]]);
+                            //alert(coordsFichero[x + 1] + " -- " + coordsFichero[x + 2]);
                             x = x + 2;
                         }
                         var geomEtrs89;
                         var t = document.getElementById("fichero");
                         var selFile = t.options[t.selectedIndex].text.substring(0, 4);
-                        alert(selFile);
+                        //alert(selFile);
                         switch (selFile) {
                             case "pnt_":
                                 geomEtrs89 = new esri.geometry.Point(coordsTracking[0][0], coordsTracking[0][1], new esri.SpatialReference({ wkid: 25830 }));
@@ -1237,7 +1255,7 @@
                             case "trac":
                                 //geomEtrs89 = new esri.geometry.Polyline(new esri.SpatialReference({wkid:25830})); //new esri.geometry.Polyline([coordsTracking]);
                                 geomEtrs89 = new esri.geometry.Polyline([coordsTracking]);
-                                //alert("genera polilinea");
+                               // alert("genera polilinea paths:" + geomEtrs89.paths.length);
                                 //geomEtrs89.addPath([coordsTracking]);
                                 //alert(geomEtrs89.paths.length);
                                 break;
@@ -1246,7 +1264,7 @@
                                 break;
                         }
                         geomEtrs89.setSpatialReference(new esri.SpatialReference({ wkid: 25830 }));
-                        //alert(geomEtrs89.spatialReference.wkid);
+                        alert(JSON.stringify(geomEtrs89.toJson()));
                         projectToWGS84(geomEtrs89, true);
                     }
                     catch (err) {
@@ -1266,7 +1284,7 @@
                             pt = projectedPoints[0];
                             if (pintar) {
                                 alert("pinta");
-                                addGraphic("Tracking", pt, true);;
+                                addGraphicCapa("Geodesic", pt, true);;
                             }
                         });
                     }
@@ -1460,7 +1478,7 @@
                 function initToolbar(evtObj) {
                     //console.debug("initToolbar");
                     tb = new esri.toolbars.Draw(evtObj.map);
-                    tb.on("draw-end", dibujaGeometria);
+                    tb.on("draw-end", dibujaGeometriaAnalisis);
                     //tb.on("draw-complete", reiniciaOrden);
                 }
 
@@ -1617,29 +1635,31 @@
 
                 function generarTextoFromGeom(migeometry,nombre) {
                     console.log('inicia proceso guardado ********************************************************************************');
-                    var texto = [];
+                    var texto = "";
                     var tipogeom = esri.geometry.getJsonType(migeometry);
                     i = 1;
                     if (tipogeom == "esriGeometryPolygon") {
                         for (x = 0; x < migeometry.rings.length; x++) {
                             for (z = 0; z < migeometry.rings[x].length; z++) {
-                                texto.push(i++ + ' ' + migeometry.rings[x][z][0].toFixed(2).replace('.', ',') + ' ' + migeometry.rings[x][z][1].toFixed(2).replace('.', ','));
-                                texto.push('\r\n');
+                                texto += i++ + '\t' + migeometry.rings[x][z][0].toFixed(2) + '\t' + migeometry.rings[x][z][1].toFixed(2) + "\r";
+                                //texto.push('\r\n');
                             }
                         }
                     }
                     else if (tipogeom == "esriGeometryPolyline") {
                         for (x = 0; x < migeometry.paths.length; x++) {
                             for (z = 0; z < migeometry.paths[x].length; z++) {
-                                texto.push(i++ + ' ' + migeometry.paths[x][z][0].toFixed(2).replace('.', ',') + ' ' + migeometry.paths[x][z][1].toFixed(2).replace('.', ','));
-                                texto.push('\r\n');
+                                texto += i++ + '\t' + migeometry.paths[x][z][0].toFixed(2) + '\t' + migeometry.paths[x][z][1].toFixed(2) + "\r";
+                                //texto.push(i++ + ' ' + migeometry.paths[x][z][0].toFixed(2).replace('.', ',') + ' ' + migeometry.paths[x][z][1].toFixed(2).replace('.', ','));
+                                //texto.push('\r\n');
                             }
                         }
                     }
-                    else { texto.push(i++ + ' ' + migeometry.x.toFixed(2).replace('.', ',') + ' ' + migeometry.y.toFixed(2).replace('.', ',')); }
+                    else { texto += i++ + '\t' + migeometry.x.toFixed(2) + '\t' + migeometry.y.toFixed(2); }
 
-                    showMessage(cordova.file);
-                    writeToFile(nombre, texto.join());
+                   
+                    //writeToFile(nombre, texto.join());
+                    writeToFile(nombre, texto);
                                         
                 };
 
