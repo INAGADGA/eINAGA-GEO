@@ -86,10 +86,10 @@
             "esri/renderers/SimpleRenderer"
 
         ], function (dom, domStyle, array, connect, parser, query, on, domConstruct, Color, esriConfig, Map, Graphic, Units, InfoTemplate, PopupMobile, Draw, Circle, normalizeUtils, webMercatorUtils, geometryEngine, jsonUtils, GeometryService, BufferParameters, Query, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, TextSymbol,
-            Font, Measurement, OverviewMap, BasemapGallery, Basemap, BasemapLayer, Scalebar, Search, HomeButton, Legend, LocateButton, FeatureLayer, ArcGISDynamicMapServiceLayer, WMSLayer, WMSLayerInfo, 
+            Font, Measurement, OverviewMap, BasemapGallery, Basemap, BasemapLayer, Scalebar, Search, HomeButton, Legend, LocateButton, FeatureLayer, ArcGISDynamicMapServiceLayer, WMSLayer, WMSLayerInfo,
             LabelClass, SimpleRenderer
-        ) {                
-                
+        ) {
+
                 //function init() {
                 parser.parse();
 
@@ -100,14 +100,14 @@
                 var customExtentAndSR = new esri.geometry.Extent(-300000, 4840000, 120000, 5280000, new esri.SpatialReference({ wkid: 3857 })); //= new esri.geometry.Extent(550000,4400000,825000,4770000, new esri.SpatialReference({wkid:25830}));
                 // variables capa de busqueda del servicio a consultar  ------------------------------------------------------------------------------------------------------------------------------
                 var tituloVisor = "<center><b><font color='white'>eINAGA-GEO</font></b></center>"
-                dom.byId("tituloVisor").innerHTML = tituloVisor; 
+                dom.byId("tituloVisor").innerHTML = tituloVisor;
 
 
                 //  otras variables -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 var d = new Date();
                 var fecha = d.getDate() + "/" + (d.getMonth() + 1) + "/" + d.getFullYear();
                 var fecha2 = d.getFullYear() + "" + ("00" + (d.getMonth() + 1)).slice(-2) + "" + ("00" + (d.getDate())).slice(-2);
-                
+
                 var sls = new SimpleLineSymbol("solid", new Color("#444444"), 3);
                 var sfs = new SimpleFillSymbol("solid", sls, new Color([68, 68, 68, 0.25]));
                 var symbolTrack = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_DIAMOND, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 1]));
@@ -294,7 +294,7 @@
                 }, "HomeButton");
                 home.startup();
 
-                
+
 
                 //Eventos -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 on(dom.byId("posicion"), "click", function () {
@@ -389,7 +389,7 @@
 
 
                 $(document).ready(function () {
-                    
+
                     $("#checkCatastro").click(function () {
                         cambiaVisibilidad("OVC");
                     });
@@ -462,7 +462,7 @@
                     });
                 });
 
-                
+
 
                 on(dom.byId("clearGraphicsM"), "click", function () {
                     if (map) {
@@ -470,7 +470,7 @@
                     }
                 });
 
-                map.on("load", initToolbar);    
+                map.on("load", initToolbar);
                 measurement.on("measure-end", function (evt) {
                     if (evt.toolName == "location") {
                         var outSR = new esri.SpatialReference(25830);
@@ -494,7 +494,7 @@
                     medicion = true;
                 });
 
-               
+
                 on(dom.byId("localizaCoord"), "click", function () {
                     //zoomToCoord(dom.byId("CoordX").value, dom.byId("CoordY").value);
                     dom.byId("transformacion2wgs84").innerHTML = "";
@@ -513,7 +513,7 @@
                         }
                     });
                 });
-                
+
                 on(dom.byId("convierteCoord"), "click", function () {
                     dom.byId("transformacion").innerHTML = "";
                     var _point = new esri.geometry.Point(dom.byId("Longitud").value.replace(',', '.'), dom.byId("Latitud").value.replace(',', '.'), new esri.SpatialReference({ wkid: 4326 }));
@@ -553,7 +553,7 @@
                     if (stringGeoJson === undefined) { showMessage("Debe de dibujar la localización antes de descargarla"); }
                     else {
                         generarTextoFromGeom(geometryProyectada, prefijo + dameFechaHora() + '.txt');
-                        writeToFile(prefijo + dameFechaHora() + '.geojson', stringGeoJson);                        
+                        writeToFile(prefijo + dameFechaHora() + '.geojson', stringGeoJson);
                     }
                 });
                 //on(dom.byId("fichero"), "click", function () {
@@ -620,21 +620,21 @@
                         }
                     }
                 });
-                                
-                on(dom.byId("select-choice-1"), "click", function () {                    
+
+                on(dom.byId("select-choice-1"), "click", function () {
                     if (textoParcelasDesglosado.length > 0) {
                         showMessage("Para cambiar de tipo de parcesa es necesario que borre la selección actual");
                         return;
                     }
                 });
 
-                
+
                 const buttonStart = document.getElementById('tracking_start');
                 const buttonStop = document.getElementById('tracking_stop');
                 buttonStart.addEventListener('click', iniciaTracking);
                 buttonStop.addEventListener('click', finalizaTracking);
 
-               //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                //Funciones -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 function dameFechaHora() {
                     var local = new Date();
                     var localdatetime = fecha2 + ("00" + (local.getHours())).slice(-2) + ("00" + (local.getMinutes())).slice(-2) + ("00" + (local.getSeconds())).slice(-2);
@@ -656,8 +656,8 @@
                     guardaTracking(singlePathPolyline, "track_" + dameFechaHora() + ".txt");
                 }
                 function cambiaVisibilidadOVC() {
-                    var x = document.getElementById("select-choice-1").value;                    
-                    if (dom.byId("myonoffswitch").checked ) {
+                    var x = document.getElementById("select-choice-1").value;
+                    if (dom.byId("myonoffswitch").checked) {
                         $("#checkCatastro").prop('checked', true).checkboxradio("refresh");
                         setVisible("OVC");
                     }
@@ -698,7 +698,7 @@
                         else {
                             nomCapa = "{0} Recintos Seleccionados";
                             fc_recintos.queryFeatures(query, dameParce);
-                        }                       
+                        }
                     }
                     catch (ex) {
                         showMessage(ex);
@@ -717,7 +717,7 @@
                     visibleFiguras = capas;
                 };
                 function dibujaGeometriaAnalisis(evtObj) {
-                   
+
                     var distancia = $("#km").val();
                     //console.log(evtObj.geometry.cache);
                     switch (evtObj.geometry.type) {
@@ -738,7 +738,7 @@
                     dameGeomEtrs89Analisis(evtObj.geometry);
                     edicion = false;
                 }
-                function guardaTracking() {                   
+                function guardaTracking() {
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
                     var geomGoogle = arguments[0];
@@ -770,7 +770,7 @@
                     var geomGoogle = arguments[0];
                     params.geometries = [geomGoogle]; //[pt.normalize()];
                     params.outSR = outSR;
-                    
+
                     var newurl = "";
                     gsvc.project(params, function (rtdos) {
                         geometryProyectada = rtdos[0];
@@ -790,7 +790,7 @@
                                 symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
                                 break;
                         }
-                        addGraphic("Geodesic", geomGoogle, symbol,true);
+                        addGraphic("Geodesic", geomGoogle, symbol, true);
                         map.getLayer("Buffer").clear();
                         map.graphics.clear();
                         var feature = L.esri.Util.arcgisToGeoJSON(geometryProyectada, "FID");
@@ -824,7 +824,7 @@
                     map.graphics.clear();
                     map.setInfoWindowOnClick(true);
                     tb.deactivate();
-                    var geometry = geomGoogle;                    
+                    var geometry = geomGoogle;
                     var params = new BufferParameters();
                     params.distances = [distancia];
                     params.outSpatialReference = map.spatialReference;
@@ -848,14 +848,14 @@
                     var sym = new esri.symbol.SimpleFillSymbol();
                     sym.setColor(null);
                     sym.setOutline(new esri.symbol.SimpleLineSymbol("solid", new dojo.Color([255, 0, 0, 1]), 2));
-                    addGraphic("Buffer", b[0], sym,true);
+                    addGraphic("Buffer", b[0], sym, true);
                     dameInf();
                 }
                 function addGraphicCapa(capa, geom, zoom) {
                     geomGoogle = geom;
                     alert(JSON.stringify(geomGoogle.toJson()));
                     var attrs = { "type": "Geodesic" };
-                    var template, g, s;                    
+                    var template, g, s;
                     template = new esri.InfoTemplate("", "Type: ${type}");
                     g = map.getLayer(capa);
                     g.clear();
@@ -867,7 +867,7 @@
                         case "polyline":
                             symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
                             break;
-                        case "polygon":                            
+                        case "polygon":
                             symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
                             break;
                     }
@@ -899,12 +899,12 @@
                     g.add(new esri.Graphic(geom, sym, attrs, template));
                     var zoomMapa = map.getZoom();
                     map.centerAndZoom(geom, zoomMapa);
-                }                        
-                       
-            
+                }
+
+
                 function dameInf() {
-                    
-                    
+
+
                     distancia = $("#km").val();
                     dom.byId("listadoRtdos").innerHTML = "";
                     dom.byId("resultadoImpacto").innerHTML = "";
@@ -912,7 +912,7 @@
                     tb.deactivate();
 
                     var query = new Query();
-                    query.geometry = geomBuffer; 
+                    query.geometry = geomBuffer;
                     query.outFields = ["*"];
                     //query.where = "";
                     query.distance = distancia;
@@ -925,48 +925,48 @@
                     contadorConsultas = 0;
                     try {
                         if ($('#checkCotos').is(":checked")) {
-                            contadorConsultas++; 
+                            contadorConsultas++;
                             fc_cotos.queryFeatures(query, dameCotos);
                         } if ($('#checkMontes').is(":checked")) {
                             contadorConsultas++;
                             fc_montes.queryFeatures(query, dameMontes);
-                        }if ($('#checkVVPP').is(":checked")) {
-                            contadorConsultas++; 
+                        } if ($('#checkVVPP').is(":checked")) {
+                            contadorConsultas++;
                             fc_vvpp.queryFeatures(query, dameVVPP);
                         } if ($('#checkGranjas').is(":checked")) {
-                            contadorConsultas++; 
-                            contadorConsultas++; 
-                            contadorConsultas++; 
+                            contadorConsultas++;
+                            contadorConsultas++;
+                            contadorConsultas++;
                             fc_granjasRega.queryFeatures(query, dameGranjasRega);
                             fc_granjasTram.queryFeatures(query, dameGranjasTrami);
                             fc_granjasReso.queryFeatures(query, dameGranjasReso);
                         } if ($('#checkboxhmd').is(":checked")) {
-                            contadorConsultas++; 
+                            contadorConsultas++;
                             fc_humedales.queryFeatures(query, dameHumedales);
                         } if ($('#checkboxlics').is(":checked")) {
-                            contadorConsultas++; 
+                            contadorConsultas++;
                             fc_lics.queryFeatures(query, dameLics);
                         } if ($('#checkboxzepas').is(":checked")) {
-                            contadorConsultas++; 
+                            contadorConsultas++;
                             fc_zepas.queryFeatures(query, dameZepas);
                         } if ($('#checkboxlig').is(":checked")) {
-                            contadorConsultas++; 
+                            contadorConsultas++;
                             fc_ligs.queryFeatures(query, dameLigs);
                         } if ($('#checkboxenp').is(":checked")) {
-                            contadorConsultas++; 
+                            contadorConsultas++;
                             fc_enp.queryFeatures(query, dameEnp);
                         } if ($('#checkboxporn').is(":checked")) {
-                            contadorConsultas++; 
+                            contadorConsultas++;
                             fc_porn.queryFeatures(query, damePorn);
                         } if ($('#checkboxacrit').is(":checked")) {
-                            contadorConsultas++; 
+                            contadorConsultas++;
                             fc_acrit.queryFeatures(query, dameAcrit);
                         } if ($('#checkboxappe').is(":checked")) {
-                            contadorConsultas++; 
+                            contadorConsultas++;
                             fc_appe.queryFeatures(query, dameAppe);
                         }
                     }
-                    catch(ex){
+                    catch (ex) {
                         showMessage(err.message);
                     }
                     if (contadorConsultas > 0) {
@@ -979,20 +979,20 @@
                         $("#collapCapasAnalisis").collapsible("expand");
                     }
                 }
-                function dameCotos(response) {                    
-                    obtieneDatosConsulta(response, "Terrenos Cinegéticos", "Cotos");                                        
-                    semaforoResta();
-                }                
-                function dameMontes(response) {                    
-                    obtieneDatosConsulta(response, "Montes", "Montes");                    
+                function dameCotos(response) {
+                    obtieneDatosConsulta(response, "Terrenos Cinegéticos", "Cotos");
                     semaforoResta();
                 }
-                function dameVVPP(response) {                    
-                    obtieneDatosConsulta(response, "Vías Pecuarias", "VVPP");                    
+                function dameMontes(response) {
+                    obtieneDatosConsulta(response, "Montes", "Montes");
                     semaforoResta();
                 }
-                function dameGranjasRega(response) {                    
-                    obtieneDatosConsulta(response, "Granjas REGA", "Granjas");                    
+                function dameVVPP(response) {
+                    obtieneDatosConsulta(response, "Vías Pecuarias", "VVPP");
+                    semaforoResta();
+                }
+                function dameGranjasRega(response) {
+                    obtieneDatosConsulta(response, "Granjas REGA", "Granjas");
                     semaforoResta();
                 }
                 function dameGranjasTrami(response) {
@@ -1003,16 +1003,16 @@
                     obtieneDatosConsulta(response, "Granjas Resolución", "Granjas");
                     semaforoResta();
                 }
-                function dameHumedales(response) {                    
-                    obtieneDatosConsulta(response, "Humedales", "Humedales");                    
+                function dameHumedales(response) {
+                    obtieneDatosConsulta(response, "Humedales", "Humedales");
                     semaforoResta();
                 }
-                function dameLics(response) {                    
-                    obtieneDatosConsulta(response, "LICS", "LICS");                    
+                function dameLics(response) {
+                    obtieneDatosConsulta(response, "LICS", "LICS");
                     semaforoResta();
                 }
                 function dameZepas(response) {
-                    obtieneDatosConsulta(response, "Zepas", "Zepas");                    
+                    obtieneDatosConsulta(response, "Zepas", "Zepas");
                     semaforoResta();
                 }
                 function dameLigs(response) {
@@ -1028,11 +1028,11 @@
                     semaforoResta();
                 }
                 function dameAcrit(response) {
-                    obtieneDatosConsulta(response, "ACRIT", "ACRIT");                    
+                    obtieneDatosConsulta(response, "ACRIT", "ACRIT");
                     semaforoResta();
                 }
                 function dameAppe(response) {
-                    obtieneDatosConsulta(response, "APPE", "APPE");                    
+                    obtieneDatosConsulta(response, "APPE", "APPE");
                     semaforoResta();
                 }
                 function semaforoResta() {
@@ -1044,8 +1044,8 @@
                 function dameParce(response) {
                     var features = response.features;
                     if (features.length === 0) { return; }
-                    var dropd = $("#select-choice-1").find('option:selected').val();                    
-                    var valor = features[0].attributes[campoRefpar];                                        
+                    var dropd = $("#select-choice-1").find('option:selected').val();
+                    var valor = features[0].attributes[campoRefpar];
                     if (textoParcelas.indexOf(valor) == -1) {
                         dom.byId("ArrayParcelas").innerHTML += "</p>" + valor;
                         contadorParcelas++;
@@ -1075,17 +1075,17 @@
                         }
                         textoParcelas += ";" + valor;
                         activaAnimacion();
-                        addGraphic("Parcelas", features[0].geometry, iconParcelas,false);
+                        addGraphic("Parcelas", features[0].geometry, iconParcelas, false);
                     }
                     else {
                         showMessage("Ya está seleccionada");
                     }
                 }
-                function obtieneDatosConsulta(response, texto, texto2) {                    
+                function obtieneDatosConsulta(response, texto, texto2) {
                     textoDescarga += "<table><h2>" + texto + "</h2>";
                     textoDescarga += "<thead><tr>";
                     var contador = obtieneDatosRtdo(response);
-                    var Afeccion = "";                    
+                    var Afeccion = "";
                     if (contador == 0) { Afeccion += "<b>" + texto + ":</b><span style='color:blue;font-weight:bold'> (" + contador + ")</span><br>"; }
                     else { Afeccion += "<b>" + texto + ":</b><span style='color:red; font-weight:bold'> (" + contador + ")</span><br>"; }
 
@@ -1108,7 +1108,7 @@
                         if (intersecta) {
                             getTextContent(features[x]);
                             contador++;
-                        }                      
+                        }
                     }
                     textoDescarga += "</table>";
                     if (contador === 0) {
@@ -1185,7 +1185,7 @@
                 function writeToFile(fileName, data) {
                     if (cordova.platformId === 'ios') {
                     }
-                    else {                        
+                    else {
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
                             //showMessage('file system open: ' + fs.name);
                             fs.root.getFile("Download/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
@@ -1195,9 +1195,9 @@
                                 writeFile(fileEntry, data);
                             }, onErrorCreateFile);
 
-                        }, onErrorLoadFs);                    
+                        }, onErrorLoadFs);
                     }
-                    
+
                 }
                 function gotFile(file) {
                     //readDataUrl(file);
@@ -1209,7 +1209,7 @@
                 function readAsText(file) {
                     var reader = new FileReader();
                     reader.onloadend = function (evt) {
-                       // showMessage(evt.target.result);
+                        // showMessage(evt.target.result);
                         AddCapaTxt(evt.target.result);
                         //var geomText = evt.target.result;
                         //var geomGeojson = L.geoJSON(geojsonFeature);
@@ -1220,7 +1220,7 @@
                 }
                 function AddCapaTxt(listadoCoord) {
                     try {
-                       // alert("addCapatxt: " + listadoCoord);
+                        // alert("addCapatxt: " + listadoCoord);
                         var coordsTracking = [];
                         listadoCoord = listadoCoord.replace(/\n|\r|\t/g, " ");
                         //alert("addCapatxt2: " + listadoCoord);
@@ -1234,7 +1234,7 @@
                         }
                         //alert("El array queda asi");
                         for (x = 0; x < coordsFichero.length; x++) {
-                           // alert(coordsFichero[x]);
+                            // alert(coordsFichero[x]);
                         }
                         //alert("numero de coord " + coordsFichero.length);
                         for (x = 0; x < coordsFichero.length - 2; x++) {
@@ -1255,7 +1255,7 @@
                             case "trac":
                                 //geomEtrs89 = new esri.geometry.Polyline(new esri.SpatialReference({wkid:25830})); //new esri.geometry.Polyline([coordsTracking]);
                                 geomEtrs89 = new esri.geometry.Polyline([coordsTracking]);
-                               // alert("genera polilinea paths:" + geomEtrs89.paths.length);
+                                // alert("genera polilinea paths:" + geomEtrs89.paths.length);
                                 //geomEtrs89.addPath([coordsTracking]);
                                 //alert(geomEtrs89.paths.length);
                                 break;
@@ -1296,16 +1296,16 @@
                 function getFiles() {
                     if (cordova.platformId === 'ios') {
                     }
-                    else {                        
+                    else {
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-                                fs.root.getDirectory('Download', { create: false }, function (dirEntry) {
-                                    var directoryReader = dirEntry.createReader();
+                            fs.root.getDirectory('Download', { create: false }, function (dirEntry) {
+                                var directoryReader = dirEntry.createReader();
                                 directoryReader.readEntries(onSuccessReadDir, onErrorReadDir);
                             }, onErrorReadDir);
-                        }, onErrorLoadFs);                    
+                        }, onErrorLoadFs);
                     }
                 }
-                
+
                 function onErrorLoadFs(error) {
                     showMessage('onErrorLoadFs: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
@@ -1316,18 +1316,18 @@
                     showMessage('onErrorReadFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorReadDir(error) {
-                    showMessage('onErrorReadDir: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');            
+                    showMessage('onErrorReadDir: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
-                function onSuccessReadDir(entries) {                    
+                function onSuccessReadDir(entries) {
                     var myarray = [];
                     var myJSON = "";
                     $('#fichero').empty();
-                    for (var i = 0; i < entries.length; i++) {                        
-                        var nameFile = entries[i].name;                        
-                        if (extension(nameFile) && checkName(nameFile)){
+                    for (var i = 0; i < entries.length; i++) {
+                        var nameFile = entries[i].name;
+                        if (extension(nameFile) && checkName(nameFile)) {
                             $('#fichero').append('<option value=' + i + '>' + entries[i].name + ' </option>');
                         }
-                    }        
+                    }
                     $('#fichero').selectmenu("refresh", true);
                 }
                 function extension(element) {
@@ -1350,14 +1350,14 @@
                         }
                     }
                     return false;
-                }                
+                }
                 function writeFile(fileEntry, dataObj) {
                     // Create a FileWriter object for our FileEntry (log.txt).
                     fileEntry.createWriter(function (fileWriter) {
 
                         //showMessage(fileEntry.fullPath);
                         fileWriter.onwriteend = function () {
-                            showMessage("Almacenado en " + fileEntry.fullPath);   
+                            showMessage("Almacenado en " + fileEntry.fullPath);
                             getFiles();
                         };
 
@@ -1455,6 +1455,7 @@
                 }
 
                 function generaTextoDescarga(nombre) {
+                    'use strict';
                     //var texto = [];
                     var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Instituto Aragonés de Gestión Ambiental</h1><h2>Aplicación eINAGA-GEO. Consulta de afecciones</h2><hr><h3>Informe sin carácter vinculante para la Administración</h3><b>Fecha: " + fecha
                         + "</b><br><b>Distancia análisis: " + distancia + " m</b>"
@@ -1470,10 +1471,14 @@
 
                     let options = { documentSize: 'A4', type: 'share', fileName: nombre };
 
-                    pdf.fromData(cuerpo, options)
-                        .then((stats) => console.log('status', stats))   // ok..., ok if it was able to handle the file to the OS.
-                        .catch((err) => console.err(err));
+                    //pdf.fromData(cuerpo, options)
+                    //    .then((stats) => console.log('status', stats); ) // ok..., ok if it was able to handle the file to the OS.
+                    //    .catch((err) => console.err(err); );
 
+                        pdf.fromData(cuerpo, options)
+                           .then(function (stats) { console.log(stats); },
+                                  function (err) { console.log(err); }); 
+                       
                 }
                 function initToolbar(evtObj) {
                     //console.debug("initToolbar");
