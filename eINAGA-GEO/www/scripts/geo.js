@@ -140,7 +140,7 @@
                     extent: customExtentAndSR
                 });
                 map.disableKeyboardNavigation();
-                map.addLayer(new esri.layers.GraphicsLayer({ "id": "Geodesic" }));
+                map.addLayer(new esri.layers.GraphicsLayer({ "id": "Analisis" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Buffer" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Parcelas" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Tracking" }));
@@ -310,7 +310,7 @@
 
                 query(".tool").on("click", function (evt) {
                     reseteaMedicion();
-                    var g = map.getLayer("Geodesic");
+                    var g = map.getLayer("Analisis");
                     g.clear();
                     geomGoogle = undefined;
                     $("#checkbox-1").prop('checked', false).checkboxradio("refresh");
@@ -776,7 +776,7 @@
                     });
                 }
                 function dameGeomEtrs89Analisis() {
-                    var g = map.getLayer("Geodesic");
+                    var g = map.getLayer("Analisis");
                     g.clear();
                     map.graphics.clear();
                     var outSR = new esri.SpatialReference(25830);
@@ -805,7 +805,7 @@
                                 symbol = symbolPoligono; //new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
                                 break;
                         }
-                        addGraphic("Geodesic", geomGoogle, symbol, true);
+                        addGraphic("Analisis", geomGoogle, symbol, true);
                         map.getLayer("Buffer").clear();
                         map.graphics.clear();
                         var feature = L.esri.Util.arcgisToGeoJSON(geometryProyectada, "FID");
@@ -869,7 +869,7 @@
                 function addGraphicCapa(capa, geom, zoom) {
                     geomGoogle = geom;
                     //alert(JSON.stringify(geomGoogle.toJson()));
-                    var attrs = { "type": "Geodesic" };
+                    var attrs = { "Geometria": "Análisis" };
                     var template, g, s;
                     template = new esri.InfoTemplate("", "Type: ${type}");
                     g = map.getLayer(capa);
@@ -894,7 +894,7 @@
                     }
                 }
                 function addGraphic(capa, geom, sym, zoom) {
-                    var attrs = { "type": "Geodesic" };
+                    var attrs = { "Geometría": capa };
                     var template, g, s;
                     geomBuffer = geom;
                     template = new esri.InfoTemplate("", "Type: ${type}");
@@ -907,7 +907,7 @@
                     }
                 }
                 function addGraphicTrack(capa, geom, sym, zoom) {
-                    var attrs = { "type": "Geodesic" };
+                    var attrs = { "type": capa };
                     var template, g, s;
                     template = new esri.InfoTemplate("", "Type: ${type}");
                     g = map.getLayer(capa);
@@ -1299,7 +1299,7 @@
                             pt = projectedPoints[0];
                             if (pintar) {
                                 //alert("pinta");
-                                addGraphicCapa("Geodesic", pt, true);;
+                                addGraphicCapa("Analisis", pt, true);;
                             }
                         });
                     }
@@ -1423,7 +1423,7 @@
                 function addPoint4326(geometry) {
                     map.graphics.clear();
                     var attrs, sym;
-                    attrs = { "type": "Geodesic" };
+                    attrs = { "type": "Analisis" };
                     symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
                     var graphic = new Graphic(geometry, symbol);
                     map.graphics.add(graphic);
