@@ -46,7 +46,13 @@ svg {
 .info {
     font-size: 0.8em;
 }
-.ui-mobile label, div.ui-controlgroup-label {
+/*.ui-mobile label, div.ui-controlgroup-label {
     font-weight: 400;
     font-size: 0.8em;
+}*/
+.ui-field-contain > label ~ [class*=ui-], .ui-field-contain .ui-controlgroup-controls {
+    margin: 0px 0px 1em 2em;
+}
+.ui-field-contain, .ui-mobile fieldset.ui-field-contain {
+    display: flex;
 }

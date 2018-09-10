@@ -308,6 +308,7 @@
                     reseteaMedicion();
                     var g = map.getLayer("Geodesic");
                     g.clear();
+                    geomGoogle = undefined;
                     $("#checkbox-1").prop('checked', false).checkboxradio("refresh");
 
                     if (evt.target.id.substring(0, 4) != "rec_") {
@@ -342,7 +343,7 @@
                 });
                 map.on("click", function (evt) {
                     $(".esriMobileInfoView").css("display", "none");
-                    if (!edicion && measurement.activeTool === null) {
+                    if (!edicion && measurement.activeTool === null && !track) {
                         if (dom.byId("myonoffswitch").checked) {
                             map.setInfoWindowOnClick(false);
                             var outSR = new esri.SpatialReference(25830);
@@ -461,8 +462,6 @@
                         toogleVisibilidadOvcSigpac();
                     });
                 });
-
-
 
                 on(dom.byId("clearGraphicsM"), "click", function () {
                     if (map) {
@@ -641,6 +640,7 @@
                     return localdatetime;
                 }
                 function iniciaTracking() {
+                    map.setInfoWindowOnClick(false);
                     var numero = $("#intervalo").val();
                     track = true;
                     mitracking = "";
@@ -649,6 +649,7 @@
                     getTrack(numero);
                 }
                 function finalizaTracking() {
+                    map.setInfoWindowOnClick(true);
                     track = false;
                     dom.byId("gps").innerHTML = "";
                     navigator.geolocation.clearWatch(watchID);
@@ -738,10 +739,10 @@
                     dameGeomEtrs89Analisis(evtObj.geometry);
                     edicion = false;
                 }
-                function guardaTracking() {
+                function guardaTracking(geom,nombreFichero) {
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
-                    var geomGoogle = arguments[0];
+                    var geomGoogle = geom; //arguments[0];
                     params.geometries = [geomGoogle]; //[pt.normalize()];
                     params.outSR = outSR;
                     var geometry;
@@ -754,7 +755,7 @@
                                 var vertice = geometry.getPoint(0, i);
                                 mitracking += contadorTrack++ + "\t" + vertice.x + "\t" + vertice.y + "\r\n";
                             }
-                            writeToFile(arguments[1], mitracking);
+                            writeToFile(nombreFichero, mitracking);
                         }
                         else {
                             showMessage("No se ha podido generar el track");
@@ -779,7 +780,7 @@
                         switch (geometryProyectada.type) {
                             case "point":
                                 prefijo = "pnt_";
-                                symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
+                                symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
                                 break;
                             case "polyline":
                                 prefijo = "lin_";
@@ -787,7 +788,8 @@
                                 break;
                             case "polygon":
                                 prefijo = "pol_";
-                                symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
+                                //symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
+                                symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
                                 break;
                         }
                         addGraphic("Geodesic", geomGoogle, symbol, true);
@@ -862,13 +864,13 @@
                     var symbol;
                     switch (geom.type) {
                         case "point":
-                            symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 0.25]));
+                            symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
                             break;
                         case "polyline":
                             symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
                             break;
                         case "polygon":
-                            symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
+                            symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
                             break;
                     }
                     g.add(new esri.Graphic(geom, symbol, attrs, template));
