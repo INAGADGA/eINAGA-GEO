@@ -122,15 +122,19 @@
                     </div>
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
                         <h3>Tracking</h3>
-                        <label for="intervalo">Intervalo en segundos:</label>
-                        <input type="number" data-clear-btn="false" name="number-1" id="intervalo" value="3000">
-                        <div>
-                            <button class="ui-mini" type="button" id="tracking_start" style="width: 48%;float: left;margin-left: 0;display: block;"><b>Inicio</b></button>
-                            <button class="ui-mini" type="button" id="tracking_stop" style="width: 48%;float: right;margin-left: 0;display: block;"><b>Parar</b></button>
+                        <!--<label for="intervalo">Intervalo en segundos:</label>
+                        <input type="number" data-clear-btn="false" name="number-1" id="intervalo" value="3">-->
+                        <div data-role="fieldcontain">
+                            <label for="intervalo">Intervalo (segundos)</label>
+                            <input type="number" data-mini="true" data-clear-btn="false" id="intervalo" value="3" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
                         </div>
-                        <div style="clear:both;">
-                            <input type="checkbox" name="checkGPSprecision" id="checkGPSprecision" data-mini="true"><label for="checkGPSprecision">No incluir coordenadas con error superior a:</label>
-                            <input type="number"  data-mini="true" name="name" id="Precision" value="20" />
+                        <div>
+                            <button data-mini="true" data-theme="b" data-iconpos="left" data-icon="navigation" type="button" id="tracking_start" style="width: 45%;float: left;margin-left: 0;display: block;"><b>Inicio</b></button>
+                            <button data-mini="true" data-theme="b" data-iconpos="left" data-icon="delete" type="button" id="tracking_stop" style="width: 45%;float: right;margin-left: 0;display: block;"><b>Parar</b></button>
+                        </div>
+                        <div style="clear: both;padding: 0.5em 0px 0.5em 0px;background-color:#d8d8d8;border-radius: 0.5em;">
+                            <input type="checkbox" name="checkGPSprecision" id="checkGPSprecision" data-mini="true"><label for="checkGPSprecision">No incluir coordenadas con error superior a (m):</label>
+                            <input type="number" data-mini="true" name="name" id="Precision" value="20" />
                         </div>
                     </div>
                     <div id="collapCoord" data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">

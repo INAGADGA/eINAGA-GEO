@@ -115,6 +115,10 @@
                     new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
                         new Color([255, 255, 255]), 2), new Color([0, 0, 255, 0.25])
                 );
+                var symbolPunto = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
+                var symbolLine = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
+                var symbolPoligono = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
+                
                 var gsvc = new esri.tasks.GeometryService("http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
                 esriConfig.defaults.geometryService = gsvc;
                 esriConfig.defaults.io.alwaysUseProxy = false;
@@ -544,6 +548,7 @@
                     var distancia = $("#km").val();
                     if (geomGoogle === undefined) { showMessage("Debe de dibujar la localización antes de realizar el análisis"); }
                     else if (distancia === undefined || distancia <= 0) { showMessage("Debe indicar la distancia del análisis"); }
+                    else if (distancia > 5000) { showMessage("La distancia de análisis debe ser menor de 5 km"); }
                     else
                         doBuffer(geomGoogle);
                 });
@@ -641,7 +646,7 @@
                 }
                 function iniciaTracking() {
                     map.setInfoWindowOnClick(false);
-                    var numero = $("#intervalo").val();
+                    var numero = $("#intervalo").val() * 1000;
                     track = true;
                     mitracking = "";
                     contadorTrack = 0;
@@ -727,11 +732,19 @@
                             break;
                         case "polyline":
                             var long = geometryEngine.geodesicLength(geometryEngine.simplify(evtObj.geometry), "meters");
-                            showMessage("longitud: " + long + " meters");
+                            //showMessage("longitud: " + long + " meters");
+                            if (long > 5000) {
+                                showMessage("No se pueden realizar análisis con líneas de más de 5 Km");
+                                return;
+                            }
                             break;
                         case "polygon":
                             var area = geometryEngine.geodesicArea(geometryEngine.simplify(evtObj.geometry), "hectares");
-                            showMessage("area: " + area + " hectares");
+                            //showMessage("area: " + area + " hectareas");
+                            if (area > 500000) {
+                                showMessage("No se pueden realizar análisis con polígonos de más de 500 Ha");
+                                return;
+                            }
                             break;
                     }
 
@@ -780,16 +793,16 @@
                         switch (geometryProyectada.type) {
                             case "point":
                                 prefijo = "pnt_";
-                                symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
+                                symbol = symbolPunto; //new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
                                 break;
                             case "polyline":
                                 prefijo = "lin_";
-                                symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
+                                symbol = symbolLine; //new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
                                 break;
                             case "polygon":
                                 prefijo = "pol_";
                                 //symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
-                                symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
+                                symbol = symbolPoligono; //new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
                                 break;
                         }
                         addGraphic("Geodesic", geomGoogle, symbol, true);
@@ -855,7 +868,7 @@
                 }
                 function addGraphicCapa(capa, geom, zoom) {
                     geomGoogle = geom;
-                    alert(JSON.stringify(geomGoogle.toJson()));
+                    //alert(JSON.stringify(geomGoogle.toJson()));
                     var attrs = { "type": "Geodesic" };
                     var template, g, s;
                     template = new esri.InfoTemplate("", "Type: ${type}");
@@ -864,13 +877,13 @@
                     var symbol;
                     switch (geom.type) {
                         case "point":
-                            symbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
+                            symbol = symbolPunto; // new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
                             break;
                         case "polyline":
-                            symbol = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
+                            symbol = symbolLine; // new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
                             break;
                         case "polygon":
-                            symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
+                            symbol = symbolPoligono; // new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
                             break;
                     }
                     g.add(new esri.Graphic(geom, symbol, attrs, template));
@@ -1266,7 +1279,7 @@
                                 break;
                         }
                         geomEtrs89.setSpatialReference(new esri.SpatialReference({ wkid: 25830 }));
-                        alert(JSON.stringify(geomEtrs89.toJson()));
+                        //alert(JSON.stringify(geomEtrs89.toJson()));
                         projectToWGS84(geomEtrs89, true);
                     }
                     catch (err) {
@@ -1275,17 +1288,17 @@
                 }
                 function projectToWGS84(geometry, pintar) {
                     try {
-                        alert("projectToWGS84 " + geometry.spatialReference.wkid);
+                        //alert("projectToWGS84 " + geometry.spatialReference.wkid);
                         var outSR = new esri.SpatialReference(3857);
                         var params = new esri.tasks.ProjectParameters();
                         params.geometries = [geometry]; //[pt.normalize()];
                         params.outSR = outSR;
                         var pt;
                         gsvc.project(params, function (projectedPoints) {
-                            alert("re projectToWGS84");
+                            //alert("re projectToWGS84");
                             pt = projectedPoints[0];
                             if (pintar) {
-                                alert("pinta");
+                                //alert("pinta");
                                 addGraphicCapa("Geodesic", pt, true);;
                             }
                         });
@@ -1333,7 +1346,7 @@
                     $('#fichero').selectmenu("refresh", true);
                 }
                 function extension(element) {
-                    var extensiones = ['txt', 'geojson'];
+                    var extensiones = ['txt']; //, 'geojson'];
                     var ext = element.split('.').pop();
                     for (x = 0; x < extensiones.length; x++) {
                         if (ext == extensiones[x]) {
@@ -1778,10 +1791,10 @@
                 s.sources[1].searchExtent = customExtentAndSR;
                 s.startup();
 
-                var legendDijit = new Legend({
-                    map: map
-                }, "legendDiv");
-                legendDijit.startup();
+                //var legendDijit = new Legend({
+                //    map: map
+                //}, "legendDiv");
+                //legendDijit.startup();
 
                 // capas
                 var resourceInfo2 = {
