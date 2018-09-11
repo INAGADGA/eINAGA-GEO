@@ -111,10 +111,7 @@
                 var sls = new SimpleLineSymbol("solid", new Color("#444444"), 3);
                 var sfs = new SimpleFillSymbol("solid", sls, new Color([68, 68, 68, 0.25]));
                 var symbolTrack = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_DIAMOND, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 1]));
-                var iconParcelas = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
-                    new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-                        new Color([255, 255, 255]), 2), new Color([0, 0, 255, 0.25])
-                );
+                var symbolParcelas = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,new Color([255, 255, 255]), 2), new Color([0, 0, 255, 0.25]));
                 var symbolPunto = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
                 var symbolLine = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
                 var symbolPoligono = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
@@ -165,7 +162,7 @@
                 geoLocate.startup();
 
                 // widget scalebar
-                var scalebar = new Scalebar({ map: map, attachTo: "bottom-center", scalebarUnit: "metric" });
+                //var scalebar = new Scalebar({ map: map, attachTo: "bottom-center", scalebarUnit: "metric" });
                 // widget medicion
 
 
@@ -285,12 +282,19 @@
                     basemaps: [topoBasemap, dkGreyBasemap, ltGreyBasemap, imagenBasemap, clarityBasemap, natGeoBasemap, streetBasemap, terrenoBasemap, oceanoBasemap]
                 }, 'basemapGallery');
 
-
+                var layer2 = new esri.dijit.BasemapLayer({ url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" });
+                layer2.opacity = 0.0;                
+                var basemap2 = new esri.dijit.Basemap({ layers: [layer2], title: "Blanco", thumbnailUrl: "" });
+                //var basemapGallery = new BasemapGallery({
+                //    showArcGISBasemaps: true,
+                //    map: map
+                //}, "basemapGallery"
+                //);
                 basemapGallery.startup();
                 basemapGallery.on("error", function (msg) {
                     //console.log("basemap gallery error:  ", msg);
                 });
-
+                basemapGallery.add(basemap2);
 
                 // widget home
                 var home = new HomeButton({
@@ -302,7 +306,6 @@
 
                 //Eventos -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 on(dom.byId("posicion"), "click", function () {
-                    //track = false;
                     getPosition();
                 });
 
@@ -352,7 +355,7 @@
                             map.setInfoWindowOnClick(false);
                             var outSR = new esri.SpatialReference(25830);
                             var params = new esri.tasks.ProjectParameters();
-                            params.geometries = [evt.mapPoint]; //map.extent]; //[pt.normalize()];
+                            params.geometries = [evt.mapPoint]; 
                             params.outSR = outSR;
                             var pt;
                             var newurl = "";
@@ -390,6 +393,7 @@
                 map.on("update-start", function () {
                     map.setMapCursor("wait");
                     domStyle.set(dom.byId("procesando"), "display", "inline-block");
+                    $("#popupNested").popup("close");
                 });
 
 
@@ -496,10 +500,8 @@
                     $("#myPanel").panel("close");
                     medicion = true;
                 });
-
-
+            
                 on(dom.byId("localizaCoord"), "click", function () {
-                    //zoomToCoord(dom.byId("CoordX").value, dom.byId("CoordY").value);
                     dom.byId("transformacion2wgs84").innerHTML = "";
                     var _point = new esri.geometry.Point(dom.byId("CoordX").value.replace(',', '.'), dom.byId("CoordY").value.replace(',', '.'), new esri.SpatialReference({ wkid: 25830 }));
                     var outSR = new esri.SpatialReference(4326);
@@ -523,7 +525,7 @@
                     addPoint4326(_point);
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
-                    params.geometries = [_point]; //[pt.normalize()];
+                    params.geometries = [_point]; 
                     params.outSR = outSR;
                     var pt;
                     gsvc.project(params, function (projectedPoints) {
@@ -544,46 +546,32 @@
 
 
                 on(dom.byId("analisisDistancias"), "click", function () {
-                    // falta comprobar la geometria de consulta no es nula
                     var distancia = $("#km").val();
                     if (geomGoogle === undefined) { showMessage("Debe de dibujar la localización antes de realizar el análisis"); }
-                    else if (distancia === undefined || distancia <= 0) { showMessage("Debe indicar la distancia del análisis"); }
-                    else if (distancia > 5000) { showMessage("La distancia de análisis debe ser menor de 5 km"); }
+                    else if (distancia === undefined || distancia < 10) { showMessage("La distancia del análisis debe ser superior a 10 m"); }
+                    else if (distancia > 5000) { showMessage("La distancia de análisis debe ser menor de 5.000 m"); }
                     else
                         doBuffer(geomGoogle);
                 });
                 on(dom.byId("descargaGeom"), "click", function () {
-                    // falta comprobar que existe geometría a descargar
                     if (stringGeoJson === undefined) { showMessage("Debe de dibujar la localización antes de descargarla"); }
                     else {
                         generarTextoFromGeom(geometryProyectada, prefijo + dameFechaHora() + '.txt');
                         writeToFile(prefijo + dameFechaHora() + '.geojson', stringGeoJson);
                     }
-                });
-                //on(dom.byId("fichero"), "click", function () {
-                //    getFiles();
-                //});
-                //$("#fichero").focus(function (e) {
-                //    getFiles();
-                //    $(this).change();
-                //});
-                //$("#fichero").change(function (e) {
-                //        fileGeo = $(this).val();
-                //});
+                });                
                 $("#abreFichero").click(function (e) {
                     var t = document.getElementById("fichero");
                     var selFile = t.options[t.selectedIndex].text;
                     readFile(selFile);
-
-                    //pintaGeometria('{"type":"Polygon","coordinates":[[[674758.2710015946,4615590.372484336],[674757.1802806852,4615378.44528815],[674752.4487425887,4615385.478633997],[674641.2633261753,4615367.6080085],[674663.1554010669,4615532.854491166],[674758.2710015946,4615590.372484336]]]}');
                 });
-                function pintaGeometria(textoGeojson) {
-                    var geojsonFeature = '{"type": "Feature","properties": {"name": "Coors Field","amenity": "Baseball Stadium","popupContent": "This is where the Rockies play!"},"geometry": {"type": "Point","coordinates": [-1, 42]}}';
-                    //var geomGeojson = L.geoJSON(JSON.parse(textoGeojson));
-                    var geom = jsonUtils.fromJson(JSON.parse(geojsonFeature));
-                    var feature = L.esri.Util.geojsonToArcGIS(geojsonFeature, "FID");
-                    addGraphic("Parcelas", feature[0].geometry, symbolTrack, true);
-                }
+                //function pintaGeometria(textoGeojson) {
+                //    var geojsonFeature = '{"type": "Feature","properties": {"name": "Coors Field","amenity": "Baseball Stadium","popupContent": "This is where the Rockies play!"},"geometry": {"type": "Point","coordinates": [-1, 42]}}';
+                //    //var geomGeojson = L.geoJSON(JSON.parse(textoGeojson));
+                //    var geom = jsonUtils.fromJson(JSON.parse(geojsonFeature));
+                //    var feature = L.esri.Util.geojsonToArcGIS(geojsonFeature, "FID");
+                //    addGraphic("Parcelas", feature[0].geometry, symbolTrack, true);
+                //}
 
                 on(dom.byId("descarga"), "click", function () {
                     generaTextoDescarga("INF_" + dameFechaHora() + '.pdf')
@@ -646,7 +634,7 @@
                 }
                 function iniciaTracking() {
                     map.setInfoWindowOnClick(false);
-                    var numero = $("#intervalo").val() * 1000;
+                    var numero = 30000; //$("#intervalo").val() * 10000;
                     track = true;
                     mitracking = "";
                     contadorTrack = 0;
@@ -724,11 +712,11 @@
                 };
                 function dibujaGeometriaAnalisis(evtObj) {
 
-                    var distancia = $("#km").val();
+                    //var distancia = $("#km").val();
                     //console.log(evtObj.geometry.cache);
                     switch (evtObj.geometry.type) {
                         case "point":
-                            if (distancia > 3000) { showMessage("Se ha superado la superficie máxima"); return; }
+                            //if (distancia > 3000) { showMessage("Se ha superado la superficie máxima"); return; }
                             break;
                         case "polyline":
                             var long = geometryEngine.geodesicLength(geometryEngine.simplify(evtObj.geometry), "meters");
@@ -740,8 +728,8 @@
                             break;
                         case "polygon":
                             var area = geometryEngine.geodesicArea(geometryEngine.simplify(evtObj.geometry), "hectares");
-                            //showMessage("area: " + area + " hectareas");
-                            if (area > 500000) {
+                            showMessage("area: " + area + " hectareas");
+                            if (area > 500) {
                                 showMessage("No se pueden realizar análisis con polígonos de más de 500 Ha");
                                 return;
                             }
@@ -912,8 +900,10 @@
                     template = new esri.InfoTemplate("", "Type: ${type}");
                     g = map.getLayer(capa);
                     g.add(new esri.Graphic(geom, sym, attrs, template));
-                    var zoomMapa = map.getZoom();
-                    map.centerAndZoom(geom, zoomMapa);
+                    if (!map.extent.contains(geom)) {
+                        var zoomMapa = map.getZoom();
+                        map.centerAndZoom(geom, zoomMapa);
+                    }
                 }
 
 
@@ -1090,7 +1080,7 @@
                         }
                         textoParcelas += ";" + valor;
                         activaAnimacion();
-                        addGraphic("Parcelas", features[0].geometry, iconParcelas, false);
+                        addGraphic("Parcelas", features[0].geometry, symbolParcelas, false);
                     }
                     else {
                         showMessage("Ya está seleccionada");
@@ -1229,7 +1219,7 @@
                         //var geomText = evt.target.result;
                         //var geomGeojson = L.geoJSON(geojsonFeature);
                         //var feature = L.esri.Util.geojsonToArcGIS(geomGeojson, "FID");
-                        //addGraphic("Parcelas", feature, iconParcelas, true);
+                        //addGraphic("Parcelas", feature, symbolParcelas, true);
                     };
                     reader.readAsText(file);
                 }
@@ -1559,14 +1549,14 @@
                             document.getElementById("gps").style.color = "white";
                         }
                         dom.byId("gps").innerHTML =
-                            "Timestamp :" + Timestamp + "</p > " +
-                            "Accuracy:" + Accuracy + "</p>" +
-                            "X:" + miposicion.x + "</p>" +
-                            "Y:" + miposicion.y + "</p>" +
-                            "altitud:" + altitud + "</p>" +
+                            // "Timestamp :" + Timestamp + "</p > " +
+                            "Precisión: " + Accuracy + " m </p>" +
+                            "Long: " + miposicion.x + "</p>" +
+                            "Lat: " + miposicion.y; //+ "</p>" +
+                            //"altitud:" + altitud + "</p>" +
                             //"AltitudeAccuracy:" + AltitudeAccuracy + "</p>" +
                             //"Heading:" + Heading + "</p>" +
-                            "speed:" + Speed + "</p>";
+                            //"speed:" + Speed + "</p>";
                     }
                     else {
                         projectToEtrs89(miposicion);
@@ -1581,11 +1571,13 @@
                 };
 
                 function onError(error) {
-                    showMessage('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                    dom.byId("gps").innerHTML = "Sin señal GPS";
+                    //showMessage('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
 
                 function getTrack(numero) {
-                    watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 1800000, enableHighAccuracy: true, maximumAge: numero });
+                    //watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 1800000, enableHighAccuracy: true, maximumAge: numero });
+                    watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 10000, enableHighAccuracy: true, maximumAge: numero });
                 }
 
                 function getPosition() {
@@ -1613,6 +1605,8 @@
                         dom.byId("Longitud").value = geometry.x.toFixed(8);
                         dom.byId("Latitud").value = geometry.y.toFixed(8);
 
+                        dom.byId("transformacion").innerHTML = "";
+                        dom.byId("transformacion2wgs84").innerHTML = "";
                         $("#myPanel").panel("open");
                         $("#collapCoord").collapsible("expand");
                         $("#collapCoordETRS").collapsible("expand");

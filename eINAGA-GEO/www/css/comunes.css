@@ -132,6 +132,17 @@ body {
     z-Index: 30
 }
 
+#escala {
+    position: absolute;
+    right: 80px;
+    bottom: 15px;
+    z-Index: 10;
+    text-shadow: 0 0 3px #000, 0 0 5px #000;
+    color: #ffff !important;
+    font-weight: 700;
+    font-size: 0.8em
+}
+
 .arcgisSearch .searchBtn {
     background-color: rgba(7, 41, 101, 0.85);
     color: white;

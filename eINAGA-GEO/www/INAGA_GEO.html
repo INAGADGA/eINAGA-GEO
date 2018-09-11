@@ -73,8 +73,7 @@
             <div data-role="main" class="ui-content">
                 <div data-role="collapsible-set" style="text-align: center;">
                     <div data-role="collapsible" data-inset="true" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                        <h3>Digitalización</h3>
-                        <label id="escala" style="">escala 1:</label>
+                        <h3>Digitalización</h3>                        
                         <div style="display: flex;margin: 0 auto;">
                             <button type="button" class="tool" id="point"></button>
                             <button type="button" class="tool" id="polyline"></button>
@@ -102,7 +101,7 @@
                         <button type="button" class="ui-mini botones" id="analisisDistancias" data-mini="true">Análisis Distancia</button>
                     </div>
                     <div data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
-                        <h3>Listados Catastrales</h3>
+                        <h3>Generar Listado Catastral</h3>
                         <label>
                             <input type="checkbox" name="checkbox-1" id="consultaParcelas" data-mini="true">Consulta Parcelas
                         </label>
@@ -124,17 +123,17 @@
                         <h3>Tracking</h3>
                         <!--<label for="intervalo">Intervalo en segundos:</label>
                         <input type="number" data-clear-btn="false" name="number-1" id="intervalo" value="3">-->
-                        <div data-role="fieldcontain">
+                        <!--<div data-role="fieldcontain">
                             <label for="intervalo">Intervalo (segundos)</label>
                             <input type="number" data-mini="true" data-clear-btn="false" id="intervalo" value="3" onkeypress='return event.charCode >= 48 && event.charCode <= 57'>
-                        </div>
+                        </div>-->
                         <div>
                             <button data-mini="true" data-theme="b" data-iconpos="left" data-icon="navigation" type="button" id="tracking_start" style="width: 45%;float: left;margin-left: 0;display: block;"><b>Inicio</b></button>
                             <button data-mini="true" data-theme="b" data-iconpos="left" data-icon="delete" type="button" id="tracking_stop" style="width: 45%;float: right;margin-left: 0;display: block;"><b>Parar</b></button>
                         </div>
                         <div style="clear: both;padding: 0.5em 0px 0.5em 0px;background-color:#d8d8d8;border-radius: 0.5em;">
-                            <input type="checkbox" name="checkGPSprecision" id="checkGPSprecision" data-mini="true"><label for="checkGPSprecision">No incluir coordenadas con error superior a (m):</label>
-                            <input type="number" data-mini="true" name="name" id="Precision" value="20" />
+                            <input type="checkbox" name="checkGPSprecision" id="checkGPSprecision" data-mini="true"><label for="checkGPSprecision">No incluir coordenadas con precisión superior a (m):</label>
+                            <input type="number" data-mini="true" name="name" id="Precision" value="12" />
                         </div>
                     </div>
                     <div id="collapCoord" data-role="collapsible" data-mini="true" data-iconpos="right" data-collapsed-icon="arrow-r" data-expanded-icon="arrow-d">
@@ -246,6 +245,7 @@
                 <div class="bounceIn" id="ParcelasSel"></div>
                 <div id="gps"></div>
                 <div id="HomeButton"></div>
+                <label id="escala" style="">escala 1:</label>
                 <!--<div id="LocateButton"></div>-->
                 <div id="search"></div>
                 <a id="herramientas" href="#myPanel" data-role="button" data-icon="bars" title="Menú herramientas"></a>
