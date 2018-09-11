@@ -119,15 +119,11 @@
                 var gsvc = new esri.tasks.GeometryService("http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
                 esriConfig.defaults.geometryService = gsvc;
                 esriConfig.defaults.io.alwaysUseProxy = false;
-                //esri.config.defaults.geometryService = new esri.tasks.GeometryService("http://tasks.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
 
                 var basemaps = [];
-                //var layer1 = new esri.dijit.BasemapLayer({url:"http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer"});
                 var layer2 = new esri.dijit.BasemapLayer({ url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" });
                 layer2.opacity = 0.0;
-                //var basemap1 = new esri.dijit.Basemap({layers:[layer1],title:"Orto",thumbnailUrl:"http://www.mapabase.es/arcgis/rest/services/Raster/MapaBase_o_ETRS89_30N/MapServer/info/thumbnail"});
                 var basemap2 = new esri.dijit.Basemap({ layers: [layer2], title: "Blanco", thumbnailUrl: "" });
-                //basemaps.push(basemap1);  basemaps.push(basemap2);
 
                 // incicializar mapa -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 map = new Map("map", {
@@ -161,11 +157,6 @@
                 geoLocate = new LocateButton({ map: map }, "LocateButton");
                 geoLocate.startup();
 
-                // widget scalebar
-                //var scalebar = new Scalebar({ map: map, attachTo: "bottom-center", scalebarUnit: "metric" });
-                // widget medicion
-
-
                 // widget overview
                 var overviewMapDijit = new OverviewMap({
                     map: map,
@@ -179,10 +170,8 @@
                 });
                 overviewMapDijit.startup();
 
-
                 // widget basemap
                 // cargamnos los mapas base
-
                 var oceano = new BasemapLayer({ url: 'https://server.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Base/MapServer' });
                 var oceanoEtiqueta = new BasemapLayer({ url: 'https://server.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Reference/MapServer' });
                 // topo item for gallery
@@ -282,14 +271,6 @@
                     basemaps: [topoBasemap, dkGreyBasemap, ltGreyBasemap, imagenBasemap, clarityBasemap, natGeoBasemap, streetBasemap, terrenoBasemap, oceanoBasemap]
                 }, 'basemapGallery');
 
-                var layer2 = new esri.dijit.BasemapLayer({ url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" });
-                layer2.opacity = 0.0;                
-                var basemap2 = new esri.dijit.Basemap({ layers: [layer2], title: "Blanco", thumbnailUrl: "" });
-                //var basemapGallery = new BasemapGallery({
-                //    showArcGISBasemaps: true,
-                //    map: map
-                //}, "basemapGallery"
-                //);
                 basemapGallery.startup();
                 basemapGallery.on("error", function (msg) {
                     //console.log("basemap gallery error:  ", msg);
@@ -301,8 +282,6 @@
                     map: map
                 }, "HomeButton");
                 home.startup();
-
-
 
                 //Eventos -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 on(dom.byId("posicion"), "click", function () {
@@ -565,13 +544,6 @@
                     var selFile = t.options[t.selectedIndex].text;
                     readFile(selFile);
                 });
-                //function pintaGeometria(textoGeojson) {
-                //    var geojsonFeature = '{"type": "Feature","properties": {"name": "Coors Field","amenity": "Baseball Stadium","popupContent": "This is where the Rockies play!"},"geometry": {"type": "Point","coordinates": [-1, 42]}}';
-                //    //var geomGeojson = L.geoJSON(JSON.parse(textoGeojson));
-                //    var geom = jsonUtils.fromJson(JSON.parse(geojsonFeature));
-                //    var feature = L.esri.Util.geojsonToArcGIS(geojsonFeature, "FID");
-                //    addGraphic("Parcelas", feature[0].geometry, symbolTrack, true);
-                //}
 
                 on(dom.byId("descarga"), "click", function () {
                     generaTextoDescarga("INF_" + dameFechaHora() + '.pdf')
@@ -711,16 +683,11 @@
                     visibleFiguras = capas;
                 };
                 function dibujaGeometriaAnalisis(evtObj) {
-
-                    //var distancia = $("#km").val();
-                    //console.log(evtObj.geometry.cache);
                     switch (evtObj.geometry.type) {
                         case "point":
-                            //if (distancia > 3000) { showMessage("Se ha superado la superficie máxima"); return; }
                             break;
                         case "polyline":
                             var long = geometryEngine.geodesicLength(geometryEngine.simplify(evtObj.geometry), "meters");
-                            //showMessage("longitud: " + long + " meters");
                             if (long > 5000) {
                                 showMessage("No se pueden realizar análisis con líneas de más de 5 Km");
                                 return;
@@ -781,16 +748,15 @@
                         switch (geometryProyectada.type) {
                             case "point":
                                 prefijo = "pnt_";
-                                symbol = symbolPunto; //new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
+                                symbol = symbolPunto; 
                                 break;
                             case "polyline":
                                 prefijo = "lin_";
-                                symbol = symbolLine; //new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
+                                symbol = symbolLine; 
                                 break;
                             case "polygon":
                                 prefijo = "pol_";
-                                //symbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_NONE, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
-                                symbol = symbolPoligono; //new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
+                                symbol = symbolPoligono; 
                                 break;
                         }
                         addGraphic("Analisis", geomGoogle, symbol, true);
@@ -856,7 +822,6 @@
                 }
                 function addGraphicCapa(capa, geom, zoom) {
                     geomGoogle = geom;
-                    //alert(JSON.stringify(geomGoogle.toJson()));
                     var attrs = { "Geometria": "Análisis" };
                     var template, g, s;
                     template = new esri.InfoTemplate("", "Type: ${type}");
@@ -865,13 +830,13 @@
                     var symbol;
                     switch (geom.type) {
                         case "point":
-                            symbol = symbolPunto; // new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
+                            symbol = symbolPunto;
                             break;
                         case "polyline":
-                            symbol = symbolLine; // new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
+                            symbol = symbolLine; 
                             break;
                         case "polygon":
-                            symbol = symbolPoligono; // new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 255, 0, 0.25]));
+                            symbol = symbolPoligono; 
                             break;
                     }
                     g.add(new esri.Graphic(geom, symbol, attrs, template));
@@ -1149,32 +1114,6 @@
                             ;
                     });
                 };
-                //function writeToFile2(fileName, data) {
-                //    if (cordova.platformId === 'ios') {
-                //    }
-                //    else {
-                //        //showMessage(data);
-                //        showMessage(cordova.file);
-                //        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function (directoryEntry) {
-                //            directoryEntry.getFile( fileName, { create: true }, function (fileEntry) {
-                //                fileEntry.createWriter(function (fileWriter) {
-                //                    fileWriter.onwriteend = function (e) {
-                //                        // for real-world usage, you might consider passing a success callback
-                //                        showMessage('<p>Archivo guardado corectamente en</p> ' + cordova.file.dataDirectory.split("/").join('</p>') + "</p> /" + fileName );
-                //                    };
-
-                //                    fileWriter.onerror = function (e) {
-                //                        // you could hook this up with our global error handler, or pass in an error callback
-                //                        showMessage('Error: ' + e.toString());
-                //                    };
-
-                //                    var blob = new Blob([data], { type: 'text/plain' });
-                //                    fileWriter.write(blob);
-                //                }, errorHandler.bind(null, fileName));
-                //            }, errorHandler.bind(null, fileName));
-                //        }, errorHandler.bind(null, fileName));                        
-                //    }
-                //}
 
                 function readFile(fileName) {
                     if (cordova.platformId === 'ios') {
@@ -1192,11 +1131,7 @@
                     }
                     else {
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-                            //showMessage('file system open: ' + fs.name);
                             fs.root.getFile("Download/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
-                                //showMessage("fileEntry is file?" + fileEntry.isFile.toString());
-                                // fileEntry.name == 'someFile.txt'
-                                // fileEntry.fullPath == '/someFile.txt'
                                 writeFile(fileEntry, data);
                             }, onErrorCreateFile);
 
@@ -1205,7 +1140,6 @@
 
                 }
                 function gotFile(file) {
-                    //readDataUrl(file);
                     readAsText(file);
                 }
                 function fail(error) {
@@ -1214,62 +1148,42 @@
                 function readAsText(file) {
                     var reader = new FileReader();
                     reader.onloadend = function (evt) {
-                        // showMessage(evt.target.result);
                         AddCapaTxt(evt.target.result);
-                        //var geomText = evt.target.result;
-                        //var geomGeojson = L.geoJSON(geojsonFeature);
-                        //var feature = L.esri.Util.geojsonToArcGIS(geomGeojson, "FID");
-                        //addGraphic("Parcelas", feature, symbolParcelas, true);
                     };
                     reader.readAsText(file);
                 }
                 function AddCapaTxt(listadoCoord) {
                     try {
-                        // alert("addCapatxt: " + listadoCoord);
                         var coordsTracking = [];
                         listadoCoord = listadoCoord.replace(/\n|\r|\t/g, " ");
-                        //alert("addCapatxt2: " + listadoCoord);
                         var coordsFichero = listadoCoord.split(" ");
                         for (x = 0; x < coordsFichero.length; x++) {
-                            //alert(coordsFichero[x]);
                             if (coordsFichero[x].trim() == "") {
                                 coordsFichero.splice(x, 1);
-                                //alert("borra indicie " + x);
                             }
                         }
-                        //alert("El array queda asi");
                         for (x = 0; x < coordsFichero.length; x++) {
-                            // alert(coordsFichero[x]);
                         }
-                        //alert("numero de coord " + coordsFichero.length);
                         for (x = 0; x < coordsFichero.length - 2; x++) {
-                            //alert(x);
                             coordsTracking.push([coordsFichero[x + 1], coordsFichero[x + 2]]);
-                            //alert(coordsFichero[x + 1] + " -- " + coordsFichero[x + 2]);
                             x = x + 2;
                         }
                         var geomEtrs89;
                         var t = document.getElementById("fichero");
                         var selFile = t.options[t.selectedIndex].text.substring(0, 4);
-                        //alert(selFile);
                         switch (selFile) {
                             case "pnt_":
                                 geomEtrs89 = new esri.geometry.Point(coordsTracking[0][0], coordsTracking[0][1], new esri.SpatialReference({ wkid: 25830 }));
                                 break;
                             case "lin_":
                             case "trac":
-                                //geomEtrs89 = new esri.geometry.Polyline(new esri.SpatialReference({wkid:25830})); //new esri.geometry.Polyline([coordsTracking]);
                                 geomEtrs89 = new esri.geometry.Polyline([coordsTracking]);
-                                // alert("genera polilinea paths:" + geomEtrs89.paths.length);
-                                //geomEtrs89.addPath([coordsTracking]);
-                                //alert(geomEtrs89.paths.length);
                                 break;
                             case "pol_":
                                 geomEtrs89 = new esri.geometry.Polygon([coordsTracking]);
                                 break;
                         }
                         geomEtrs89.setSpatialReference(new esri.SpatialReference({ wkid: 25830 }));
-                        //alert(JSON.stringify(geomEtrs89.toJson()));
                         projectToWGS84(geomEtrs89, true);
                     }
                     catch (err) {
@@ -1278,17 +1192,14 @@
                 }
                 function projectToWGS84(geometry, pintar) {
                     try {
-                        //alert("projectToWGS84 " + geometry.spatialReference.wkid);
                         var outSR = new esri.SpatialReference(3857);
                         var params = new esri.tasks.ProjectParameters();
-                        params.geometries = [geometry]; //[pt.normalize()];
+                        params.geometries = [geometry];
                         params.outSR = outSR;
                         var pt;
                         gsvc.project(params, function (projectedPoints) {
-                            //alert("re projectToWGS84");
                             pt = projectedPoints[0];
                             if (pintar) {
-                                //alert("pinta");
                                 addGraphicCapa("Analisis", pt, true);;
                             }
                         });
@@ -1357,10 +1268,8 @@
                     return false;
                 }
                 function writeFile(fileEntry, dataObj) {
-                    // Create a FileWriter object for our FileEntry (log.txt).
                     fileEntry.createWriter(function (fileWriter) {
 
-                        //showMessage(fileEntry.fullPath);
                         fileWriter.onwriteend = function () {
                             showMessage("Almacenado en " + fileEntry.fullPath);
                             getFiles();
@@ -1434,10 +1343,6 @@
                     }
                 };
 
-                //fresize = function resizeIframe(obj) {
-                //    obj.style.height = obj.contentWindow.document.body.scrollHeight + 'px';
-                //}
-
                 function cambiaVisibilidad(nombre) {
                     var targetLayer = map.getLayer(nombre);
                     if (targetLayer.visible) {
@@ -1461,18 +1366,11 @@
 
                 function generaTextoDescarga(nombre) {
                     'use strict';
-                    //var texto = [];
                     var cuerpo = "<html><head><title>Análisis de Distancias</title><style>body { font-family: arial, sans-serif}; table{ border-collapse: collapse;width: 100%;}td, th {border: 1px solid #dddddd;text-align: left;padding: 8px;}tr:nth-child(even) {background-color: #dddddd;}thead{background-color: #A9BCF5;}</style></head><body><h1>Instituto Aragonés de Gestión Ambiental</h1><h2>Aplicación eINAGA-GEO. Consulta de afecciones</h2><hr><h3>Informe sin carácter vinculante para la Administración</h3><b>Fecha: " + fecha
                         + "</b><br><b>Distancia análisis: " + distancia + " m</b>"
                         + textoDescarga
                         + "<br><hr><br><b>Geometría de consulta en geojson (SRS 25830): </b>" + stringGeoJson
                         + "</body></html>";
-                    //texto.push(cuerpo);
-                    //var myWindow = window.open("", "_blank", "scrollbars=yes");
-                    //myWindow.document.write(cuerpo);
-                    //return new Blob(texto, {
-                    //    type: 'text/plain'
-                    //});
 
                     let options = { documentSize: 'A4', type: 'share', fileName: nombre };
 
@@ -1486,14 +1384,11 @@
                        
                 }
                 function initToolbar(evtObj) {
-                    //console.debug("initToolbar");
                     tb = new esri.toolbars.Draw(evtObj.map);
                     tb.on("draw-end", dibujaGeometriaAnalisis);
-                    //tb.on("draw-complete", reiniciaOrden);
                 }
 
-                function showCoordinates(evt) {
-                    //display mouse coordinates     
+                function showCoordinates(evt) {  
                     dom.byId("info").innerHTML = "<b>UTM ETRS89 Huso 30N<br/>x:" + evt.mapPoint.x.toFixed(0) + " y:" + evt.mapPoint.y.toFixed(0) + "</b> <hr/>Escala: 1:" + Math.round(map.getScale(), 0).toLocaleString('de-DE') + "</br></br>";
                 }
 
@@ -1549,14 +1444,9 @@
                             document.getElementById("gps").style.color = "white";
                         }
                         dom.byId("gps").innerHTML =
-                            // "Timestamp :" + Timestamp + "</p > " +
                             "Precisión: " + Accuracy + " m </p>" +
                             "Long: " + miposicion.x + "</p>" +
-                            "Lat: " + miposicion.y; //+ "</p>" +
-                            //"altitud:" + altitud + "</p>" +
-                            //"AltitudeAccuracy:" + AltitudeAccuracy + "</p>" +
-                            //"Heading:" + Heading + "</p>" +
-                            //"speed:" + Speed + "</p>";
+                            "Lat: " + miposicion.y; 
                     }
                     else {
                         projectToEtrs89(miposicion);
@@ -1572,18 +1462,15 @@
 
                 function onError(error) {
                     dom.byId("gps").innerHTML = "Sin señal GPS";
-                    //showMessage('code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
 
-                function getTrack(numero) {
-                    //watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 1800000, enableHighAccuracy: true, maximumAge: numero });
-                    watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 10000, enableHighAccuracy: true, maximumAge: numero });
+                function getTrack(numero) {                    
+                    watchID = navigator.geolocation.watchPosition(onSuccess, onError, { timeout: 120000, enableHighAccuracy: true, maximumAge: numero });
                 }
 
                 function getPosition() {
                     var options = {
                         enableHighAccuracy: true
-                        //,maximumAge: 3600000
                     }
                     var watchID = navigator.geolocation.getCurrentPosition(onSuccess, onError, options);                   
                 }
@@ -1591,7 +1478,7 @@
                 function projectToEtrs89(geometry) {
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
-                    params.geometries = [geometry]; //[pt.normalize()];
+                    params.geometries = [geometry]; 
                     params.outSR = outSR;
                     var pt;
                     gsvc.project(params, function (projectedPoints) {
@@ -1656,7 +1543,6 @@
                         for (x = 0; x < migeometry.rings.length; x++) {
                             for (z = 0; z < migeometry.rings[x].length; z++) {
                                 texto += i++ + '\t' + migeometry.rings[x][z][0].toFixed(2) + '\t' + migeometry.rings[x][z][1].toFixed(2) + "\r";
-                                //texto.push('\r\n');
                             }
                         }
                     }
@@ -1664,20 +1550,13 @@
                         for (x = 0; x < migeometry.paths.length; x++) {
                             for (z = 0; z < migeometry.paths[x].length; z++) {
                                 texto += i++ + '\t' + migeometry.paths[x][z][0].toFixed(2) + '\t' + migeometry.paths[x][z][1].toFixed(2) + "\r";
-                                //texto.push(i++ + ' ' + migeometry.paths[x][z][0].toFixed(2).replace('.', ',') + ' ' + migeometry.paths[x][z][1].toFixed(2).replace('.', ','));
-                                //texto.push('\r\n');
                             }
                         }
                     }
                     else { texto += i++ + '\t' + migeometry.x.toFixed(2) + '\t' + migeometry.y.toFixed(2); }
 
-                   
-                    //writeToFile(nombre, texto.join());
-                    writeToFile(nombre, texto);
-                                        
+                    writeToFile(nombre, texto);                                        
                 };
-
-
 
                 function showLoading() {
                     domStyle.set(dom.byId("loading"), "display", "inline-block");
@@ -1785,15 +1664,9 @@
                 s.sources[1].searchExtent = customExtentAndSR;
                 s.startup();
 
-                //var legendDijit = new Legend({
-                //    map: map
-                //}, "legendDiv");
-                //legendDijit.startup();
-
                 // capas
                 var resourceInfo2 = {
-                    extent: customExtentAndSR, // new esri.geometry.Extent(-2.4, 39.6, 0.7, 43.3),
-                    //extent: customExtentAndSR,  
+                    extent: customExtentAndSR, 
                     layerInfos: []
                 };
 
@@ -1806,16 +1679,9 @@
                 var dynamicMSLayerMontes = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer", {
                     id: "Montes",
                     outFields: ["*"]
-                    //,opacity: 0.9
                 });
                 dynamicMSLayerMontes.setVisibility(false);
-                dynamicMSLayerMontes.setInfoTemplates({
-                    //0: { infoTemplate:   new esri.InfoTemplate("Piquetes de deslinde", "${*}") },
-                    //1: { infoTemplate:   new esri.InfoTemplate("Mojones de montes", "${*}") },
-                    //2: { infoTemplate:   new esri.InfoTemplate("Consorcios de repoblación", "${*}") },
-                    //3: { infoTemplate:   new esri.InfoTemplate("Consorcios de repoblación", "${*}") },
-                    //4: { infoTemplate: new esri.InfoTemplate("Montes", "Matricula: ${MATRICULA}<br>Nombre: ${NOMBRE}<br>Titular: ${TITULAR}<br>Tipo: ${DTIPO}") },
-                    //5: { infoTemplate: new esri.InfoTemplate("Montes Gen", "Matricula: ${MATRICULA}<br>Nombre: ${DENOMINACION}<br>Titular: ${TITULAR}<br>Tipo: ${TIPO}") }
+                dynamicMSLayerMontes.setInfoTemplates({                    
                     4: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes", "<h3>Montes:</h3><b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${NOMBRE}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${DTIPO}")) },
                     5: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Montes Gen", "<h3>Montes:</h3><b>Matricula:</b> ${MATRICULA}<br><b>Nombre:</b> ${DENOMINACION}<br><b>Titular:</b> ${TITULAR}<br><b>Tipo:</b> ${TIPO}")) },
                     6: { infoTemplate: new esri.InfoTemplate(getInfotemplate("Vías Pecuarias", "<h3>Vías Pecuarias:</h3><b>Municipio:</b> ${MUNICIPIO}<br><b>Nombre:</b> ${NOMBRE_VIA}<br><b>Tipo:</b> ${DTIPVIA}")) }
@@ -1850,7 +1716,6 @@
                 var dynamicMSLayerCotos = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Cotos_Caza/MapServer", {
                     id: "Cotos",
                     outFields: ["*"]
-                    //,opacity: 0.7
                 });
                 dynamicMSLayerCotos.setVisibility(false);
                 dynamicMSLayerCotos.setInfoTemplates({
@@ -1870,7 +1735,6 @@
                 var dynamicMSLayerFPA = new esri.layers.ArcGISDynamicMapServiceLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_FPA/MapServer", {
                     id: "Figuras",
                     outFields: ["*"]
-                    //,opacity: 0.7
                 });
                 dynamicMSLayerFPA.setInfoTemplates({
                     0: { infoTemplate: new esri.InfoTemplate(getInfotemplate("HUMEDALES", "<h3>HUMEDALES:</h3><b>CODIGO:</b> ${CODIGO}<br><b>Nombre:</b> ${DESCRIPCIO}")) },
@@ -1945,9 +1809,7 @@
                 wmsLayeriGN.version = "1.1.1";
                 wmsLayeriGN.spatialReferences[0] = 3857;
 
-
                 map.addLayers([wmsLayeriGN, dynamicMSLayerMontes, dynamicMSLayerVVPP, dynamicMSLayerGranjas, dynamicMSLayerCotos, dynamicMSLayerFPA, dynamicMSLayerLimites, wmsSigpac, layerCat]);
-                //map.addLayers([wmsLayeriGN, fc_montes,fc_vvpp, fc_cotos, fc_humedales, fc_lics, fc_zepas, fc_ligs, fc_enp, fc_porn, fc_acrit, fc_acrit, dynamicMSLayerLimites, wmsSigpac, layerCat]);
 
                 getFiles();
 
