@@ -529,7 +529,7 @@
                     if (geomGoogle != undefined && geomGoogle.type == "polyline") {
                         var long = geometryEngine.geodesicLength(geometryEngine.simplify(geomGoogle), "meters");
                         if (long > 5000) {
-                            showMessage("La longitud de la geomtría es de " + long + " y debe ser menor de 5.000 m");
+                            showMessage("La longitud de la geomtría es de " + (Math.round(long * 100) / 100) + " y debe ser menor de 5.000 m");
                             return;
                         }
                     }
