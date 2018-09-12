@@ -525,6 +525,15 @@
 
 
                 on(dom.byId("analisisDistancias"), "click", function () {
+                    // Comprobar si la geometría es de líneas por si han incluido un track que no pasa por el filtro de longitud al ser creado
+                    if (geomGoogle != undefined && geomGoogle.type == "polyline") {
+                        var long = geometryEngine.geodesicLength(geometryEngine.simplify(geomGoogle), "meters");
+                        if (long > 5000) {
+                            showMessage("La longitud de la geomtría es de " + long + " y debe ser menor de 5.000 m");
+                            return;
+                        }
+                    }
+                    // Comprobar la distancia del análisis
                     var distancia = $("#km").val();
                     if (geomGoogle === undefined) { showMessage("Debe de dibujar la localización antes de realizar el análisis"); }
                     else if (distancia === undefined || distancia < 10) { showMessage("La distancia del análisis debe ser superior a 10 m"); }
