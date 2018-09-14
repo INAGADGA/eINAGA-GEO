@@ -30,7 +30,9 @@
         var coordsTracking = [];
         var track;        
         var watchID;
-        var geometryProyectada;
+        var geometryProyectada;        
+        var directorioAlmacenamiento = "";
+
         require([
             "dojo/dom",
             "dojo/dom-style",
@@ -92,8 +94,13 @@
 
                 //function init() {
                 parser.parse();
-
                 valores = getGET();
+                if (cordova.platformId === 'ios') {
+                    directorioAlmacenamiento = "Download";
+                }
+                else {
+                    directorioAlmacenamiento = "Download";
+                }
 
                 var popup = new PopupMobile(null, domConstruct.create("div"));
 
@@ -132,6 +139,7 @@
                     //extent: new esri.geometry.Extent(-2.4, 39.6, 0.7, 43.3)
                     extent: customExtentAndSR
                 });
+                maxExtent = map.extent;
                 map.disableKeyboardNavigation();
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Analisis" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Buffer" }));
@@ -360,7 +368,6 @@
                     coordy = evt.mapPoint.y.toFixed(2).replace('.', ',');
                 });
                 map.on("zoom-end", function () {
-
                     $("#escala").text("Escala 1:" + map.getScale().toFixed(0));
                 });
 
@@ -374,6 +381,7 @@
                     domStyle.set(dom.byId("procesando"), "display", "inline-block");
                     $("#popupNested").popup("close");
                 });
+                
 
 
                 $(document).ready(function () {
@@ -1125,28 +1133,18 @@
                 };
 
                 function readFile(fileName) {
-                    if (cordova.platformId === 'ios') {
-                    }
-                    else {
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-                            fs.root.getFile("Download/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
+                            fs.root.getFile(directorioAlmacenamiento + "/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
                                 fileEntry.file(gotFile, fail);
                             }, onErrorReadFile);
                         }, onErrorLoadFs);
-                    }
                 }
-                function writeToFile(fileName, data) {
-                    if (cordova.platformId === 'ios') {
-                    }
-                    else {
+                function writeToFile(fileName, data) {                    
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-                            fs.root.getFile("Download/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
+                            fs.root.getFile(directorioAlmacenamiento + "/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
                                 writeFile(fileEntry, data);
                             }, onErrorCreateFile);
-
-                        }, onErrorLoadFs);
-                    }
-
+                        }, onErrorLoadFs);                    
                 }
                 function gotFile(file) {
                     readAsText(file);
@@ -1654,7 +1652,7 @@
                         enableSuggestions: true,
                         minCharacters: 0
                     }, {
-                        locator: new esri.tasks.Locator("//geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"),
+                        locator: new esri.tasks.Locator("https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"),
                         singleLineFieldName: "SingleLine",
                         name: "Geocoding Service",
                         localSearchOptions: {
