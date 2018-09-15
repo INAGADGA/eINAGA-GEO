@@ -123,12 +123,12 @@
                 var symbolLine = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
                 var symbolPoligono = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
                 
-                var gsvc = new esri.tasks.GeometryService("http://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
+                var gsvc = new esri.tasks.GeometryService("https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
                 esriConfig.defaults.geometryService = gsvc;
                 esriConfig.defaults.io.alwaysUseProxy = false;
 
                 var basemaps = [];
-                var layer2 = new esri.dijit.BasemapLayer({ url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" });
+                var layer2 = new esri.dijit.BasemapLayer({ url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" });
                 layer2.opacity = 0.0;
                 var basemap2 = new esri.dijit.Basemap({ layers: [layer2], title: "Blanco", thumbnailUrl: "" });
 
@@ -1217,16 +1217,15 @@
 
                 }
                 function getFiles() {
-                    if (cordova.platformId === 'ios') {
-                    }
-                    else {
+                   
+                                       
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-                            fs.root.getDirectory('Download', { create: false }, function (dirEntry) {
+                            fs.root.getDirectory(directorioAlmacenamiento, { create: false }, function (dirEntry) {
                                 var directoryReader = dirEntry.createReader();
                                 directoryReader.readEntries(onSuccessReadDir, onErrorReadDir);
                             }, onErrorReadDir);
                         }, onErrorLoadFs);
-                    }
+                   
                 }
 
                 function onErrorLoadFs(error) {
