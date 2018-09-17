@@ -26,6 +26,7 @@
     <allow-intent href="market:*" />
   </platform>
   <platform name="ios">
+    <allow-navigation href="http://ovc.catastro.meh.es"/>
     <allow-intent href="itms:*" />
     <allow-intent href="itms-apps:*" />
   </platform>

@@ -98,7 +98,7 @@
                 valores = getGET();
                 if (cordova.platformId === 'ios') {
                     directorioAlmacenamiento = "Download"; //"documents"; //cordova.file.documentsDirectory; // ;
-                    alert("diralmacen: " + directorioAlmacenamiento );
+                   
                 }
                 else {
                     directorioAlmacenamiento = "Download";
@@ -348,7 +348,7 @@
                             var newurl = "";
                             gsvc.project(params, function (projectedPoints) {
                                 pt = projectedPoints[0];
-                                var urlCat = "https://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx?&REQUEST=GetFeatureInfo&VERSION=1.1.1&SRS=EPSG%3A25830&BBOX=" + pt.x + "," + pt.y + "," + (pt.x + 1) + "," + (pt.y + 1) + "&WIDTH=" + map.width + "&HEIGHT=" + map.height + "&X=" + evt.layerX + "&Y=" + evt.offsetY;
+                                var urlCat = "http://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx?&REQUEST=GetFeatureInfo&VERSION=1.1.1&SRS=EPSG%3A25830&BBOX=" + pt.x + "," + pt.y + "," + (pt.x + 1) + "," + (pt.y + 1) + "&WIDTH=" + map.width + "&HEIGHT=" + map.height + "&X=" + evt.layerX + "&Y=" + evt.offsetY;
                                 popup.setContent('<iframe style="float:left; height:30em; width:100%" src=' + urlCat + ' frameborder="0" scrolling="yes"></iframe>');
                                 popup.setTitle("Información catastral");
                                 // cerrar ventana datos
@@ -1150,7 +1150,7 @@
                     readAsText(file);
                 }
                 function fail(error) {
-                    alert(error.code);
+                    showMessage(error.code);
                 }
                 function readAsText(file) {
                     var reader = new FileReader();
@@ -1194,7 +1194,7 @@
                         projectToWGS84(geomEtrs89, true);
                     }
                     catch (err) {
-                        alert(err.message);
+                        showMessage(err.message);
                     }
                 }
                 function projectToWGS84(geometry, pintar) {
@@ -1212,7 +1212,7 @@
                         });
                     }
                     catch (err) {
-                        alert(err.message);
+                        showMessage(err.message);
                     }
 
                 }
@@ -1229,16 +1229,16 @@
                 }
 
                 function onErrorLoadFs(error) {
-                    alert('onErrorLoadFs: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                    showMessage('onErrorLoadFs: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorCreateFile(error) {
-                    alert('onErrorCreateFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                    showMessage('onErrorCreateFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorReadFile(error) {
-                    alert('onErrorReadFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                    showMessage('onErrorReadFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorReadDir(error) {
-                    alert('onErrorReadDir: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                    showMessage('onErrorReadDir: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onSuccessReadDir(entries) {
                     var myarray = [];
