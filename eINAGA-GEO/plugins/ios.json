@@ -1,0 +1,29 @@
+{
+    "prepare_queue": {
+        "installed": [],
+        "uninstalled": []
+    },
+    "config_munge": {
+        "files": {}
+    },
+    "installed_plugins": {
+        "cordova-pdf-generator": {
+            "PACKAGE_NAME": "es.aragon.inageo"
+        },
+        "cordova-plugin-file": {
+            "PACKAGE_NAME": "es.aragon.inageo"
+        },
+        "cordova-plugin-geolocation": {
+            "GEOLOCATION_USAGE_DESCRIPTION": " ",
+            "PACKAGE_NAME": "es.aragon.inageo"
+        },
+        "cordova-plugin-whitelist": {
+            "PACKAGE_NAME": "es.aragon.inageo"
+        }
+    },
+    "dependent_plugins": {
+        "cordova-plugin-compat": {
+            "PACKAGE_NAME": "es.aragon.inageo"
+        }
+    }
+}

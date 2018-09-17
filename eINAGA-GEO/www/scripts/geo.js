@@ -1,11 +1,11 @@
-(function () {
-    //"use strict";
+//(function () {
+//    "use strict";
 
-    document.addEventListener('deviceready', onDeviceReady.bind(this), false);
+//    document.addEventListener('deviceready', onDeviceReady.bind(this), false);
 
-    function onDeviceReady() {
+//    function onDeviceReady() {
 
-        console.log('inicio visor **************************************************************************');
+        //console.log('inicio visor **************************************************************************');
         var _timer;
         var geomGoogle, geomINAGA;
         var map, tb, coordx, coordy, geom, url;
@@ -15,7 +15,7 @@
         var textoParcelasDesglosado = ""; 
         var contadorParcelas = 0;
         var listcoor = []; var orden = 0;
-        var loading; var edicion = false; medicion = false;
+        var loading; var edicion = false; var medicion = false;
         var visible = [];
         var visibleFiguras = [];
         var prefijo, nomCapa,  ultpos = 0;
@@ -71,8 +71,8 @@
             "esri/dijit/Measurement",
             "esri/dijit/OverviewMap",
             "esri/dijit/BasemapGallery",
-            'esri/dijit/Basemap',
-            'esri/dijit/BasemapLayer',
+            "esri/dijit/Basemap",
+            "esri/dijit/BasemapLayer",
 
             "esri/dijit/Scalebar",
             "esri/dijit/Search",
@@ -93,15 +93,17 @@
         ) {
 
                 //function init() {
+                
                 parser.parse();
                 valores = getGET();
                 if (cordova.platformId === 'ios') {
-                    directorioAlmacenamiento = "Download";
+                    directorioAlmacenamiento = "Download"; //"documents"; //cordova.file.documentsDirectory; // ;
+                    alert("diralmacen: " + directorioAlmacenamiento );
                 }
                 else {
                     directorioAlmacenamiento = "Download";
                 }
-
+                
                 var popup = new PopupMobile(null, domConstruct.create("div"));
 
                 var customExtentAndSR = new esri.geometry.Extent(-300000, 4840000, 120000, 5280000, new esri.SpatialReference({ wkid: 3857 })); //= new esri.geometry.Extent(550000,4400000,825000,4770000, new esri.SpatialReference({wkid:25830}));
@@ -122,11 +124,10 @@
                 var symbolPunto = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
                 var symbolLine = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
                 var symbolPoligono = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
-                
+
                 var gsvc = new esri.tasks.GeometryService("https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer");
                 esriConfig.defaults.geometryService = gsvc;
                 esriConfig.defaults.io.alwaysUseProxy = false;
-
                 var basemaps = [];
                 var layer2 = new esri.dijit.BasemapLayer({ url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer" });
                 layer2.opacity = 0.0;
@@ -139,7 +140,7 @@
                     //extent: new esri.geometry.Extent(-2.4, 39.6, 0.7, 43.3)
                     extent: customExtentAndSR
                 });
-                maxExtent = map.extent;
+                
                 map.disableKeyboardNavigation();
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Analisis" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Buffer" }));
@@ -162,9 +163,9 @@
                 );
                 measurement.startup();
                 // widget geolocate
-                geoLocate = new LocateButton({ map: map }, "LocateButton");
+                var geoLocate = new LocateButton({ map: map }, "LocateButton");
                 geoLocate.startup();
-
+                
                 // widget overview
                 var overviewMapDijit = new OverviewMap({
                     map: map,
@@ -177,7 +178,7 @@
                     opacity: .40
                 });
                 overviewMapDijit.startup();
-
+                
                 // widget basemap
                 // cargamnos los mapas base
                 var oceano = new BasemapLayer({ url: 'https://server.arcgisonline.com/arcgis/rest/services/Ocean/World_Ocean_Base/MapServer' });
@@ -271,7 +272,6 @@
                     title: 'Open Street Map',
                     thumbnailUrl: 'https://www.arcgis.com/sharing/rest/content/items/d415dff75dd042258ceda46f7252ad70/info/thumbnail/temposm.jpg'
                 });
-
                 // widget basemap
                 var basemapGallery = new BasemapGallery({
                     showArcGISBasemaps: false,
@@ -285,12 +285,12 @@
                 });
                 basemapGallery.add(basemap2);
 
+                
                 // widget home
                 var home = new HomeButton({
                     map: map
                 }, "HomeButton");
                 home.startup();
-
                 //Eventos -------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 on(dom.byId("posicion"), "click", function () {
                     getPosition();
@@ -609,7 +609,7 @@
                     }
                 });
 
-
+                
                 const buttonStart = document.getElementById('tracking_start');
                 const buttonStop = document.getElementById('tracking_stop');
                 buttonStart.addEventListener('click', iniciaTracking);
@@ -1133,11 +1133,11 @@
                 };
 
                 function readFile(fileName) {
-                        window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-                            fs.root.getFile(directorioAlmacenamiento + "/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
-                                fileEntry.file(gotFile, fail);
-                            }, onErrorReadFile);
-                        }, onErrorLoadFs);
+                    window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
+                        fs.root.getFile(directorioAlmacenamiento + "/" + fileName, { create: true, exclusive: false }, function (fileEntry) {
+                            fileEntry.file(gotFile, fail);
+                        }, onErrorReadFile);
+                    }, onErrorLoadFs);
                 }
                 function writeToFile(fileName, data) {                    
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
@@ -1220,7 +1220,7 @@
                    
                                        
                         window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function (fs) {
-                            fs.root.getDirectory(directorioAlmacenamiento, { create: false }, function (dirEntry) {
+                            fs.root.getDirectory(directorioAlmacenamiento, { create: true }, function (dirEntry) {
                                 var directoryReader = dirEntry.createReader();
                                 directoryReader.readEntries(onSuccessReadDir, onErrorReadDir);
                             }, onErrorReadDir);
@@ -1229,16 +1229,16 @@
                 }
 
                 function onErrorLoadFs(error) {
-                    showMessage('onErrorLoadFs: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                    alert('onErrorLoadFs: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorCreateFile(error) {
-                    showMessage('onErrorCreateFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                    alert('onErrorCreateFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorReadFile(error) {
-                    showMessage('onErrorReadFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                    alert('onErrorReadFile: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onErrorReadDir(error) {
-                    showMessage('onErrorReadDir: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
+                    alert('onErrorReadDir: code: ' + error.code + '\n' + 'message: ' + error.message + '\n');
                 }
                 function onSuccessReadDir(entries) {
                     var myarray = [];
@@ -1335,7 +1335,7 @@
                     map.centerAndZoom(graphic.geometry, 18);
                 }
 
-                fTemplate = function locate() {
+                var fTemplate = function locate() {
                     if (graphico !== undefined) {
                         var extension = graphico.geometry.getExtent();
                         if (!extension) {
@@ -1583,7 +1583,6 @@
                 
                 // Capas necesarias para las búsquedas-------------------------------------------------------------------------------------------------------------------------------------------------------------------
                 // create a text symbol to define the style of labels               
-                
                 var fc_cotos = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_Cotos_Caza/MapServer/2");  
                 var fc_montes = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer/5");  
                 var fc_vvpp = new FeatureLayer("https://idearagon.aragon.es/servicios/rest/services/INAGA/INAGA_CMA/MapServer/6");  
@@ -1786,7 +1785,7 @@
                     extent: customExtentAndSR,
                     layerInfos: [layerSigpacPar, layerSigpacRec]
                 };
-                var wmsSigpac = new WMSLayer('https://wms.magrama.es/wms/wms.aspx?', {
+                var wmsSigpac = new WMSLayer('http://wms.magrama.es/wms/wms.aspx?', {
                     resourceInfo: resourceInfo,
                     visibleLayers: ['PARCELA', 'RECINTO']
 
@@ -1805,7 +1804,7 @@
                     extent: customExtentAndSR,
                     layerInfos: [layerIGN]
                 };
-                var wmsLayeriGN = new WMSLayer('http://www.ign.es/wms-inspire/mapa-raster?', {
+                var wmsLayeriGN = new WMSLayer('https://www.ign.es/wms-inspire/mapa-raster?', {
                     resourceInfo: resourceInfo,
                     visibleLayers: ['mtn_rasterizado']
 
@@ -1818,7 +1817,7 @@
                 map.addLayers([wmsLayeriGN, dynamicMSLayerMontes, dynamicMSLayerVVPP, dynamicMSLayerGranjas, dynamicMSLayerCotos, dynamicMSLayerFPA, dynamicMSLayerLimites, wmsSigpac, layerCat]);
 
                 getFiles();
-
             });
-    }
-})();
+
+//    }
+//})();
