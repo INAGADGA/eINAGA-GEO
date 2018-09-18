@@ -765,6 +765,7 @@
                     //var g = map.getLayer("Analisis");
                     //g.clear();
                     //map.graphics.clear();
+                    map.getLayer("Buffer").clear();
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
                     geomGoogle = geom;
@@ -804,6 +805,7 @@
                 function dameGeom4326Analisis(geom, abrirPanel) {
                     //var g = map.getLayer("Analisis");
                     //g.clear();
+                    map.getLayer("Buffer").clear();
                     map.graphics.clear();
                     geometryProyectada  = geom;
                     var feature = L.esri.Util.arcgisToGeoJSON(geometryProyectada , "FID");
