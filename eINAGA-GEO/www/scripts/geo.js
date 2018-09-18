@@ -122,6 +122,7 @@
                 var symbolTrack = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_DIAMOND, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([0, 255, 0, 1]));
                 var symbolParcelas = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,new Color([255, 255, 255]), 2), new Color([0, 0, 255, 0.25]));
                 var symbolPunto = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_SQUARE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255, 0, 0]), 1), new Color([255, 255, 0, 0.25]));
+                var symbolOVC = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 10, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 255, 255]), 1), new Color([0, 0, 58, 0.85]));
                 var symbolLine = new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2);
                 var symbolPoligono = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID, new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASHDOT, new Color([255, 0, 0]), 2), new Color([255, 0, 0, 0.25]));
 
@@ -146,6 +147,7 @@
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Buffer" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Parcelas" }));
                 map.addLayer(new esri.layers.GraphicsLayer({ "id": "Tracking" }));
+                map.addLayer(new esri.layers.GraphicsLayer({ "id": "Coordenadas" }));
 
                 //map.infoWindow.resize(400, 300);
 
@@ -303,6 +305,7 @@
                     var g = map.getLayer("Analisis");
                     g.clear();
                     geomGoogle = undefined;
+                    map.getLayer("Buffer").clear();
                     $("#checkbox-1").prop('checked', false).checkboxradio("refresh");
 
                     if (evt.target.id.substring(0, 4) != "rec_") {
@@ -340,6 +343,7 @@
                     if (!edicion && measurement.activeTool === null && !track) {
                         if (dom.byId("myonoffswitch").checked) {
                             map.setInfoWindowOnClick(false);
+                            geomGoogle = evt.mapPoint;                            
                             var outSR = new esri.SpatialReference(25830);
                             var params = new esri.tasks.ProjectParameters();
                             params.geometries = [evt.mapPoint]; 
@@ -348,12 +352,17 @@
                             var newurl = "";
                             gsvc.project(params, function (projectedPoints) {
                                 pt = projectedPoints[0];
+                                geometryProyectada = pt;
                                 var urlCat = "http://ovc.catastro.meh.es/Cartografia/WMS/ServidorWMS.aspx?&REQUEST=GetFeatureInfo&VERSION=1.1.1&SRS=EPSG%3A25830&BBOX=" + pt.x + "," + pt.y + "," + (pt.x + 1) + "," + (pt.y + 1) + "&WIDTH=" + map.width + "&HEIGHT=" + map.height + "&X=" + evt.layerX + "&Y=" + evt.offsetY;
                                 popup.setContent('<iframe style="float:left; height:30em; width:100%" src=' + urlCat + ' frameborder="0" scrolling="yes"></iframe>');
                                 popup.setTitle("Información catastral");
+                                // dibujar y zoom a coordenada
+                                replaceGraphic("Analisis", geomGoogle, symbolPunto, true);
+                                actualizaCoordTextBox(geomGoogle, geometryProyectada, false);
                                 // cerrar ventana datos
                                 $(".esriMobileInfoView").css("display", "inline-block");
                                 $(".esriMobileNavigationBar").css("display", "inline-block");
+                                
                             });
                         }
                         else if (dom.byId("consultaParcelas").checked) {
@@ -490,38 +499,43 @@
             
                 on(dom.byId("localizaCoord"), "click", function () {
                     dom.byId("transformacion2wgs84").innerHTML = "";
-                    var _point = new esri.geometry.Point(dom.byId("CoordX").value.replace(',', '.'), dom.byId("CoordY").value.replace(',', '.'), new esri.SpatialReference({ wkid: 25830 }));
-                    var outSR = new esri.SpatialReference(4326);
-                    var params = new esri.tasks.ProjectParameters();
-                    params.geometries = [_point];
-                    params.outSR = outSR;
-                    var pt;
-                    gsvc.project(params, function (projectedPoints) {
-                        pt = projectedPoints[0];
-                        if (pt == undefined) { dom.byId("transformacion2wgs84").innerHTML = "Coordenada incorrecta"; }
-                        else {
-                            dom.byId("transformacion2wgs84").innerHTML = "<b>Coordenada Geográfica<hr/><table style='width:100%'><tr><th>Longitud</th><th>Latitud</th></tr><tr><td align='center'>" + pt.x.toFixed(6) + "</td><td align='center'>" + pt.y.toFixed(6) + "</td></tr></table><hr />";
-                            addPoint4326(pt);
-                        }
-                    });
+                    //var _point = new esri.geometry.Point(dom.byId("CoordX").value.replace(',', '.'), dom.byId("CoordY").value.replace(',', '.'), new esri.SpatialReference({ wkid: 25830 }));
+                    var _point = new esri.geometry.Point(Number(dom.byId("CoordX").value.replace(',', '.')), Number(dom.byId("CoordY").value.replace(',', '.')), new esri.SpatialReference({ wkid: 25830 }));
+                    dameGeom4326Analisis(_point, true);
+                    //var outSR = new esri.SpatialReference(4326);
+                    //var params = new esri.tasks.ProjectParameters();
+                    //params.geometries = [_point];
+                    //params.outSR = outSR;
+                    //var pt;
+                    //gsvc.project(params, function (projectedPoints) {
+                    //    pt = projectedPoints[0];
+                    //    if (pt == undefined) { dom.byId("transformacion2wgs84").innerHTML = "Coordenada incorrecta"; }
+                    //    else {
+                    //        dom.byId("transformacion2wgs84").innerHTML = "<b>Coordenada Geográfica<hr/><table style='width:100%'><tr><th>Longitud</th><th>Latitud</th></tr><tr><td align='center'>" + pt.x.toFixed(6) + "</td><td align='center'>" + pt.y.toFixed(6) + "</td></tr></table><hr />";
+                    //       // addPoint4326(pt);
+                    //        //dameGeomEtrs89Analisis(pt,false);
+                    //    }
+                    //});
                 });
 
                 on(dom.byId("convierteCoord"), "click", function () {
                     dom.byId("transformacion").innerHTML = "";
-                    var _point = new esri.geometry.Point(dom.byId("Longitud").value.replace(',', '.'), dom.byId("Latitud").value.replace(',', '.'), new esri.SpatialReference({ wkid: 4326 }));
-                    addPoint4326(_point);
-                    var outSR = new esri.SpatialReference(25830);
-                    var params = new esri.tasks.ProjectParameters();
-                    params.geometries = [_point]; 
-                    params.outSR = outSR;
-                    var pt;
-                    gsvc.project(params, function (projectedPoints) {
-                        pt = projectedPoints[0];
-                        if (pt == undefined) { dom.byId("transformacion").innerHTML = "Coordenada incorrecta"; }
-                        else {
-                            dom.byId("transformacion").innerHTML = "<b>Coordenada ETRS89 30N<hr/><table style='width:100%'><tr><th>X</th><th>Y</th></tr><tr><td align='center'>" + pt.x.toFixed(0) + "</td><td align='center'>" + pt.y.toFixed(0) + "</td></tr></table><hr />";
-                        }
-                    });
+                    var _point = new esri.geometry.Point(Number(dom.byId("Longitud").value.replace(',', '.')), Number(dom.byId("Latitud").value.replace(',', '.')), new esri.SpatialReference({ wkid: 4326 }));
+                    dameGeomEtrs89Analisis(_point,true);
+                    //addPoint4326(_point);
+                    //var outSR = new esri.SpatialReference(25830);
+                    //var params = new esri.tasks.ProjectParameters();
+                    //params.geometries = [_point]; 
+                    //params.outSR = outSR;
+                    //var pt;
+                    //gsvc.project(params, function (projectedPoints) {
+                    //    pt = projectedPoints[0];
+                    //    if (pt == undefined) { dom.byId("transformacion").innerHTML = "Coordenada incorrecta"; }
+                    //    else {
+                    //        dom.byId("transformacion").innerHTML = "<b>Coordenada ETRS89 30N<hr/><table style='width:100%'><tr><th>X</th><th>Y</th></tr><tr><td align='center'>" + pt.x.toFixed(0) + "</td><td align='center'>" + pt.y.toFixed(0) + "</td></tr></table><hr />";
+                    //    }
+                    //    dameGeom4326Analisis(pt, true);
+                    //});
                 });
 
                 popup.on("selection-change", function () {
@@ -699,7 +713,7 @@
                     }
                     visibleFiguras = capas;
                 };
-                function dibujaGeometriaAnalisis(evtObj) {
+                function actualizaGeometriaAnalisis(evtObj) {
                     switch (evtObj.geometry.type) {
                         case "point":
                             break;
@@ -712,23 +726,23 @@
                             break;
                         case "polygon":
                             var area = geometryEngine.geodesicArea(geometryEngine.simplify(evtObj.geometry), "hectares");
-                            showMessage("area: " + area + " hectareas");
                             if (area > 500) {
                                 showMessage("No se pueden realizar análisis con polígonos de más de 500 Ha");
                                 return;
                             }
                             break;
                     }
+                    //geomGoogle = evtObj.geometry;
+                    dameGeomEtrs89Analisis(evtObj.geometry, false);
 
-                    geomGoogle = evtObj.geometry;
-                    dameGeomEtrs89Analisis(evtObj.geometry);
                     edicion = false;
                 }
+                
                 function guardaTracking(geom,nombreFichero) {
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
-                    var geomGoogle = geom; //arguments[0];
-                    params.geometries = [geomGoogle]; //[pt.normalize()];
+                    var geomGoogle = geom; 
+                    params.geometries = [geomGoogle]; 
                     params.outSR = outSR;
                     var geometry;
                     var newurl = "";
@@ -747,16 +761,15 @@
                         }
                     });
                 }
-                function dameGeomEtrs89Analisis() {
-                    var g = map.getLayer("Analisis");
-                    g.clear();
-                    map.graphics.clear();
+                function dameGeomEtrs89Analisis(geom, abrirPanel) {
+                    //var g = map.getLayer("Analisis");
+                    //g.clear();
+                    //map.graphics.clear();
                     var outSR = new esri.SpatialReference(25830);
                     var params = new esri.tasks.ProjectParameters();
-                    var geomGoogle = arguments[0];
+                    geomGoogle = geom;
                     params.geometries = [geomGoogle]; //[pt.normalize()];
                     params.outSR = outSR;
-
                     var newurl = "";
                     gsvc.project(params, function (rtdos) {
                         geometryProyectada = rtdos[0];
@@ -766,6 +779,7 @@
                             case "point":
                                 prefijo = "pnt_";
                                 symbol = symbolPunto; 
+                                actualizaCoordTextBox(geomGoogle, geometryProyectada, abrirPanel);
                                 break;
                             case "polyline":
                                 prefijo = "lin_";
@@ -776,7 +790,7 @@
                                 symbol = symbolPoligono; 
                                 break;
                         }
-                        addGraphic("Analisis", geomGoogle, symbol, true);
+                        replaceGraphic("Analisis", geomGoogle, symbol, true);
                         map.getLayer("Buffer").clear();
                         map.graphics.clear();
                         var feature = L.esri.Util.arcgisToGeoJSON(geometryProyectada, "FID");
@@ -784,6 +798,45 @@
                         tb.deactivate();
                         map.setInfoWindowOnClick(true);
                         $("#myPanel").panel("open");
+                        
+                    });
+                }
+                function dameGeom4326Analisis(geom, abrirPanel) {
+                    //var g = map.getLayer("Analisis");
+                    //g.clear();
+                    map.graphics.clear();
+                    geometryProyectada  = geom;
+                    var feature = L.esri.Util.arcgisToGeoJSON(geometryProyectada , "FID");
+                    stringGeoJson = JSON.stringify(feature);
+                    var outSR = new esri.SpatialReference(4326);
+                    var params = new esri.tasks.ProjectParameters();                    
+                    params.geometries = [geom]; //[pt.normalize()];
+                    params.outSR = outSR;
+                    var newurl = "";
+                    gsvc.project(params, function (rtdos) {
+                        geomGoogle = rtdos[0];
+                        var symbol;
+                        switch (geomGoogle.type) {
+                            case "point":
+                                prefijo = "pnt_";
+                                symbol = symbolPunto;
+                                actualizaCoordTextBox(geomGoogle, geometryProyectada, abrirPanel);
+                                break;
+                            case "polyline":
+                                prefijo = "lin_";
+                                symbol = symbolLine;
+                                break;
+                            case "polygon":
+                                prefijo = "pol_";
+                                symbol = symbolPoligono;
+                                break;
+                        }
+                        replaceGraphic("Analisis", geomGoogle, symbol, true);
+                        map.getLayer("Buffer").clear();
+                        map.graphics.clear();                        
+                        tb.deactivate();
+                        map.setInfoWindowOnClick(true);
+                        if (abrirPanel) { $("#myPanel").panel("open"); }
                     });
                 }
                 function reseteaMedicion() {
@@ -859,7 +912,31 @@
                     g.add(new esri.Graphic(geom, symbol, attrs, template));
                     if (zoom) {
                         if (g.graphics.length > 0) {
-                            map.setExtent(esri.graphicsExtent([g.graphics[g.graphics.length - 1]]).expand(1.4), true);
+                            if (geom.type === "point") {
+                                map.centerAndZoom(geom, 18);
+                            }
+                            else {
+                                map.setExtent(esri.graphicsExtent([g.graphics[g.graphics.length - 1]]).expand(1.4), true);
+                            }
+                        }
+                    }
+                }
+                function replaceGraphic(capa, geom, sym, zoom) {
+                    var attrs = { "Geometría": capa };
+                    var template, g, s;
+                    //geomBuffer = geom;
+                    template = new esri.InfoTemplate("", "Type: ${type}");
+                    g = map.getLayer(capa);
+                    g.clear();
+                    g.add(new esri.Graphic(geom, sym, attrs, template));
+                    if (zoom) {
+                        if (g.graphics.length > 0) {
+                            if (geom.type === "point") {
+                                map.centerAndZoom(geom, 17);
+                            }
+                            else {
+                                map.setExtent(esri.graphicsExtent([g.graphics[g.graphics.length - 1]]).expand(1.4), true);
+                            }
                         }
                     }
                 }
@@ -872,7 +949,12 @@
                     g.add(new esri.Graphic(geom, sym, attrs, template));
                     if (zoom) {
                         if (g.graphics.length > 0) {
-                            map.setExtent(esri.graphicsExtent([g.graphics[g.graphics.length - 1]]).expand(1.4), true);
+                            if (geom.type === "point") {
+                                map.centerAndZoom(geom, 18);
+                            }
+                            else {
+                                map.setExtent(esri.graphicsExtent([g.graphics[g.graphics.length - 1]]).expand(1.4), true);
+                            }                            
                         }
                     }
                 }
@@ -890,8 +972,6 @@
 
 
                 function dameInf() {
-
-
                     distancia = $("#km").val();
                     dom.byId("listadoRtdos").innerHTML = "";
                     dom.byId("resultadoImpacto").innerHTML = "";
@@ -1289,7 +1369,7 @@
                         fileWriter.write(blob);
                     });
                 }
-
+                
                 var errorHandler = function (fileName, e) {
                     var msg = '';
 
@@ -1391,7 +1471,7 @@
                 }
                 function initToolbar(evtObj) {
                     tb = new esri.toolbars.Draw(evtObj.map);
-                    tb.on("draw-end", dibujaGeometriaAnalisis);
+                    tb.on("draw-end", actualizaGeometriaAnalisis);
                 }
 
                 function showCoordinates(evt) {  
@@ -1455,14 +1535,15 @@
                             "Lat: " + miposicion.y; 
                     }
                     else {
-                        projectToEtrs89(miposicion);
-                        map.centerAndZoom(miposicion, 17);
-                        var markerSymbol = new SimpleMarkerSymbol();
-                        markerSymbol.setPath("M40.94,5.617C37.318,1.995,32.502,0,27.38,0c-5.123,0-9.938,1.995-13.56,5.617c-6.703,6.702-7.536,19.312-1.804,26.952  L27.38,54.757L42.721,32.6C48.476,24.929,47.643,12.319,40.94,5.617z M27.557,26c-3.859,0-7-3.141-7-7s3.141-7,7-7s7,3.141,7,7  S31.416,26,27.557,26z");
-                        markerSymbol.setColor(new Color([19, 24, 175, 0.80]));
-                        markerSymbol.setSize(40);
-                        map.graphics.clear();
-                        map.graphics.add(new Graphic(miposicion, markerSymbol));
+                        //projectToEtrs89(miposicion);
+                        //map.centerAndZoom(miposicion, 17);
+                        //var markerSymbol = new SimpleMarkerSymbol();
+                        //markerSymbol.setPath("M40.94,5.617C37.318,1.995,32.502,0,27.38,0c-5.123,0-9.938,1.995-13.56,5.617c-6.703,6.702-7.536,19.312-1.804,26.952  L27.38,54.757L42.721,32.6C48.476,24.929,47.643,12.319,40.94,5.617z M27.557,26c-3.859,0-7-3.141-7-7s3.141-7,7-7s7,3.141,7,7  S31.416,26,27.557,26z");
+                        //markerSymbol.setColor(new Color([19, 24, 175, 0.80]));
+                        //markerSymbol.setSize(40);
+                        //map.graphics.clear();
+                        //map.graphics.add(new Graphic(miposicion, markerSymbol));
+                        dameGeomEtrs89Analisis(miposicion, true);
                     }
                 };
 
@@ -1489,23 +1570,26 @@
                     var pt;
                     gsvc.project(params, function (projectedPoints) {
                         pt = projectedPoints[0];
-                        coordx = pt.x.toFixed(0);
-                        coordy = pt.y.toFixed(0);
-                        dom.byId("etrs").innerHTML = "<hr /><b>Coordenada en ETRS89 30N</br><table style='width:100%'><tr><th>X</th><th>Y</th></tr><tr><td>" + pt.x.toFixed(0) + "</td><td>" + pt.y.toFixed(0) + "</td></tr></table><hr />";
+                        actualizaCoordTextBox(geometry,pt, true);
+                    });
 
-                        dom.byId("CoordX").value = pt.x.toFixed(0);
-                        dom.byId("CoordY").value = pt.y.toFixed(0);
-                        dom.byId("Longitud").value = geometry.x.toFixed(8);
-                        dom.byId("Latitud").value = geometry.y.toFixed(8);
-
+                }
+                function actualizaCoordTextBox(pt,ptEtrs,abrirPanel) {
+                    coordx = ptEtrs.x.toFixed(0);
+                    coordy = ptEtrs.y.toFixed(0);
+                    dom.byId("etrs").innerHTML = "<hr /><b>Coordenada en ETRS89 30N</br><table style='width:100%'><tr><th>X</th><th>Y</th></tr><tr><td>" + coordx + "</td><td>" + coordy + "</td></tr></table><hr />";
+                    dom.byId("CoordX").value = coordx;
+                    dom.byId("CoordY").value = coordy;
+                    dom.byId("Longitud").value = pt.getLongitude().toFixed(8);
+                    dom.byId("Latitud").value = pt.getLatitude().toFixed(8);; //pt.y.toFixed(8);
+                    if (abrirPanel) {
                         dom.byId("transformacion").innerHTML = "";
                         dom.byId("transformacion2wgs84").innerHTML = "";
                         $("#myPanel").panel("open");
                         $("#collapCoord").collapsible("expand");
                         $("#collapCoordETRS").collapsible("expand");
                         $("#collapCoordGEO").collapsible("expand");
-                    });
-
+                    }
                 }
                 
                 function zoomToCoord(x, y) {
