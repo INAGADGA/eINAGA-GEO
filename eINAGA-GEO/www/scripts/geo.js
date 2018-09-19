@@ -667,7 +667,8 @@ require([
         }
                 
         function actualizaGeometriaDigitalizada(evtObj) {
-            switch (evtObj.geometry.type) {
+            var geom = evtObj.geometry;
+            switch (geom.type) {
                 case "point":
                     break;
                 case "polyline":
@@ -678,8 +679,9 @@ require([
                     }
                     break;
                 case "polygon":
-                    var area = geometryEngine.geodesicArea(geometryEngine.simplify(evtObj.geometry), "hectares");
-                    if (evtObj.geometry.isSelfIntersecting(evtObj.geometry)) {
+                    geom.removePoint(0, geom.rings[0].length - 2);
+                    var area = geometryEngine.geodesicArea(geometryEngine.simplify(geom), "hectares");
+                    if (geom.isSelfIntersecting(geom)) {
                         showMessage("El perímetro del polígono intersecta consigo mismo");
                         return;
                     }
@@ -689,7 +691,7 @@ require([
                     }
                     break;
             }
-            dameGeomEtrs89Analisis(evtObj.geometry, false);
+            dameGeomEtrs89Analisis(geom, false);
             edicion = false;
         }
                                 
