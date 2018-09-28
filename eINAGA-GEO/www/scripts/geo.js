@@ -1268,17 +1268,14 @@ require([
         }
         function writeFile(fileEntry, dataObj) {
             fileEntry.createWriter(function (fileWriter) {
-
-                fileWriter.onwriteend = function () {
-                    //showMessage("Almacenado en " + fileEntry.fullPath);
-                   // alert("Almacenado en " + fileEntry.fullPath);
+                fileWriter.onwriteend = function () {                    
                     getFiles();
-                    $('#myPanel').hide().show(0);
+                    showMessage("Almacenado en " + fileEntry.fullPath);
                 };
 
                 fileWriter.onerror = function (e) {
                     alert("Falla el guardado: " + e.toString());
-                    //showMessage("Falla el guardado: " + e.toString());
+                    showMessage("Falla el guardado: " + e.toString());
                 };
 
                 var blob = new Blob([dataObj], { type: 'text/plain' });
