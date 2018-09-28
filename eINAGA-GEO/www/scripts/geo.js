@@ -1270,12 +1270,15 @@ require([
             fileEntry.createWriter(function (fileWriter) {
 
                 fileWriter.onwriteend = function () {
-                    showMessage("Almacenado en " + fileEntry.fullPath);
+                    //showMessage("Almacenado en " + fileEntry.fullPath);
+                   // alert("Almacenado en " + fileEntry.fullPath);
                     getFiles();
+                    $('#myPanel').hide().show(0);
                 };
 
                 fileWriter.onerror = function (e) {
-                    showMessage("Falla el guardado: " + e.toString());
+                    alert("Falla el guardado: " + e.toString());
+                    //showMessage("Falla el guardado: " + e.toString());
                 };
 
                 var blob = new Blob([dataObj], { type: 'text/plain' });

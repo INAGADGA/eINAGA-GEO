@@ -61,9 +61,8 @@ body {
     /*border-radius: 15px 50px;
     border: 1px solid midnightblue;
     background-color: #E4E4E4;
-    padding: 12px;
-    display:none;*/
-    
+    padding: 12px;*/
+    display: none;
 }
 .app {
     position: absolute;

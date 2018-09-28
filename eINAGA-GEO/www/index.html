@@ -1,10 +1,11 @@
 ﻿<!DOCTYPE html>
 <html lang="es-es">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-eval' 'unsafe-inline';
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src * blob: 'self' gap: 'unsafe-eval' 'unsafe-inline';
                   script-src 'self' https://code.jquery.com 'unsafe-eval' 'unsafe-inline' data: gap: https://ssl.gstatic.com 'unsafe-eval';
                   img-src 'self'   https://code.jquery.com 'unsafe-eval' 'unsafe-inline' blob: data: ;
-                  style-src 'self'   https://code.jquery.com 'unsafe-inline'; media-src *">
+                  style-src 'self'   https://code.jquery.com 'unsafe-inline'; media-src *">-->
+    <meta http-equiv="Content-Security-Policy" content="default-src gap://ready file://* *; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src 'self' 'unsafe-inline' *">
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <meta content="width=device-width, initial-scale=1" http-equiv="content-type" charset="UTF-8" name="viewport" />
     <meta name="format-detection" content="telephone=no">
@@ -25,7 +26,7 @@
     <script src="https://code.jquery.com/jquery-1.12.4.min.js"
             integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
             crossorigin="anonymous"></script>
-   
+
     <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
 </head>
 <body>

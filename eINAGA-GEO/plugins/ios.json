@@ -7,7 +7,7 @@
         "files": {}
     },
     "installed_plugins": {
-        "cordova-pdf-generator": {
+        "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "es.aragon.inageo"
         },
         "cordova-plugin-file": {
@@ -17,7 +17,7 @@
             "GEOLOCATION_USAGE_DESCRIPTION": " ",
             "PACKAGE_NAME": "es.aragon.inageo"
         },
-        "cordova-plugin-whitelist": {
+        "cordova-pdf-generator": {
             "PACKAGE_NAME": "es.aragon.inageo"
         }
     },

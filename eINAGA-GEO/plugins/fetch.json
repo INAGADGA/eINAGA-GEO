@@ -7,13 +7,12 @@
         "is_top_level": true,
         "variables": {}
     },
-    "cordova-pdf-generator": {
+    "cordova-plugin-compat": {
         "source": {
-            "type": "git",
-            "url": "https://github.com/cesarvr/pdf-generator",
-            "subdir": "."
+            "type": "registry",
+            "id": "cordova-plugin-compat"
         },
-        "is_top_level": true,
+        "is_top_level": false,
         "variables": {}
     },
     "cordova-plugin-file": {
@@ -24,18 +23,19 @@
         "is_top_level": true,
         "variables": {}
     },
-    "cordova-plugin-compat": {
-        "source": {
-            "type": "registry",
-            "id": "cordova-plugin-compat"
-        },
-        "is_top_level": false,
-        "variables": {}
-    },
     "cordova-plugin-geolocation": {
         "source": {
             "type": "registry",
             "id": "cordova-plugin-geolocation@2.4.3"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-pdf-generator": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/cesarvr/pdf-generator",
+            "subdir": "."
         },
         "is_top_level": true,
         "variables": {}
