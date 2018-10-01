@@ -63,6 +63,9 @@
     <!-- iPad Spotlight and Settings Icon -->
     <icon src="res/icons/ios/icon-50.png" width="50" height="50" />
     <icon src="res/icons/ios/icon-50-2x.png" width="100" height="100" />
+
+    <icon src="res/icons/ios/icon-83.5-2x.png" width="167" height="167" />
+    <icon src="res/icons/ios/icon-small-3x.png" width="87" height="87" />
   </platform>
   <platform name="windows">
     <icon src="res/icons/windows/Square150x150Logo.scale-100.png" width="150" height="150" />
@@ -88,6 +91,18 @@
     <splash src="res/screens/android/screen-ldpi-portrait.png" density="port-ldpi" />
     <splash src="res/screens/android/screen-mdpi-portrait.png" density="port-mdpi" />
     <splash src="res/screens/android/screen-xhdpi-portrait.png" density="port-xhdpi" />
+  </platform>
+  <platform name="ios">
+    <splash src="res/screens/ios/screen-iphone-portrait.png" width="320" height="480" />
+    <splash src="res/screens/ios/screen-iphone-portrait-2x.png" width="640" height="960" />
+    <splash src="res/screens/ios/screen-ipad-portrait.png" width="768" height="1024" />
+    <splash src="res/screens/ios/screen-ipad-portrait-2x.png" width="1536" height="2048" />
+    <splash src="res/screens/ios/screen-ipad-landscape.png" width="1024" height="768" />
+    <splash src="res/screens/ios/screen-ipad-landscape-2x.png" width="2048" height="1536" />
+    <splash src="res/screens/ios/screen-iphone-568h-2x.png" width="640" height="1136" />
+    <splash src="res/screens/ios/screen-iphone-portrait-667h.png" width="750" height="1334" />
+    <splash src="res/screens/ios/screen-iphone-portrait-736h.png" width="1242" height="2208" />
+    <splash src="res/screens/ios/screen-iphone-landscape-736h.png" width="2208" height="1242" />
   </platform>
   <platform name="windows">
     <splash src="res/screens/windows/SplashScreen.scale-100.png" width="620" height="300" />
