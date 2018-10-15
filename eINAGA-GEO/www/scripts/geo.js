@@ -1328,7 +1328,7 @@ require([
             map.centerAndZoom(graphic.geometry, 18);
         }
 
-        var fTemplate = function locate() {
+        fTemplate = function locate() {
             if (graphico !== undefined) {
                 var extension = graphico.geometry.getExtent();
                 if (!extension) {
